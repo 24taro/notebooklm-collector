@@ -1,18 +1,18 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, type FormEvent } from "react";
 import DocbaseDomainInput from "./DocbaseDomainInput";
 import DocbaseTokenInput from "./DocbaseTokenInput";
 
 /**
  * 検索フォームコンポーネント
  */
-const SearchForm: React.FC = () => {
+const SearchForm = () => {
   const [keyword, setKeyword] = useState("");
   const [domain, setDomain] = useState("");
   const [token, setToken] = useState("");
 
-  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     // ここで検索処理を呼び出す (Issue #2 で実装予定)
     console.log({ keyword, domain, token });

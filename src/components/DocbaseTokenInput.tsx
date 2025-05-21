@@ -12,7 +12,7 @@ interface Props {
  * @param value 入力値
  * @param onChange 入力値変更ハンドラ
  */
-const DocbaseTokenInput: React.FC<Props> = ({ value, onChange }) => {
+const DocbaseTokenInput = ({ value, onChange }: Props) => {
   return (
     <div>
       <label htmlFor="docbase-token">Docbase Token:</label>

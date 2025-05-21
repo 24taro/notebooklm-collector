@@ -12,7 +12,8 @@ interface Props {
  * @param value 入力値
  * @param onChange 入力値変更ハンドラ
  */
-const DocbaseDomainInput: React.FC<Props> = ({ value, onChange }) => {
+// React.FC<Props> を削除し、propsに直接型注釈
+const DocbaseDomainInput = ({ value, onChange }: Props) => {
   return (
     <div>
       <label htmlFor="docbase-domain">Docbase Domain:</label>
