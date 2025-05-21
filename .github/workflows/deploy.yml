@@ -1,0 +1,53 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches:
+      - main # mainブランチへのpush時のみ実行
+  workflow_dispatch: # 手動実行も可能にする
+
+permissions:
+  contents: read
+  pages: write # pagesへの書き込み権限
+  id-token: write # OIDCトークンへの書き込み権限 (actions/deploy-pages@v4 で必要)
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: true
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20" # プロジェクトで使用するNode.jsバージョン
+          cache: "npm"
+      - name: Install dependencies
+        run: npm ci
+      - name: Lint with Biome
+        run: npm run lint
+      - name: Type check with TypeScript
+        run: npm run type-check
+      - name: Build with Next.js
+        env:
+          NEXT_PUBLIC_BASE_PATH: /notebooklm-collector # GitHub Pagesのリポジトリ名
+        run: npm run build
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: ./out # Next.jsのビルド出力ディレクトリ
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

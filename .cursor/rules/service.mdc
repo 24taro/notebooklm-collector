@@ -1,0 +1,156 @@
+---
+description: 
+globs: 
+alwaysApply: true
+---
+# サービス仕様書 v1.9 — Docbase連携 NotebookLM 用ドキュメント生成アプリ
+
+> **最終更新日** 2025-05-17   > **作成者** （記入）  > **ドキュメント ID** NB-MD-GEN-001
+
+---
+
+## 1. ユースケース & UX フロー
+
+### 1.1 主要ユースケース
+
+1. **情報収集**
+
+   * ユーザーが「キーワード」「Docbase ドメイン」「Docbase トークン」を入力。
+   * **検索リクエスト** `/teams/{domain}/posts?q={keyword}` を実行し、該当メモの *ID / title / draft* を取得。
+   * 取得した **ID リスト** に対して `/teams/{domain}/posts/{id}` を並列 fetch。
+   * 各レスポンスのオブジェクトメンバ `body` を結合し 1 つの Markdown ファイルへ整形。
+2. **NotebookLM 学習**
+
+   * 生成された `.md` を NotebookLM にアップロードし、AI 質問応答のソースにする。
+
+### 1.2 UI ワイヤフロー
+
+```
+[キーワード & ドメイン & トークン入力]
+        ↓ searchDocbase()
+[Markdown プレビュー (全文)]
+        ↓ [Markdown DL]
+[DL 完了トースト]
+```
+
+### 1.3 画面構成（スクリーン）
+
+| ID | 画面名      | 主なコンポーネント                                                                  | 機能概要                          |
+| -- | -------- | -------------------------------------------------------------------------- | ----------------------------- |
+| S1 | **検索画面** | `SearchForm`, `DocbaseDomainInput`, `DocbaseTokenInput`, `MarkdownPreview` | 検索実行・Markdown 生成・DL |
+
+---
+
+## 2. 機能要件
+
+### 2.1 データ取得フロー（フロントエンド fetch）
+
+| フェーズ | メソッド & エンドポイント                   | 認証ヘッダー           | パラメータ                             | 目的                                       |
+| ---- | -------------------------------- | ---------------- | --------------------------------- | ---------------------------------------- |
+| 検索   | `GET /teams/{domain}/posts`      | `X-DocBaseToken` | `q` (keyword), `page`, `per_page` | 該当メモの **ID・title・created_at・url・body** を取得             |
+
+### 2.2 Markdown 生成
+
+* 投稿ごとに以下のテンプレートで追加。
+
+  ````md
+  ## {title}
+
+  > {created_at}  
+  > {url}
+
+  ```md
+  {body}
+  ````
+
+  ```
+  ```
+
+### 2.3 ファイルダウンロード
+
+* `Blob` → `<a download>` 方式で `notebooklm_{keyword}_{YYYYMMDDHHmmss}.md` を保存。
+* 分割時は `_1`, `_2` … を末尾に付与。
+
+### 2.4 トークン管理
+
+* Docbase **トークン**と**ドメイン**を `localStorage` に平文保存。
+  初回アクセス時のみ入力必須とし、以降は自動補完。
+
+### 2.5 エラーハンドリング
+
+| エラー         | 表示                             | 再試行                |
+| ----------- | ------------------------------ | ------------------ |
+| 401         | 「トークンが無効です」トースト & トークン再入力ダイアログ | ―                  |
+| 429         | 「Docbase が混み合っています」トースト        | 自動再試行（指数バックオフ 3 回） |
+| fetch error | 「ネットワークに接続できません」トースト           | 手動再試行ボタン           |
+
+---
+
+## 3. フロントエンドアーキテクチャ
+
+```
+┌───────────── Next.js (React) ─────────────┐
+│  useSearch(keyword, domain, token)       │
+│   └─ fetchList()  ───────→ Markdown      │
+│        └─ generateBlob() → download()    │
+└──────────────────────────────────────────┘
+```
+
+### 3.1 技術スタック
+
+| レイヤ           | 技術                                |
+| ------------- | --------------------------------- |
+| UI            | Next.js 15 / React / Tailwind CSS |
+| データ取得         | fetch / TanStack Query            |
+| ストレージ         | localStorage                      |
+| Lint / Format | **Biome**                         |
+
+---
+
+## 4. データモデル (TypeScript)
+
+```ts
+type DocbasePostListItem = {
+  id: number;
+  title: string;
+  body: string;
+  created_at: string; // ISO-8601
+  url: string;
+};
+
+```
+
+---
+
+## 5. デプロイ & CI/CD
+
+1. GitHub Actions で `biome check` → `tsc --noEmit` → `next build && next export`。
+2. `main` ブランチ push で `actions/upload-pages-artifact@v1` → `actions/deploy-pages@v1`。
+3. 公開 URL: `https://<org|user>.github.io/<repo>/`。
+
+   * Next.js の `assetPrefix` を Pages パスに合わせること。
+
+---
+
+## 6. API 利用ガイド
+
+### 6.1 Docbase API
+
+| 操作 | Endpoint                     | ヘッダー             | クエリ                     |
+| -- | ---------------------------- | ---------------- | ----------------------- |
+| 検索 | `/teams/{domain}/posts`      | `X-DocBaseToken` | `q`, `page`, `per_page` |
+
+#### curl サンプル
+
+```bash
+# 例）完全一致させたいキーワードを変数に入れる
+KEYWORD='営業定例'
+
+# 完全一致（"営業定例"）で検索し、関連度スコアが高い順に並べる
+curl -G "https://api.docbase.io/teams/${TEAM}/posts" \
+     -H "X-DocBaseToken: ${TOKEN}" \
+     --data-urlencode "q=\"${KEYWORD}\"" \   # ← ダブルクォートで完全一致
+     --data-urlencode "sort=score" \        # ← ソートキーを「score」に
+     --data-urlencode "direction=desc"      # ← 高スコア → 低スコア
+---
+
