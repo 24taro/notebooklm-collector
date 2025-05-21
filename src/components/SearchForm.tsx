@@ -5,17 +5,27 @@ import DocbaseDomainInput from "./DocbaseDomainInput";
 import DocbaseTokenInput from "./DocbaseTokenInput";
 import { useSearch } from "../hooks/useSearch";
 import { useDownload } from "../hooks/useDownload";
+import useLocalStorage from "../hooks/useLocalStorage";
 import type { ApiError } from "../types/error";
 import { generateMarkdown } from "../utils/markdownGenerator";
 import MarkdownPreview from "./MarkdownPreview";
+
+const LOCAL_STORAGE_DOMAIN_KEY = "docbaseDomain";
+const LOCAL_STORAGE_TOKEN_KEY = "docbaseToken";
 
 /**
  * 検索フォームコンポーネント
  */
 const SearchForm = () => {
   const [keyword, setKeyword] = useState("");
-  const [domain, setDomain] = useState("");
-  const [token, setToken] = useState("");
+  const [domain, setDomain] = useLocalStorage<string>(
+    LOCAL_STORAGE_DOMAIN_KEY,
+    ""
+  );
+  const [token, setToken] = useLocalStorage<string>(
+    LOCAL_STORAGE_TOKEN_KEY,
+    ""
+  );
   const [markdownContent, setMarkdownContent] = useState("");
 
   const { posts, isLoading, error, searchPosts } = useSearch();
