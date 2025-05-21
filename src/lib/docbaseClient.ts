@@ -13,9 +13,17 @@ import type {
 } from "../types/error";
 
 const DOCBASE_API_BASE_URL = "https://api.docbase.io/teams";
+const MAX_RETRIES = 3;
+const INITIAL_BACKOFF_MS = 1000; // 1秒
 
 /**
- * Docbase APIから投稿リストを取得する関数
+ * 指定されたミリ秒待機するPromiseを返すヘルパー関数
+ * @param ms 待機するミリ秒
+ */
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
+/**
+ * Docbase APIから投稿リストを取得する関数（リトライ処理付き）
  *
  * @param domain Docbaseのチームドメイン
  * @param token Docbase APIトークン
@@ -25,18 +33,15 @@ const DOCBASE_API_BASE_URL = "https://api.docbase.io/teams";
 export const fetchDocbasePosts = async (
   domain: string,
   token: string,
-  keyword: string
+  keyword: string,
+  retries = MAX_RETRIES, // 残りのリトライ回数
+  backoff = INITIAL_BACKOFF_MS // 現在のバックオフ時間
 ): Promise<Result<DocbasePostListItem[], ApiError>> => {
-  // キーワードが空の場合は検索を実行しない
   if (!keyword.trim()) {
-    return ok([]); // 空の配列を成功として返す
+    return ok([]);
   }
 
-  const searchParams = new URLSearchParams({
-    q: keyword,
-    // per_page: '100', // 必要に応じて取得件数を調整
-  });
-
+  const searchParams = new URLSearchParams({ q: keyword });
   const url = `${DOCBASE_API_BASE_URL}/${domain}/posts?${searchParams.toString()}`;
 
   try {
@@ -49,7 +54,6 @@ export const fetchDocbasePosts = async (
 
     if (!response.ok) {
       if (response.status === 401) {
-        // UnauthorizedApiError を使用
         const error: UnauthorizedApiError = {
           type: "unauthorized",
           message: "Docbase APIトークンが無効です。",
@@ -57,7 +61,6 @@ export const fetchDocbasePosts = async (
         return err(error);
       }
       if (response.status === 404) {
-        // NotFoundApiError を使用
         const error: NotFoundApiError = {
           type: "notFound",
           message:
@@ -66,17 +69,28 @@ export const fetchDocbasePosts = async (
         return err(error);
       }
       if (response.status === 429) {
-        // RateLimitApiError を使用
+        if (retries > 0) {
+          console.warn(
+            `Rate limit exceeded. Retrying in ${backoff}ms... (${retries} retries left)`
+          );
+          await sleep(backoff);
+          // 再帰的に呼び出し、リトライ回数を減らし、バックオフ時間を増やす (指数バックオフ)
+          return fetchDocbasePosts(
+            domain,
+            token,
+            keyword,
+            retries - 1,
+            backoff * 2
+          );
+        }
         const error: RateLimitApiError = {
           type: "rateLimit",
           message:
-            "Docbase APIのレートリミットに達しました。時間をおいて再度お試しください。",
+            "Docbase APIのレートリミットに達しました。何度か再試行しましたが改善しませんでした。",
         };
         return err(error);
       }
-      // その他のHTTPエラー
       const errorText = await response.text();
-      // NetworkApiError を使用 (causeなし)
       const error: NetworkApiError = {
         type: "network",
         message: `Docbase APIリクエストエラー: ${response.status} ${response.statusText}. ${errorText}`,
@@ -88,8 +102,27 @@ export const fetchDocbasePosts = async (
     return ok(data.posts);
   } catch (error) {
     console.error("Docbase API fetch error:", error);
+    // ネットワークエラーの場合もリトライを試みる (ただし、リトライ回数は共通)
+    if (
+      retries > 0 &&
+      (error instanceof TypeError ||
+        (error instanceof Error &&
+          error.message.toLowerCase().includes("network error")))
+    ) {
+      console.warn(
+        `Network error occurred. Retrying in ${backoff}ms... (${retries} retries left)`
+      );
+      await sleep(backoff);
+      return fetchDocbasePosts(
+        domain,
+        token,
+        keyword,
+        retries - 1,
+        backoff * 2
+      );
+    }
+
     if (error instanceof Error) {
-      // NetworkApiError を使用 (causeあり)
       const apiError: NetworkApiError = {
         type: "network",
         message: `ネットワークエラー: ${error.message}`,
@@ -97,7 +130,6 @@ export const fetchDocbasePosts = async (
       };
       return err(apiError);
     }
-    // UnknownApiError を使用
     const unknownError: UnknownApiError = {
       type: "unknown",
       message: "不明なエラーが発生しました。コンソールを確認してください。",

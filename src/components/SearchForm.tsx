@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, type FormEvent, useEffect } from "react";
+import React, { useState, type FormEvent, useEffect, useRef } from "react";
 import DocbaseDomainInput from "./DocbaseDomainInput";
 import DocbaseTokenInput from "./DocbaseTokenInput";
 import { useSearch } from "../hooks/useSearch";
@@ -28,8 +28,11 @@ const SearchForm = () => {
   );
   const [markdownContent, setMarkdownContent] = useState("");
 
-  const { posts, isLoading, error, searchPosts } = useSearch();
+  const { posts, isLoading, error, searchPosts, canRetry, retrySearch } =
+    useSearch();
   const { isDownloading, handleDownload } = useDownload();
+
+  const tokenInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -45,6 +48,12 @@ const SearchForm = () => {
       setMarkdownContent("");
     }
   }, [posts]);
+
+  useEffect(() => {
+    if (error?.type === "unauthorized") {
+      tokenInputRef.current?.focus();
+    }
+  }, [error]);
 
   const handleDownloadClick = () => {
     const postsExist = posts && posts.length > 0;
@@ -97,6 +106,15 @@ const SearchForm = () => {
         >
           {isDownloading ? "ダウンロード中..." : "Markdownダウンロード"}
         </button>
+        {canRetry && !isLoading && (
+          <button
+            type="button"
+            onClick={retrySearch}
+            className="bg-yellow-500 hover:bg-yellow-700 text-white font-bold py-2 px-4 rounded"
+          >
+            再試行
+          </button>
+        )}
       </div>
 
       {error && (
