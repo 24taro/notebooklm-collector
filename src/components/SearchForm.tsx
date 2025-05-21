@@ -4,6 +4,7 @@ import React, { useState, type FormEvent, useEffect } from "react";
 import DocbaseDomainInput from "./DocbaseDomainInput";
 import DocbaseTokenInput from "./DocbaseTokenInput";
 import { useSearch } from "../hooks/useSearch";
+import { useDownload } from "../hooks/useDownload";
 import type { ApiError } from "../types/error";
 import { generateMarkdown } from "../utils/markdownGenerator";
 import MarkdownPreview from "./MarkdownPreview";
@@ -18,9 +19,11 @@ const SearchForm = () => {
   const [markdownContent, setMarkdownContent] = useState("");
 
   const { posts, isLoading, error, searchPosts } = useSearch();
+  const { isDownloading, handleDownload } = useDownload();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setMarkdownContent("");
     await searchPosts(domain, token, keyword);
   };
 
@@ -32,6 +35,11 @@ const SearchForm = () => {
       setMarkdownContent("");
     }
   }, [posts]);
+
+  const handleDownloadClick = () => {
+    const postsExist = posts && posts.length > 0;
+    handleDownload(markdownContent, keyword, postsExist);
+  };
 
   const renderErrorCause = (currentError: ApiError | null) => {
     if (!currentError) return null;
@@ -58,18 +66,28 @@ const SearchForm = () => {
           onChange={(e) => setKeyword(e.target.value)}
           placeholder="検索キーワード"
           className="border p-2 rounded w-full"
-          disabled={isLoading}
+          disabled={isLoading || isDownloading}
         />
       </div>
       <DocbaseDomainInput value={domain} onChange={setDomain} />
       <DocbaseTokenInput value={token} onChange={setToken} />
-      <button
-        type="submit"
-        className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:bg-gray-400"
-        disabled={isLoading}
-      >
-        {isLoading ? "検索中..." : "検索"}
-      </button>
+      <div className="flex space-x-2">
+        <button
+          type="submit"
+          className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded disabled:bg-gray-400"
+          disabled={isLoading || isDownloading}
+        >
+          {isLoading ? "検索中..." : "検索"}
+        </button>
+        <button
+          type="button"
+          onClick={handleDownloadClick}
+          className="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded disabled:bg-gray-400"
+          disabled={isLoading || isDownloading || !markdownContent.trim()}
+        >
+          {isDownloading ? "ダウンロード中..." : "Markdownダウンロード"}
+        </button>
+      </div>
 
       {error && (
         <div className="mt-4 p-2 text-red-700 bg-red-100 border border-red-400 rounded">
