@@ -1,10 +1,12 @@
 "use client";
 
-import React, { useState, type FormEvent } from "react";
+import React, { useState, type FormEvent, useEffect } from "react";
 import DocbaseDomainInput from "./DocbaseDomainInput";
 import DocbaseTokenInput from "./DocbaseTokenInput";
 import { useSearch } from "../hooks/useSearch";
 import type { ApiError } from "../types/error";
+import { generateMarkdown } from "../utils/markdownGenerator";
+import MarkdownPreview from "./MarkdownPreview";
 
 /**
  * 検索フォームコンポーネント
@@ -13,6 +15,7 @@ const SearchForm = () => {
   const [keyword, setKeyword] = useState("");
   const [domain, setDomain] = useState("");
   const [token, setToken] = useState("");
+  const [markdownContent, setMarkdownContent] = useState("");
 
   const { posts, isLoading, error, searchPosts } = useSearch();
 
@@ -20,6 +23,15 @@ const SearchForm = () => {
     event.preventDefault();
     await searchPosts(domain, token, keyword);
   };
+
+  useEffect(() => {
+    if (posts && posts.length > 0) {
+      const md = generateMarkdown(posts);
+      setMarkdownContent(md);
+    } else {
+      setMarkdownContent("");
+    }
+  }, [posts]);
 
   const renderErrorCause = (currentError: ApiError | null) => {
     if (!currentError) return null;
@@ -66,14 +78,10 @@ const SearchForm = () => {
         </div>
       )}
 
-      {posts.length > 0 && (
-        <div className="mt-4">
-          <h2 className="text-xl font-semibold">検索結果:</h2>
-          <ul className="list-disc pl-5">
-            {posts.map((post) => (
-              <li key={post.id}>{post.title}</li>
-            ))}
-          </ul>
+      {markdownContent && !isLoading && !error && (
+        <div className="mt-8">
+          <h2 className="text-2xl font-semibold mb-4">Markdownプレビュー</h2>
+          <MarkdownPreview markdown={markdownContent} />
         </div>
       )}
     </form>
