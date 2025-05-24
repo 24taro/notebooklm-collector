@@ -2,9 +2,10 @@
 
 import React from 'react'
 
-const Header = () => {
+const DocbaseHeader = () => {
+  // 名前を DocbaseHeader に変更
   return (
-    <header className="w-full py-6 mb-10">
+    <header className="w-full py-6 shadow-md">
       <div className="max-w-screen-lg mx-auto flex justify-between items-center px-4 sm:px-6 lg:px-8">
         <div className="flex items-center">
           {/* <img src="/docbase-collector-logo.svg" alt="Docbase Collector Logo" className="h-8 w-auto mr-3" /> */}
@@ -16,4 +17,4 @@ const Header = () => {
   )
 }
 
-export default Header
+export default DocbaseHeader // export も DocbaseHeader に変更
