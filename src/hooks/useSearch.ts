@@ -5,6 +5,16 @@ import type { ApiError } from '../types/error'
 import type { Result } from 'neverthrow' // Resultを型としてインポート (typeキーワードを明示)
 import toast from 'react-hot-toast' // react-hot-toastをインポート
 
+// 詳細検索条件の型定義
+export interface AdvancedFilters {
+  tags: string
+  author: string
+  titleFilter: string
+  startDate: string
+  endDate: string
+  group: string
+}
+
 interface UseSearchResult {
   posts: DocbasePostListItem[]
   isLoading: boolean
@@ -13,11 +23,7 @@ interface UseSearchResult {
     domain: string,
     token: string,
     keyword: string,
-    tags?: string,
-    author?: string,
-    title?: string,
-    startDate?: string,
-    endDate?: string,
+    advancedFilters?: AdvancedFilters, // advancedFilters をオプションで追加
   ) => Promise<void>
   canRetry: boolean // 再試行可能かどうかのフラグ
   retrySearch: () => void // 再試行用の関数
@@ -34,39 +40,22 @@ export const useSearch = (): UseSearchResult => {
     domain: string
     token: string
     keyword: string
-    tags?: string
-    author?: string
-    title?: string
-    startDate?: string
-    endDate?: string
+    advancedFilters?: AdvancedFilters // advancedFilters を追加
   } | null>(null)
   const [canRetry, setCanRetry] = useState<boolean>(false)
 
   const executeSearch = useCallback(
-    async (
-      domain: string,
-      token: string,
-      keyword: string,
-      tags?: string,
-      author?: string,
-      title?: string,
-      startDate?: string,
-      endDate?: string,
-    ) => {
+    async (domain: string, token: string, keyword: string, advancedFilters?: AdvancedFilters) => {
       setIsLoading(true)
       setError(null)
       setCanRetry(false)
-      setLastSearchParams({ domain, token, keyword, tags, author, title, startDate, endDate }) // 最後に検索したパラメータを保存
+      setLastSearchParams({ domain, token, keyword, advancedFilters }) // 最後に検索したパラメータを保存
 
       const result: Result<DocbasePostListItem[], ApiError> = await fetchDocbasePosts(
         domain,
         token,
         keyword,
-        tags,
-        author,
-        title,
-        startDate,
-        endDate,
+        advancedFilters, // advancedFilters を渡す
       )
 
       if (result.isOk()) {
@@ -108,26 +97,8 @@ export const useSearch = (): UseSearchResult => {
   )
 
   const searchPosts = useCallback(
-    async (
-      domain: string,
-      token: string,
-      keyword: string,
-      tags?: string,
-      author?: string,
-      title?: string,
-      startDate?: string,
-      endDate?: string,
-    ) => {
-      if (
-        !keyword.trim() &&
-        !domain.trim() &&
-        !token.trim() &&
-        !tags?.trim() &&
-        !author?.trim() &&
-        !title?.trim() &&
-        !startDate?.trim() &&
-        !endDate?.trim()
-      ) {
+    async (domain: string, token: string, keyword: string, advancedFilters?: AdvancedFilters) => {
+      if (!keyword.trim() && !domain.trim() && !token.trim()) {
         // 全て空なら何もしない
         setPosts([])
         setError(null)
@@ -143,11 +114,11 @@ export const useSearch = (): UseSearchResult => {
       }
       if (
         !keyword.trim() &&
-        !tags?.trim() &&
-        !author?.trim() &&
-        !title?.trim() &&
-        !startDate?.trim() &&
-        !endDate?.trim()
+        !advancedFilters?.tags?.trim() &&
+        !advancedFilters?.author?.trim() &&
+        !advancedFilters?.titleFilter?.trim() &&
+        !advancedFilters?.startDate?.trim() &&
+        !advancedFilters?.endDate?.trim()
       ) {
         toast.success('キーワードまたは詳細検索条件を入力して検索してください。') // 検索前にキーワードが空ならメッセージ表示
         setPosts([])
@@ -155,7 +126,7 @@ export const useSearch = (): UseSearchResult => {
         setCanRetry(false)
         return
       }
-      await executeSearch(domain, token, keyword, tags, author, title, startDate, endDate)
+      await executeSearch(domain, token, keyword, advancedFilters) // advancedFilters を渡す
     },
     [executeSearch],
   )
@@ -167,11 +138,7 @@ export const useSearch = (): UseSearchResult => {
         lastSearchParams.domain,
         lastSearchParams.token,
         lastSearchParams.keyword,
-        lastSearchParams.tags,
-        lastSearchParams.author,
-        lastSearchParams.title,
-        lastSearchParams.startDate,
-        lastSearchParams.endDate,
+        lastSearchParams.advancedFilters, // advancedFilters を渡す
       )
     }
   }, [lastSearchParams, executeSearch])

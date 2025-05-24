@@ -8,6 +8,7 @@ import type {
   NotFoundApiError,
   RateLimitApiError,
 } from '../types/error'
+import type { AdvancedFilters } from '../hooks/useSearch'
 
 const DOCBASE_API_BASE_URL = 'https://api.docbase.io/teams'
 const MAX_RETRIES = 3
@@ -25,20 +26,67 @@ const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
  * @param domain Docbaseのチームドメイン
  * @param token Docbase APIトークン
  * @param keyword 検索キーワード
+ * @param advancedFilters 詳細検索条件
  * @returns 成功時はDocbasePostListItemの配列、失敗時はApiErrorを含むResult型
  */
 export const fetchDocbasePosts = async (
   domain: string,
   token: string,
   keyword: string,
+  advancedFilters?: AdvancedFilters,
   retries = MAX_RETRIES, // 残りのリトライ回数
   backoff = INITIAL_BACKOFF_MS, // 現在のバックオフ時間
 ): Promise<Result<DocbasePostListItem[], ApiError>> => {
-  if (!keyword.trim()) {
+  // キーワードと詳細検索条件の両方が空の場合は空の配列を返す
+  if (
+    !keyword.trim() &&
+    (!advancedFilters ||
+      (!advancedFilters.tags?.trim() &&
+        !advancedFilters.author?.trim() &&
+        !advancedFilters.titleFilter?.trim() &&
+        !advancedFilters.startDate?.trim() &&
+        !advancedFilters.endDate?.trim() &&
+        !advancedFilters.group?.trim()))
+  ) {
     return ok([])
   }
 
-  const exactMatchKeyword = `"${keyword}"`
+  let query = keyword.trim() ? `"${keyword.trim()}"` : ''
+
+  if (advancedFilters) {
+    const { tags, author, titleFilter, startDate, endDate, group } = advancedFilters
+    if (tags?.trim()) {
+      for (const tag of tags
+        .split(',')
+        .map((t) => t.trim())
+        .filter((t) => t)) {
+        query += ` tag:${tag}`
+      }
+    }
+    if (author?.trim()) {
+      query += ` author:${author.trim()}`
+    }
+    if (titleFilter?.trim()) {
+      query += ` title:${titleFilter.trim()}`
+    }
+    if (startDate?.trim() && endDate?.trim()) {
+      query += ` created_at:${startDate.trim()}~${endDate.trim()}`
+    } else if (startDate?.trim()) {
+      query += ` created_at:${startDate.trim()}~*`
+    } else if (endDate?.trim()) {
+      query += ` created_at:*~${endDate.trim()}`
+    }
+    if (group?.trim()) {
+      query += ` group:${group.trim()}`
+    }
+  }
+  query = query.trim() // 前後の空白を削除
+
+  // クエリが空なら空の配列を返す
+  if (!query) {
+    return ok([])
+  }
+
   const allPosts: DocbasePostListItem[] = []
   let currentPage = 1
   const postsPerPage = 100 // 1ページあたりの取得件数
@@ -50,7 +98,7 @@ export const fetchDocbasePosts = async (
 
   while (currentPage <= maxPages) {
     const searchParams = new URLSearchParams({
-      q: exactMatchKeyword,
+      q: query,
       page: currentPage.toString(),
       per_page: postsPerPage.toString(),
     })
@@ -88,7 +136,7 @@ export const fetchDocbasePosts = async (
             await sleep(backoff)
             // fetchDocbasePosts を再度呼び出すが、retries と backoff を渡して再帰的にリトライ
             // ループ処理は中断し、関数の最初から再試行する
-            return fetchDocbasePosts(domain, token, keyword, retries - 1, backoff * 2)
+            return fetchDocbasePosts(domain, token, keyword, advancedFilters, retries - 1, backoff * 2)
           }
           const error: RateLimitApiError = {
             type: 'rateLimit',
@@ -131,7 +179,7 @@ export const fetchDocbasePosts = async (
           `Network error occurred during page ${currentPage} fetch. Retrying entire fetch operation in ${backoff}ms... (${retries} retries left)`,
         )
         await sleep(backoff)
-        return fetchDocbasePosts(domain, token, keyword, retries - 1, backoff * 2)
+        return fetchDocbasePosts(domain, token, keyword, advancedFilters, retries - 1, backoff * 2)
       }
 
       if (error instanceof Error) {

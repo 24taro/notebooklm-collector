@@ -75,7 +75,7 @@ export default function Home() {
 
         {/* 使い方説明セクション */}
         <section className="w-full mt-12">
-          <div className="max-w-screen-lg mx-auto px-6 sm:px-10 lg:px-24 py-16 rounded-xl border border-gray-200 bg-docbase-bg-light">
+          <div className="max-w-screen-lg mx-auto px-6 sm:px-10 lg:px-24 py-16 rounded-xl border border-gray-200 bg-background-light">
             <h2 className="text-3xl md:text-4xl font-bold mb-20 text-center text-gray-800">利用はかんたん3ステップ</h2>
             <div className="grid md:grid-cols-3 gap-x-8 gap-y-10 relative">
               {[
@@ -112,6 +112,19 @@ export default function Home() {
                   <p className="text-gray-600 text-sm leading-relaxed">{item.description}</p>
                 </div>
               ))}
+            </div>
+          </div>
+        </section>
+
+        {/* セキュリティ説明セクション */}
+        <section className="w-full mt-12">
+          <div className="max-w-screen-lg mx-auto px-6 sm:px-10 lg:px-24 py-16 rounded-xl border border-gray-200 bg-background-light">
+            <div className="text-center">
+              <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-gray-800">🔒 セキュリティについて</h2>
+              <p className="text-gray-600 text-lg leading-relaxed max-w-3xl mx-auto">
+                入力されたDocbase APIトークンや取得された記事の内容は、お使いのブラウザ内でのみ処理されます。
+                これらの情報が外部のサーバーに送信されたり、保存されたりすることは一切ありませんので、安心してご利用いただけます。
+              </p>
             </div>
           </div>
         </section>

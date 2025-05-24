@@ -15,10 +15,10 @@ alwaysApply: true
 
 1. **情報収集**
 
-   * ユーザーが「キーワード」「Docbase ドメイン」「Docbase トークン」を入力。
-   * **検索リクエスト** `/teams/{domain}/posts?q={keyword}` を実行し、該当メモの *ID / title / draft* を取得。
-   * 取得した **ID リスト** に対して `/teams/{domain}/posts/{id}` を並列 fetch。
-   * 各レスポンスのオブジェクトメンバ `body` を結合し 1 つの Markdown ファイルへ整形。
+   * ユーザーが「キーワード」「Docbase ドメイン」「Docbase トークン」およびオプションで詳細検索条件（タグ、投稿者、タイトル、投稿期間、グループ）を入力。
+   * メインの検索キーワードは「完全一致」として扱われます。
+   * **検索リクエスト** `/teams/{domain}/posts?q={query}` を実行し、該当メモの *ID / title / created_at / url / body* を最大500件まで取得。
+   * 取得したメモの `body` を結合し 1 つの Markdown ファイルへ整形。
 2. **NotebookLM 学習**
 
    * 生成された `.md` を NotebookLM にアップロードし、AI 質問応答のソースにする。
@@ -37,7 +37,7 @@ alwaysApply: true
 
 | ID | 画面名      | 主なコンポーネント                                                                  | 機能概要                          |
 | -- | -------- | -------------------------------------------------------------------------- | ----------------------------- |
-| S1 | **検索画面** | `SearchForm`, `DocbaseDomainInput`, `DocbaseTokenInput`, `MarkdownPreview` | 検索実行・Markdown 生成・DL |
+| S1 | **検索画面** | `SearchForm`, `DocbaseDomainInput`, `DocbaseTokenInput`, `AdvancedSearchFilters` (タグ、投稿者、タイトル、投稿期間、グループ入力欄), `MarkdownPreview` (取得記事のうち最大10件表示), 取得件数表示 | 検索実行・Markdown 生成 (最大500件)・DL |
 
 ---
 
@@ -47,11 +47,29 @@ alwaysApply: true
 
 | フェーズ | メソッド & エンドポイント                   | 認証ヘッダー           | パラメータ                             | 目的                                       |
 | ---- | -------------------------------- | ---------------- | --------------------------------- | ---------------------------------------- |
-| 検索   | `GET /teams/{domain}/posts`      | `X-DocBaseToken` | `q` (keyword), `page`, `per_page` | 該当メモの **ID・title・created_at・url・body** を取得             |
+| 検索   | `GET /teams/{domain}/posts`      | `X-DocBaseToken` | `q` (メインキーワードはダブルクォートで囲み完全一致検索。詳細検索条件が指定された場合はAND結合。詳細は2.1.1参照), `page` (1~5), `per_page` (100) | 該当メモの **ID・title・created_at・url・body** を最大500件取得             |
+
+### 2.1.1 詳細検索条件 (新規追加セクション)
+
+メインの検索キーワードに加え、以下の詳細条件を指定することで、より絞り込んだ検索が可能です。各条件は Docbase API の検索クエリパラメータ `q` に AND 条件として結合されます。
+
+| 条件       | Docbase API クエリ形式                  | 例                                         |
+| ---------- | --------------------------------------- | ------------------------------------------ |
+| タグ       | `tag:タグ名`                            | `tag:API tag:設計` (複数指定可、カンマ区切り入力) |
+| 投稿者     | `author:ユーザーID`                     | `author:user123`                           |
+| タイトル   | `title:キーワード`                      | `title:仕様書`                             |
+| 投稿期間   | `created_at:YYYY-MM-DD~YYYY-MM-DD`      | `created_at:2023-01-01~2023-12-31`         |
+|            | `created_at:YYYY-MM-DD~*` (開始日のみ)  | `created_at:2024-01-01~*`                  |
+|            | `created_at:*~YYYY-MM-DD` (終了日のみ)  | `created_at:*~2024-03-31`                  |
+| グループ   | `group:グループ名`                      | `group:開発チーム`                         |
+
+例: キーワード「バグ報告」、タグ「iOS」、投稿者「dev_user」、タイトル「クラッシュ」、投稿期間「2024-01-01から」、グループ「モバイル班」の場合の `q` パラメータ
+`"バグ報告" tag:iOS author:dev_user title:クラッシュ created_at:2024-01-01~* group:モバイル班`
 
 ### 2.2 Markdown 生成
 
-* 投稿ごとに以下のテンプレートで追加。
+* Markdownプレビューには、検索結果のうち最大10件の投稿内容が表示されます。
+* ダウンロードされるMarkdownファイルには、検索結果の最大500件の投稿内容が以下のテンプレートで追加されます。
 
   ````md
   ## {title}
@@ -62,9 +80,6 @@ alwaysApply: true
   ```md
   {body}
   ````
-
-  ```
-  ```
 
 ### 2.3 ファイルダウンロード
 
@@ -83,6 +98,12 @@ alwaysApply: true
 | 401         | 「トークンが無効です」トースト & トークン再入力ダイアログ | ―                  |
 | 429         | 「Docbase が混み合っています」トースト        | 自動再試行（指数バックオフ 3 回） |
 | fetch error | 「ネットワークに接続できません」トースト           | 手動再試行ボタン           |
+
+### 2.6 セキュリティ
+
+*   **データ処理の範囲:** 入力されたDocbase APIトークンおよび取得された記事内容は、外部サーバーに送信されることなく、すべてユーザーのブラウザ内で処理が完結します。
+*   **情報漏洩リスクの低減:** データがブラウザ外に出ないため、機密情報が意図せず外部に漏洩するリスクを最小限に抑えています。
+*   **トークンの保存:** Docbase APIトークンは、利便性のためにブラウザのLocalStorageに保存されますが、これもユーザーのローカル環境に限定された保存です。
 
 ---
 
@@ -149,8 +170,15 @@ KEYWORD='営業定例'
 # 完全一致（"営業定例"）で検索し、関連度スコアが高い順に並べる
 curl -G "https://api.docbase.io/teams/${TEAM}/posts" \
      -H "X-DocBaseToken: ${TOKEN}" \
-     --data-urlencode "q=\"${KEYWORD}\"" \   # ← ダブルクォートで完全一致
-     --data-urlencode "sort=score" \        # ← ソートキーを「score」に
-     --data-urlencode "direction=desc"      # ← 高スコア → 低スコア
+     --data-urlencode "q=\""${KEYWORD}\"" \
+     --data-urlencode "sort=score" \
+     --data-urlencode "direction=desc"
+
+# 詳細検索条件を組み合わせた例
+# キーワード「仕様書」、タグ「API」、グループ「開発チーム」で検索
+# (実際のAPIリクエストでは、各条件はスペースで区切ってqパラメータに含めます)
+curl -G "https://api.docbase.io/teams/${TEAM}/posts" \
+     -H "X-DocBaseToken: ${TOKEN}" \
+     --data-urlencode 'q="仕様書" tag:API group:開発チーム'
 ---
 
