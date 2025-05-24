@@ -51,7 +51,7 @@ function mapSlackErrorToApiErrorType(slackError: string | undefined): ApiError['
 export async function fetchSlackMessages(
   token: string,
   channelId: string,
-  limit: number = 20,
+  limit = 20,
   cursor?: string, // ページネーション用のカーソル
 ): Promise<Result<SlackConversationsHistoryResponse, ApiError>> {
   // レスポンス全体を返すように変更
