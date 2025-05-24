@@ -14,7 +14,9 @@ import type {
   SlackSpecificApiError,
 } from '../types/error'
 
-const SLACK_API_BASE_URL = 'https://slack.com/api'
+// プロキシAPIのベースURL
+// 本番環境では適切に環境変数から取得するなどの対応が必要
+const API_PROXY_BASE_URL = '/api/slack/search'
 
 // 成功時のレスポンスの型 (新しい構造)
 export interface SearchSuccessResponse {
@@ -29,6 +31,7 @@ export interface SearchSuccessResponse {
 
 /**
  * Slack API を使用してメッセージを検索します。
+ * プロキシAPIを経由してCORS問題を回避します。
  *
  * @param token Slack API トークン (User Token推奨: xoxp-)
  * @param query 検索クエリ
@@ -46,22 +49,18 @@ export const fetchSlackMessages = async (
     return err({ type: 'validation', message: 'トークンと検索クエリは必須です。' } as ValidationApiError)
   }
 
-  // search.messages は GET もしくは application/x-www-form-urlencoded 形式のPOST をサポート
-  // ここではGETを使用
+  // プロキシAPIに渡すパラメータを準備
   const params = new URLSearchParams({
+    token,
     query,
     count: count.toString(),
     page: page.toString(),
-    // sort: 'timestamp', // 必要に応じてソート順を指定 (score or timestamp)
-    // sort_dir: 'desc',   // 必要に応じてソート方向を指定 (asc or desc)
   })
 
   try {
-    const response = await fetch(`${SLACK_API_BASE_URL}/search.messages?${params.toString()}`, {
+    // プロキシAPIを呼び出し
+    const response = await fetch(`${API_PROXY_BASE_URL}?${params.toString()}`, {
       method: 'GET',
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
     })
 
     if (!response.ok) {
