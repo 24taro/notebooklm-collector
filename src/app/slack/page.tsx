@@ -1,11 +1,68 @@
 'use client'
 
 import { useState } from 'react'
+import type React from 'react'
 import Header from '../../components/Header'
 import Footer from '../../components/Footer'
 import { fetchSlackMessages } from '../../lib/slackClient'
 import type { SlackMessage } from '../../types/slack'
 import { toast } from 'react-hot-toast'
+
+// タイムスタンプをフォーマットするヘルパー関数
+const formatTimestamp = (ts: string): string => {
+  const date = new Date(Number.parseFloat(ts) * 1000)
+  return date.toLocaleString('ja-JP', {
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit',
+  })
+}
+
+// 簡単なmrkdwnをHTMLに変換する
+const formatMessageText = (text: string) => {
+  let formattedText = text
+
+  // HTMLエンティティをエスケープする（基本的なもののみ）
+  formattedText = formattedText
+    .replace(/&/g, '&amp;')
+    .replace(/</g, '&lt;')
+    .replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;')
+    .replace(/'/g, '&#039;')
+
+  // URLをリンクに変換 (エスケープ後に実行)
+  formattedText = formattedText.replace(
+    /(https?:\/\/[^\s&<>"'`]+)/g, // URLの正規表現を少し安全に
+    (url) =>
+      `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">${url}</a>`,
+  )
+
+  // 太字: *text* -> <strong>text</strong>
+  formattedText = formattedText.replace(/\*(.+?)\*/g, '<strong>$1</strong>')
+  // イタリック: _text_ -> <em>text</em>
+  formattedText = formattedText.replace(/_(.+?)_/g, '<em>$1</em>')
+  // 取り消し線: ~text~ -> <del>text</del>
+  formattedText = formattedText.replace(/~(.+?)~/g, '<del>$1</del>')
+  // コード: `text` -> <code>text</code>
+  formattedText = formattedText.replace(/`(.+?)`/g, '<code>$1</code>')
+  // プレーンテキストブロック: ```text``` -> <pre><code>text</code></pre>
+  formattedText = formattedText.replace(
+    /```([\s\S]+?)```/g,
+    (match, p1) =>
+      `<pre class="bg-gray-100 p-2 my-1 rounded text-sm whitespace-pre-wrap"><code>${p1.trim() /* .replace(/\n/g, '<br />') */}</code></pre>`,
+  )
+
+  // 通常の改行を <br> に変換 (preブロック処理後)
+  // preブロック内の改行はそのまま活かしたいので、この処理は pre の外側に適用されるようにする
+  // ただし、単純な置換だと pre の中も <br> になってしまうので、より高度な処理が必要
+  // 今回は、preブロック以外での改行はそのまま表示されることを期待し、明示的な <br> 変換は一旦見送る
+
+  // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
+  return <span dangerouslySetInnerHTML={{ __html: formattedText }} />
+}
 
 export default function SlackPage() {
   const [slackToken, setSlackToken] = useState('')
@@ -141,10 +198,11 @@ export default function SlackPage() {
             <div className="bg-gray-50 p-4 rounded-md border max-h-96 overflow-y-auto">
               {messages.map((msg) => (
                 <div key={msg.ts} className="mb-2 pb-2 border-b last:border-b-0">
-                  <p className="text-xs text-gray-500">
-                    User: {msg.user || 'N/A'} (ts: {msg.ts})
-                  </p>
-                  <p className="text-sm">{msg.text || '(本文なし)'}</p>
+                  <div className="flex justify-between items-center mb-1">
+                    <span className="text-xs text-gray-600 font-medium">User: {msg.user || 'N/A'}</span>
+                    <span className="text-xs text-gray-500">{formatTimestamp(msg.ts)}</span>
+                  </div>
+                  <div className="text-sm break-words whitespace-pre-wrap">{formatMessageText(msg.text || '')}</div>
                 </div>
               ))}
             </div>
