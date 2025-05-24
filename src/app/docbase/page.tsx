@@ -1,6 +1,6 @@
 'use client' // クライアントコンポーネントとしてマーク
 
-import SearchForm from '../../components/SearchForm' // パスを修正
+import SearchForm from '../../components/DocbaseSearchForm' // パスを修正
 import { Toaster } from 'react-hot-toast' // Toasterをインポート
 // import { SparklesCore } from "../../components/ui/sparkles"; // 架空のUIコンポーネントなのだ -> 一旦コメントアウト
 import Header from '../../components/Header' // 変更

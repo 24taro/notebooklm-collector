@@ -6,7 +6,6 @@ import type {
   NetworkApiError,
   UnknownApiError,
   UnauthorizedApiError,
-  NotFoundApiError,
   RateLimitApiError,
   ApiError,
   ValidationApiError,
