@@ -185,11 +185,11 @@ const SearchForm = () => {
           </div>
         )}
 
-        {markdownContent && !isLoading && !error && posts && posts.length > 0 && (
+        {markdownContent && !isLoading && !error && (
           <div className="mt-6 pt-5 border-t border-gray-200">
             <div className="flex justify-between items-center mb-3">
               <h3 className="text-lg font-semibold text-docbase-text">Markdownプレビュー</h3>
-              <span className="text-sm text-docbase-text-sub">(取得記事数: {posts.length}件)</span>
+              {posts && posts.length > 0 && <p className="text-sm text-docbase-text-sub">取得件数: {posts.length}件</p>}
             </div>
             <MarkdownPreview markdown={markdownContent} />
           </div>

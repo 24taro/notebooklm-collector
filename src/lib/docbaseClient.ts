@@ -42,7 +42,7 @@ export const fetchDocbasePosts = async (
   const allPosts: DocbasePostListItem[] = []
   let currentPage = 1
   const postsPerPage = 100 // 1ページあたりの取得件数
-  const maxPages = 5 // 最大取得ページ数
+  const maxPages = 3 // 最大取得ページ数
 
   // リトライ処理をページネーションの外側に移動するため、
   // この関数がリトライされるときは、特定のページからではなく、常に最初のページから再試行する。
