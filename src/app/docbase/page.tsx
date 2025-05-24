@@ -3,14 +3,14 @@
 import SearchForm from '../../components/SearchForm' // パスを修正
 import { Toaster } from 'react-hot-toast' // Toasterをインポート
 // import { SparklesCore } from "../../components/ui/sparkles"; // 架空のUIコンポーネントなのだ -> 一旦コメントアウト
-import DocbaseHeader from '../../components/DocbaseHeader' // 新しいヘッダーをインポート
-import DocbaseFooter from '../../components/DocbaseFooter' // 新しいフッターをインポート
+import Header from '../../components/Header' // 変更
+import Footer from '../../components/Footer' // 変更
 
 export default function DocbasePage() {
   // コンポーネント名を DocbasePage に変更
   return (
     <main className="flex min-h-screen flex-col text-gray-800 selection:bg-docbase-primary font-sans">
-      <DocbaseHeader /> {/* ヘッダーをここに配置 */}
+      <Header title="NotebookLM Collector - Docbase" /> {/* 変更 */}
       {/* 背景のパーティクルエフェクト (架空のコンポーネント) */}
       {/* <div className=\"absolute inset-0 w-full h-full z-0\"> */}
       {/*  <SparklesCore */}
@@ -140,7 +140,7 @@ export default function DocbasePage() {
           </div>
         </section>
       </div>
-      <DocbaseFooter /> {/* フッターをここに配置 */}
+      <Footer /> {/* 変更 */}
     </main>
   )
 }

@@ -1,13 +1,13 @@
 'use client' // クライアントコンポーネントとしてマーク
 
 import Link from 'next/link'
-import DocbaseHeader from '../components/DocbaseHeader'
-import DocbaseFooter from '../components/DocbaseFooter'
+import Header from '../components/Header'
+import Footer from '../components/Footer'
 
 export default function HomePage() {
   return (
     <main className="flex min-h-screen flex-col text-gray-800 selection:bg-docbase-primary font-sans">
-      <DocbaseHeader />
+      <Header title="NotebookLM Collector" />
       <div className="flex-grow flex flex-col items-center justify-center px-4">
         <div className="text-center mb-12">
           <h1 className="text-5xl font-bold mb-4">NotebookLM Collector</h1>
@@ -32,7 +32,7 @@ export default function HomePage() {
           </Link>
         </div>
       </div>
-      <DocbaseFooter />
+      <Footer />
     </main>
   )
 }
