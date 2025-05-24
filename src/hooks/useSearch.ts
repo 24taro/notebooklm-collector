@@ -75,7 +75,7 @@ export const useSearch = (): UseSearchResult => {
             // (例: document.getElementById("docbase-token")?.focus();)
             // ただし、フックから直接DOM操作するのは避けた方が良い場合もあるので、コンポーネント側で対応する方が望ましい
             break
-          case 'rateLimit':
+          case 'rate_limit':
             toast.error('Docbase APIが混み合っています。しばらくしてから再試行してください。')
             setCanRetry(true) // レートリミットの場合は手動再試行を許可
             break
