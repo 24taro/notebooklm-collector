@@ -8,6 +8,8 @@ import { fetchSlackMessages, type SearchSuccessResponse } from '@/lib/slackClien
 import { convertToSlackMarkdown } from '../../lib/slackdown'
 import type { SlackMessage } from '../../types/slack'
 import { toast, Toaster } from 'react-hot-toast'
+import { useDownload } from '../../hooks/useDownload'
+import { MarkdownPreview } from '../../components/DocbaseMarkdownPreview'
 
 // タイムスタンプをフォーマットするヘルパー関数
 const formatTimestamp = (ts: string): string => {
@@ -78,6 +80,13 @@ export default function SlackPage() {
     perPage: 20,
   })
   const [currentPreviewMarkdown, setCurrentPreviewMarkdown] = useState<string>('')
+  const [startDate, setStartDate] = useState<string>('')
+  const [endDate, setEndDate] = useState<string>('')
+  const [customPerPage, setCustomPerPage] = useState<number>(20)
+  const [channel, setChannel] = useState<string>('')
+  const [author, setAuthor] = useState<string>('')
+  const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
+  const { isDownloading, handleDownload } = useDownload()
 
   // ローカルストレージからトークンを読み込み・保存するuseEffect
   useEffect(() => {
@@ -92,6 +101,16 @@ export default function SlackPage() {
       localStorage.setItem('slackApiToken', token)
     }
   }, [token])
+
+  // 検索クエリに期間・件数を反映するヘルパー
+  const buildQuery = () => {
+    let q = searchQuery.trim()
+    if (channel) q += ` in:${channel.startsWith('#') ? channel : `#${channel}`}`
+    if (author) q += ` from:${author.startsWith('@') ? author : `@${author}`}`
+    if (startDate) q += ` after:${startDate}`
+    if (endDate) q += ` before:${endDate}`
+    return q
+  }
 
   const handleFetchMessages = async () => {
     if (!token) {
@@ -126,7 +145,7 @@ export default function SlackPage() {
         )
 
         // APIから取得する件数は paginationInfo.perPage を使用
-        const result = await fetchSlackMessages(token, searchQuery, paginationInfo.perPage, currentPageInternal)
+        const result = await fetchSlackMessages(token, buildQuery(), customPerPage, currentPageInternal)
 
         if (result.isOk()) {
           const responseData = result.value
@@ -186,137 +205,331 @@ export default function SlackPage() {
   }
 
   return (
-    <main className="flex min-h-screen flex-col items-center justify-between bg-gradient-to-b from-slate-50 to-sky-100 text-slate-800">
-      <Header title="Slack メッセージ検索 & Markdown出力" />
-      <div className="flex-grow container mx-auto px-4 py-8 w-full max-w-3xl">
-        <Toaster position="top-right" />
-        <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">Slack メッセージ検索 & Markdown出力</h1>
-
-        <div className="mb-6 p-4 border border-blue-300 rounded-lg bg-blue-50 shadow-sm">
-          <p className="text-sm text-blue-700">
-            このツールはSlackの <strong className="font-semibold">search.messages</strong>{' '}
-            APIエンドポイントを使用します。
-            <br />
-            利用には、Slackアプリに <code className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">search:read</code>{' '}
-            のスコープ権限が必要です。
-            <br />
-            以前のバージョンから移行した場合は、アプリの権限を確認し、必要であれば再認証してください。
-          </p>
-        </div>
-
-        <form onSubmit={handleFormSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow-md">
-          <div>
-            <label htmlFor="token" className="block text-sm font-medium text-gray-700 mb-1">
-              Slack API トークン (User Token: <code className="text-xs">xoxp-</code> から始まるもの):
-            </label>
-            <input
-              type="password"
-              id="token"
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              placeholder="xoxp-..."
-              required
-            />
-          </div>
-
-          <div>
-            <label htmlFor="searchQuery" className="block text-sm font-medium text-gray-700 mb-1">
-              検索クエリ (例: <code className="text-xs">重要なキーワード in:#general after:2024-01-01</code>):
-            </label>
-            <input
-              type="text"
-              id="searchQuery"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-              className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              placeholder="Slackの検索演算子が利用可能"
-            />
-            <p className="mt-2 text-xs text-gray-500">
-              ヘルプ: Slackの検索演算子は
-              <a
-                href="https://slack.com/intl/ja-jp/help/articles/202528808-Slack-%E3%81%A7%E6%A4%9C%E7%B4%A2%E3%81%99%E3%82%8B"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-indigo-600 hover:text-indigo-800 underline"
-              >
-                こちら
-              </a>
-              を参照。
+    <main className="flex min-h-screen flex-col text-gray-800 selection:bg-blue-100 font-sans">
+      <Header title="NotebookLM Collector - Slack" />
+      <Toaster
+        position="top-center"
+        toastOptions={{
+          className: '!border !border-gray-200 !bg-white !text-gray-700 !shadow-lg !rounded-md',
+          success: {
+            iconTheme: {
+              primary: '#36C5F0', // Slackブルー
+              secondary: '#FFFFFF',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#EF4444',
+              secondary: '#FFFFFF',
+            },
+          },
+        }}
+      />
+      <div className="relative z-10 flex flex-col items-center w-full">
+        {/* ヒーローセクション */}
+        <section className="w-full text-center my-32">
+          <div className="max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6 text-gray-800 leading-tight">
+              Slackの会話を、
+              <br />
+              NotebookLMへ簡単連携
+            </h1>
+            <p className="text-lg md:text-xl lg:text-2xl text-gray-600 max-w-3xl mx-auto">
+              キーワードや期間でSlackメッセージを検索し、NotebookLM用のMarkdownファイルをすぐに生成できます。
             </p>
           </div>
-
-          <div className="flex items-center space-x-3">
-            <button
-              type="submit"
-              disabled={isLoading || !token || !searchQuery}
-              className="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 transition ease-in-out duration-150"
-            >
-              {isLoading ? '取得中...' : '検索・全件取得 (最大500件)'}
-            </button>
-          </div>
-        </form>
-
-        {error && (
-          <div className="mt-6 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md shadow-sm">
-            <p className="font-medium">エラーが発生しました:</p>
-            <p className="text-sm">{error}</p>
-          </div>
-        )}
-
-        {messages.length > 0 && (
-          <div className="mt-8">
-            <h2 className="text-2xl font-semibold mb-4 text-gray-800">
-              検索結果 ({messages.length}件表示 / API上の総結果: {paginationInfo.totalResults}件)
-            </h2>
-            <div className="space-y-4">
-              {messages.map((msg) => (
-                <div
-                  key={msg.ts}
-                  className="p-4 border border-gray-200 rounded-lg shadow-sm bg-white hover:shadow-md transition-shadow"
-                >
-                  <div className="flex justify-between items-center mb-2">
-                    <span className="font-semibold text-indigo-700">
-                      {msg.username || msg.user || 'Unknown User'} (
-                      {msg.channel.name ? `#${msg.channel.name}` : msg.channel.id})
+        </section>
+        {/* 使い方説明セクション */}
+        <section className="w-full mt-12">
+          <div className="max-w-screen-lg mx-auto px-6 sm:px-10 lg:px-24 py-16 rounded-xl border border-gray-200 bg-background-light">
+            <h2 className="text-3xl md:text-4xl font-bold mb-20 text-center text-gray-800">利用はかんたん3ステップ</h2>
+            <div className="grid md:grid-cols-3 gap-x-8 gap-y-10 relative">
+              {[
+                {
+                  step: '1',
+                  title: '情報を入力',
+                  description: 'Slackトークン、検索キーワード、期間などを入力します。トークンは保存可能です。',
+                  icon: '⌨️',
+                },
+                {
+                  step: '2',
+                  title: '検索して生成',
+                  description:
+                    '「検索実行」ボタンでSlackからメッセージを取得し、NotebookLM用Markdownをプレビューします。',
+                  icon: '🔍',
+                },
+                {
+                  step: '3',
+                  title: 'ダウンロード',
+                  description: '生成されたMarkdownを「ダウンロード」ボタンで保存。すぐにAIに学習させられます。',
+                  icon: '💾',
+                },
+              ].map((item) => (
+                <div key={item.step} className="text-center md:text-left">
+                  <div className="flex items-center justify-center md:justify-start mb-4">
+                    <span className="flex items-center justify-center w-10 h-10 bg-blue-500 text-white text-xl font-bold rounded-full mr-4">
+                      {item.step}
                     </span>
-                    <a
-                      href={msg.permalink}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="text-xs text-indigo-500 hover:underline"
-                    >
-                      {formatTimestamp(msg.ts)} (Slackで表示)
-                    </a>
+                    <span className="text-3xl">{item.icon}</span>
                   </div>
-                  <div className="whitespace-pre-wrap text-sm text-gray-700">{msg.text || '(本文なし)'}</div>
+                  <h3 className="text-lg font-semibold mb-2 text-gray-800">{item.title}</h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">{item.description}</p>
                 </div>
               ))}
             </div>
           </div>
-        )}
-
-        {currentPreviewMarkdown && (
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold mb-3 text-gray-800">Markdownプレビュー:</h2>
-            <button
-              type="button"
-              onClick={() => {
-                navigator.clipboard.writeText(currentPreviewMarkdown)
-                toast.success('Markdownをクリップボードにコピーしました！')
-              }}
-              className="mb-2 px-3 py-1.5 bg-teal-500 text-white text-sm font-semibold rounded-md shadow-sm hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-1 transition ease-in-out duration-150"
-            >
-              Markdownをコピー
-            </button>
-            <textarea
-              readOnly
-              value={currentPreviewMarkdown}
-              className="w-full h-96 p-3 border border-gray-300 rounded-md bg-gray-50 font-mono text-xs shadow-inner"
-              placeholder="ここにMarkdownプレビューが表示されます"
-            />
+        </section>
+        {/* セキュリティ説明セクション */}
+        <section className="w-full mt-12">
+          <div className="max-w-screen-lg mx-auto px-6 sm:px-10 lg:px-24 py-16 rounded-xl border border-gray-200 bg-background-light">
+            <div className="text-center">
+              <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-gray-800">🔒 セキュリティについて</h2>
+              <p className="text-gray-600 text-lg leading-relaxed max-w-3xl mx-auto">
+                入力されたSlack APIトークンや取得したメッセージ内容は、お使いのブラウザ内でのみ処理されます。
+                これらの情報が外部サーバーに送信されたり、保存されたりすることは一切ありませんので、安心してご利用いただけます。
+              </p>
+            </div>
           </div>
-        )}
+        </section>
+        {/* メイン機能セクション */}
+        <section id="main-tool-section" className="w-full my-12 bg-white">
+          <div className="max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12 shadow-md rounded-lg border border-gray-200">
+            <div className="px-0">
+              <h2 className="text-4xl font-bold mb-6 text-center text-gray-800">Slack メッセージ検索・収集</h2>
+              <div className="max-w-3xl mx-auto">
+                <form onSubmit={handleFormSubmit} className="space-y-6">
+                  <div className="space-y-4">
+                    <div>
+                      <label htmlFor="searchQuery" className="block text-base font-medium text-gray-700 mb-1">
+                        検索キーワード
+                      </label>
+                      <input
+                        id="searchQuery"
+                        type="text"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        placeholder="Slackの検索演算子も利用可"
+                        className="block w-full px-4 py-3 border border-gray-400 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+                        disabled={isLoading || isDownloading}
+                        required
+                      />
+                    </div>
+                    <div>
+                      <label htmlFor="token" className="block text-base font-medium text-gray-700 mb-1">
+                        Slack API トークン
+                      </label>
+                      <input
+                        id="token"
+                        type="password"
+                        value={token}
+                        onChange={(e) => setToken(e.target.value)}
+                        placeholder="xoxp-..."
+                        className="block w-full px-4 py-3 border border-gray-400 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+                        disabled={isLoading || isDownloading}
+                        required
+                      />
+                    </div>
+                  </div>
+                  <div className="space-y-4 pt-2">
+                    <button
+                      type="button"
+                      onClick={() => setShowAdvanced(!showAdvanced)}
+                      className="text-sm text-blue-600 hover:text-blue-800 focus:outline-none"
+                    >
+                      {showAdvanced ? '詳細な条件を閉じる ▲' : 'もっと詳細な条件を追加する ▼'}
+                    </button>
+                    {showAdvanced && (
+                      <div className="space-y-4 p-4 border border-gray-300 rounded-md bg-gray-50">
+                        <div>
+                          <label htmlFor="channel" className="block text-sm font-medium text-gray-700 mb-1">
+                            チャンネル (例: #general)
+                          </label>
+                          <input
+                            id="channel"
+                            type="text"
+                            value={channel}
+                            onChange={(e) => setChannel(e.target.value)}
+                            placeholder="#general"
+                            className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+                            disabled={isLoading || isDownloading}
+                          />
+                        </div>
+                        <div>
+                          <label htmlFor="author" className="block text-sm font-medium text-gray-700 mb-1">
+                            投稿者 (例: @user)
+                          </label>
+                          <input
+                            id="author"
+                            type="text"
+                            value={author}
+                            onChange={(e) => setAuthor(e.target.value)}
+                            placeholder="@user"
+                            className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+                            disabled={isLoading || isDownloading}
+                          />
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                          <div>
+                            <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
+                              投稿期間 (開始日)
+                            </label>
+                            <input
+                              id="startDate"
+                              type="date"
+                              value={startDate}
+                              onChange={(e) => setStartDate(e.target.value)}
+                              className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+                              disabled={isLoading || isDownloading}
+                            />
+                          </div>
+                          <div>
+                            <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
+                              投稿期間 (終了日)
+                            </label>
+                            <input
+                              id="endDate"
+                              type="date"
+                              value={endDate}
+                              onChange={(e) => setEndDate(e.target.value)}
+                              className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+                              disabled={isLoading || isDownloading}
+                            />
+                          </div>
+                        </div>
+                        <div>
+                          <label htmlFor="customPerPage" className="block text-sm font-medium text-gray-700 mb-1">
+                            1ページ取得件数 (最大100)
+                          </label>
+                          <input
+                            id="customPerPage"
+                            type="number"
+                            min={1}
+                            max={100}
+                            value={customPerPage}
+                            onChange={(e) => setCustomPerPage(Number(e.target.value))}
+                            placeholder="20"
+                            className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+                            disabled={isLoading || isDownloading}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 pt-2">
+                    <button
+                      type="submit"
+                      className="w-full inline-flex items-center justify-center py-2.5 px-4 border border-transparent shadow-sm text-sm font-medium rounded-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors duration-150 ease-in-out"
+                      disabled={isLoading || isDownloading || !token || !searchQuery}
+                    >
+                      {isLoading ? (
+                        <>
+                          <svg
+                            className="animate-spin -ml-1 mr-2 h-5 w-5"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <title>検索処理ローディング</title>
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            />
+                          </svg>
+                          検索中...
+                        </>
+                      ) : (
+                        '検索実行'
+                      )}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDownload(currentPreviewMarkdown, searchQuery, !!currentPreviewMarkdown)}
+                      className="w-full inline-flex items-center justify-center py-2.5 px-4 border border-blue-600 shadow-sm text-sm font-medium rounded-sm text-blue-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 disabled:bg-gray-50 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed transition-colors duration-150 ease-in-out"
+                      disabled={isLoading || isDownloading || !currentPreviewMarkdown}
+                    >
+                      {isDownloading ? (
+                        <>
+                          <svg
+                            className="animate-spin -ml-1 mr-2 h-5 w-5"
+                            xmlns="http://www.w3.org/2000/svg"
+                            fill="none"
+                            viewBox="0 0 24 24"
+                          >
+                            <title>ダウンロード処理ローディング</title>
+                            <circle
+                              className="opacity-25"
+                              cx="12"
+                              cy="12"
+                              r="10"
+                              stroke="currentColor"
+                              strokeWidth="4"
+                            />
+                            <path
+                              className="opacity-75"
+                              fill="currentColor"
+                              d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                            />
+                          </svg>
+                          生成中...
+                        </>
+                      ) : (
+                        'Markdownダウンロード'
+                      )}
+                    </button>
+                  </div>
+                  {/* エラー表示 */}
+                  {error && (
+                    <div className="mt-5 p-3.5 text-sm text-gray-800 bg-red-50 border border-red-300 rounded-sm shadow-sm">
+                      <div className="flex items-center">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5 mr-2 text-red-500"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                          strokeWidth="2"
+                        >
+                          <title>エラーアイコン</title>
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"
+                          />
+                        </svg>
+                        <p className="font-medium">エラーが発生しました:</p>
+                      </div>
+                      <p className="ml-7 mt-0.5 text-red-600">{error}</p>
+                    </div>
+                  )}
+                  {/* プレビュー */}
+                  {currentPreviewMarkdown && !isLoading && !error && (
+                    <div className="mt-6 pt-5 border-t border-gray-200">
+                      <div className="flex justify-between items-center mb-3">
+                        <h3 className="text-lg font-semibold text-gray-800">Markdownプレビュー</h3>
+                        <p className="text-sm text-gray-500">取得件数: {messages.length}件</p>
+                      </div>
+                      <MarkdownPreview markdown={currentPreviewMarkdown} />
+                      {messages.length > 10 && (
+                        <p className="mt-2 text-sm text-gray-500">
+                          プレビューには最初の10件のみ表示されています。すべての内容を確認するには、ファイルをダウンロードしてください。
+                        </p>
+                      )}
+                    </div>
+                  )}
+                </form>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
       <Footer />
     </main>
