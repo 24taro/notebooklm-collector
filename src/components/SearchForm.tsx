@@ -21,6 +21,13 @@ const SearchForm = () => {
   const [domain, setDomain] = useLocalStorage<string>(LOCAL_STORAGE_DOMAIN_KEY, '')
   const [token, setToken] = useLocalStorage<string>(LOCAL_STORAGE_TOKEN_KEY, '')
   const [markdownContent, setMarkdownContent] = useState('')
+  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false)
+  const [tags, setTags] = useState('')
+  const [author, setAuthor] = useState('')
+  const [titleFilter, setTitleFilter] = useState('')
+  const [startDate, setStartDate] = useState('')
+  const [endDate, setEndDate] = useState('')
+  const [group, setGroup] = useState('')
 
   const { posts, isLoading, error, searchPosts, canRetry, retrySearch } = useSearch()
   const { isDownloading, handleDownload } = useDownload()
@@ -30,7 +37,15 @@ const SearchForm = () => {
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     setMarkdownContent('')
-    await searchPosts(domain, token, keyword)
+    const advancedFilters = {
+      tags,
+      author,
+      titleFilter,
+      startDate,
+      endDate,
+      group,
+    }
+    await searchPosts(domain, token, keyword, advancedFilters)
   }
 
   useEffect(() => {
@@ -88,6 +103,106 @@ const SearchForm = () => {
           </div>
           <DocbaseDomainInput domain={domain} onDomainChange={setDomain} disabled={isLoading || isDownloading} />
           <DocbaseTokenInput token={token} onTokenChange={setToken} disabled={isLoading || isDownloading} />
+        </div>
+
+        {/* 詳細検索の開閉ボタンと入力フィールドを追加 */}
+        <div className="space-y-4 pt-2">
+          <button
+            type="button"
+            onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
+            className="text-sm text-docbase-primary hover:text-docbase-primary-dark focus:outline-none"
+          >
+            {showAdvancedSearch ? '詳細な条件を閉じる ▲' : 'もっと詳細な条件を追加する ▼'}
+          </button>
+
+          {showAdvancedSearch && (
+            <div className="space-y-4 p-4 border border-gray-300 rounded-md bg-gray-50">
+              <div>
+                <label htmlFor="tags" className="block text-sm font-medium text-docbase-text mb-1">
+                  タグ (カンマ区切り)
+                </label>
+                <input
+                  id="tags"
+                  type="text"
+                  value={tags}
+                  onChange={(e) => setTags(e.target.value)}
+                  placeholder="例: API, 設計"
+                  className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm placeholder-docbase-text-sub focus:outline-none focus:ring-1 focus:ring-docbase-primary focus:border-docbase-primary disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+                  disabled={isLoading || isDownloading}
+                />
+              </div>
+              <div>
+                <label htmlFor="author" className="block text-sm font-medium text-docbase-text mb-1">
+                  投稿者 (ユーザーID)
+                </label>
+                <input
+                  id="author"
+                  type="text"
+                  value={author}
+                  onChange={(e) => setAuthor(e.target.value)}
+                  placeholder="例: user123"
+                  className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm placeholder-docbase-text-sub focus:outline-none focus:ring-1 focus:ring-docbase-primary focus:border-docbase-primary disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+                  disabled={isLoading || isDownloading}
+                />
+              </div>
+              <div>
+                <label htmlFor="titleFilter" className="block text-sm font-medium text-docbase-text mb-1">
+                  タイトルに含むキーワード
+                </label>
+                <input
+                  id="titleFilter"
+                  type="text"
+                  value={titleFilter}
+                  onChange={(e) => setTitleFilter(e.target.value)}
+                  placeholder="例: 仕様書"
+                  className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm placeholder-docbase-text-sub focus:outline-none focus:ring-1 focus:ring-docbase-primary focus:border-docbase-primary disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+                  disabled={isLoading || isDownloading}
+                />
+              </div>
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                  <label htmlFor="startDate" className="block text-sm font-medium text-docbase-text mb-1">
+                    投稿期間 (開始日)
+                  </label>
+                  <input
+                    id="startDate"
+                    type="date"
+                    value={startDate}
+                    onChange={(e) => setStartDate(e.target.value)}
+                    className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-docbase-primary focus:border-docbase-primary disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+                    disabled={isLoading || isDownloading}
+                  />
+                </div>
+                <div>
+                  <label htmlFor="endDate" className="block text-sm font-medium text-docbase-text mb-1">
+                    投稿期間 (終了日)
+                  </label>
+                  <input
+                    id="endDate"
+                    type="date"
+                    value={endDate}
+                    onChange={(e) => setEndDate(e.target.value)}
+                    className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-docbase-primary focus:border-docbase-primary disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+                    disabled={isLoading || isDownloading}
+                  />
+                </div>
+              </div>
+              <div>
+                <label htmlFor="group" className="block text-sm font-medium text-docbase-text mb-1">
+                  グループ名
+                </label>
+                <input
+                  id="group"
+                  type="text"
+                  value={group}
+                  onChange={(e) => setGroup(e.target.value)}
+                  placeholder="例: 開発チーム"
+                  className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm placeholder-docbase-text-sub focus:outline-none focus:ring-1 focus:ring-docbase-primary focus:border-docbase-primary disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+                  disabled={isLoading || isDownloading}
+                />
+              </div>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 pt-2">
