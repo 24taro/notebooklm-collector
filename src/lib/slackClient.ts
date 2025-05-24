@@ -46,22 +46,21 @@ export const fetchSlackMessages = async (
     return err({ type: 'validation', message: 'トークンと検索クエリは必須です。' } as ValidationApiError)
   }
 
-  // search.messages は GET もしくは application/x-www-form-urlencoded 形式のPOST をサポート
-  // ここではGETを使用
   const params = new URLSearchParams({
+    token, // トークンをパラメータに追加
     query,
     count: count.toString(),
     page: page.toString(),
-    // sort: 'timestamp', // 必要に応じてソート順を指定 (score or timestamp)
-    // sort_dir: 'desc',   // 必要に応じてソート方向を指定 (asc or desc)
   })
 
   try {
-    const response = await fetch(`${SLACK_API_BASE_URL}/search.messages?${params.toString()}`, {
-      method: 'GET',
+    // POSTメソッドに変更し、Content-Type を application/x-www-form-urlencoded に設定
+    const response = await fetch(`${SLACK_API_BASE_URL}/search.messages`, {
+      method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
+      body: params.toString(), // パラメータをボディに設定
     })
 
     if (!response.ok) {
@@ -84,8 +83,6 @@ export const fetchSlackMessages = async (
     const data = (await response.json()) as SlackSearchResponse
 
     if (!data.ok) {
-      // Slack APIがok: falseを返した場合
-      // data.error には 'invalid_auth', 'not_authed', 'missing_scope' などが入る
       if (
         data.error === 'invalid_auth' ||
         data.error === 'not_authed' ||

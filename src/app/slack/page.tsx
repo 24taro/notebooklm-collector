@@ -1,12 +1,13 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import type React from 'react'
 import Header from '../../components/Header'
 import Footer from '../../components/Footer'
-import { fetchSlackMessages } from '../../lib/slackClient'
+import { fetchSlackMessages, type SearchSuccessResponse } from '@/lib/slackClient'
+import { convertToSlackMarkdown } from '../../lib/slackdown'
 import type { SlackMessage } from '../../types/slack'
-import { toast } from 'react-hot-toast'
+import { toast, Toaster } from 'react-hot-toast'
 
 // タイムスタンプをフォーマットするヘルパー関数
 const formatTimestamp = (ts: string): string => {
@@ -65,157 +66,255 @@ const formatMessageText = (text: string) => {
 }
 
 export default function SlackPage() {
-  const [slackToken, setSlackToken] = useState('')
-  const [channelId, setChannelId] = useState('')
-  const [isLoading, setIsLoading] = useState(false)
+  const [token, setToken] = useState<string>('')
+  const [searchQuery, setSearchQuery] = useState<string>('')
   const [messages, setMessages] = useState<SlackMessage[]>([])
+  const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<string | null>(null)
-  const [nextCursor, setNextCursor] = useState<string | undefined>(undefined)
+  const [paginationInfo, setPaginationInfo] = useState<SearchSuccessResponse['pagination']>({
+    currentPage: 1,
+    totalPages: 1,
+    totalResults: 0,
+    perPage: 20,
+  })
+  const [currentPreviewMarkdown, setCurrentPreviewMarkdown] = useState<string>('')
 
-  const handleFetch = async (isLoadMore = false) => {
-    if (!isLoadMore) {
-      setMessages([])
-      setNextCursor(undefined)
+  // ローカルストレージからトークンを読み込み・保存するuseEffect
+  useEffect(() => {
+    const storedToken = localStorage.getItem('slackApiToken')
+    if (storedToken) {
+      setToken(storedToken)
     }
-    setIsLoading(true)
-    setError(null)
+  }, [])
 
-    if (!slackToken || !channelId) {
-      const validationError = 'Slack APIトークンとチャンネルIDを入力してください。'
-      setError(validationError)
-      toast.error(validationError)
-      setIsLoading(false)
+  useEffect(() => {
+    if (token) {
+      localStorage.setItem('slackApiToken', token)
+    }
+  }, [token])
+
+  const handleFetchMessages = async () => {
+    if (!token) {
+      toast.error('Slack API トークンを入力してください。')
+      return
+    }
+    if (!searchQuery) {
+      toast.error('検索クエリを入力してください。')
       return
     }
 
-    const loadingToastId = toast.loading(isLoadMore ? 'さらにメッセージを取得中...' : 'Slackからメッセージを取得中...')
+    setIsLoading(true)
+    setError(null)
+    setMessages([])
+    setCurrentPreviewMarkdown('')
+    setPaginationInfo((prev) => ({ ...prev, currentPage: 1, totalPages: 1, totalResults: 0 }))
 
-    const result = await fetchSlackMessages(slackToken, channelId, 20, isLoadMore ? nextCursor : undefined)
+    let currentPageInternal = 1
+    const allFetchedMessages: SlackMessage[] = []
+    const maxTotalMessagesToFetch = 500
+    let totalMessagesFetchedSoFar = 0
+    let currentApiTotalPages = 1 // APIから返される最新の総ページ数
+    let loopError = false
 
-    toast.dismiss(loadingToastId)
+    const loadingToastId = toast.loading('Slackからメッセージを検索・取得準備中...')
 
-    if (result.isOk()) {
-      const responseData = result.value
-      if (responseData.messages && Array.isArray(responseData.messages)) {
-        if (responseData.messages.length > 0) {
-          setMessages((prevMessages) => {
-            const newMessages = (responseData.messages || []) as SlackMessage[]
-            const currentMessages: SlackMessage[] = prevMessages || []
-            return isLoadMore ? [...currentMessages, ...newMessages] : newMessages
-          })
-          toast.success(`${responseData.messages.length}件のメッセージを取得しました。`)
+    try {
+      while (totalMessagesFetchedSoFar < maxTotalMessagesToFetch) {
+        toast.loading(
+          `取得中 (${totalMessagesFetchedSoFar}件 / 最大${maxTotalMessagesToFetch}件) - Page ${currentPageInternal}${currentApiTotalPages > 1 ? `/${currentApiTotalPages}` : ''}`,
+          { id: loadingToastId },
+        )
+
+        // APIから取得する件数は paginationInfo.perPage を使用
+        const result = await fetchSlackMessages(token, searchQuery, paginationInfo.perPage, currentPageInternal)
+
+        if (result.isOk()) {
+          const responseData = result.value
+          currentApiTotalPages = responseData.pagination.totalPages // 最新の総ページ数を更新
+          setPaginationInfo(responseData.pagination) // APIからの最新のページネーション情報でstateを更新
+
+          if (responseData.messages && responseData.messages.length > 0) {
+            allFetchedMessages.push(...responseData.messages)
+            totalMessagesFetchedSoFar = allFetchedMessages.length
+            setMessages([...allFetchedMessages])
+
+            const newMarkdownChunk = responseData.messages.map(convertToSlackMarkdown).join('\n\n---\n\n')
+            setCurrentPreviewMarkdown((prev) => (prev ? `${prev}\n\n---\n\n${newMarkdownChunk}` : newMarkdownChunk))
+          } else {
+            // APIからメッセージが返ってこなかった場合 (該当ページにメッセージがないか、全ページ取得完了)
+            break
+          }
+
+          if (currentPageInternal >= currentApiTotalPages || totalMessagesFetchedSoFar >= maxTotalMessagesToFetch) {
+            break // 全ページ取得完了、または最大件数に達した
+          }
+          currentPageInternal++
         } else {
-          if (!isLoadMore) setMessages([])
-          toast.success('新しいメッセージはありませんでした。')
+          const apiError = result.error
+          console.error('Slack API Error during auto-pagination:', apiError)
+          setError(`エラー (Page ${currentPageInternal}, Type: ${apiError.type}): ${apiError.message}`)
+          toast.error(`ページ ${currentPageInternal} の取得中にエラー: ${apiError.message}`, {
+            id: loadingToastId,
+            duration: 4000,
+          })
+          if (apiError.type === 'unauthorized' || apiError.type === 'missing_scope') {
+            toast.error('トークンが無効か、必要な権限 (search:read) がありません。', { duration: 6000 })
+          }
+          loopError = true
+          break // エラーが発生したらループを抜ける
         }
+      }
+      if (!loopError) {
+        toast.success(`合計 ${totalMessagesFetchedSoFar} 件のメッセージを取得しました。`, { id: loadingToastId })
       } else {
-        if (!isLoadMore) setMessages([])
-        toast.success('メッセージ形式が正しくないか、取得できませんでした。')
+        // ループ中にエラーがあった場合、エラー用のトーストを維持するか、別途表示
+        // ここでは上記toast.errorで表示しているので、loadingトーストをdismissするだけでも良い
+        toast.dismiss(loadingToastId)
       }
-      setNextCursor(responseData.response_metadata?.next_cursor)
-    } else {
-      const apiError = result.error
-      console.error('Slack API Error:', apiError)
-      setError(`エラー: ${apiError.message}`)
-      toast.error(`エラー: ${apiError.message}`)
-      if (apiError.type === 'unauthorized') {
-        setSlackToken('')
-      }
-      setNextCursor(undefined)
+    } catch (e) {
+      console.error('Unexpected error during message fetching loop:', e)
+      toast.error('メッセージの自動取得中に予期せぬエラーが発生しました。', { id: loadingToastId })
+      setError('予期せぬエラーが発生しました。')
+    } finally {
+      setIsLoading(false)
     }
-    setIsLoading(false)
   }
 
-  const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+  const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    await handleFetch(false)
-  }
-
-  const handleLoadMore = async () => {
-    if (nextCursor && !isLoading) {
-      await handleFetch(true)
-    }
+    handleFetchMessages()
   }
 
   return (
-    <main className="flex min-h-screen flex-col text-gray-800 selection:bg-docbase-primary font-sans">
-      <Header title="NotebookLM Collector - Slack" />
-      <div className="flex-grow container mx-auto px-4 py-8">
-        <h1 className="text-3xl font-bold mb-6 text-center">Slack メッセージ収集</h1>
+    <main className="flex min-h-screen flex-col items-center justify-between bg-gradient-to-b from-slate-50 to-sky-100 text-slate-800">
+      <Header title="Slack メッセージ検索 & Markdown出力" />
+      <div className="flex-grow container mx-auto px-4 py-8 w-full max-w-3xl">
+        <Toaster position="top-right" />
+        <h1 className="text-3xl font-bold mb-8 text-center text-gray-800">Slack メッセージ検索 & Markdown出力</h1>
 
-        <form
-          onSubmit={handleSubmit}
-          className="max-w-xl mx-auto bg-white p-8 rounded-lg shadow-md border border-gray-200"
-        >
-          <div className="mb-6">
-            <label htmlFor="slackToken" className="block text-sm font-medium text-gray-700 mb-1">
-              Slack API トークン (OAuth)
+        <div className="mb-6 p-4 border border-blue-300 rounded-lg bg-blue-50 shadow-sm">
+          <p className="text-sm text-blue-700">
+            このツールはSlackの <strong className="font-semibold">search.messages</strong>{' '}
+            APIエンドポイントを使用します。
+            <br />
+            利用には、Slackアプリに <code className="bg-blue-100 text-blue-800 px-1.5 py-0.5 rounded">search:read</code>{' '}
+            のスコープ権限が必要です。
+            <br />
+            以前のバージョンから移行した場合は、アプリの権限を確認し、必要であれば再認証してください。
+          </p>
+        </div>
+
+        <form onSubmit={handleFormSubmit} className="space-y-6 bg-white p-6 rounded-lg shadow-md">
+          <div>
+            <label htmlFor="token" className="block text-sm font-medium text-gray-700 mb-1">
+              Slack API トークン (User Token: <code className="text-xs">xoxp-</code> から始まるもの):
             </label>
             <input
               type="password"
-              id="slackToken"
-              value={slackToken}
-              onChange={(e) => setSlackToken(e.target.value)}
+              id="token"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              placeholder="xoxb-..."
+              placeholder="xoxp-..."
               required
             />
           </div>
 
-          <div className="mb-6">
-            <label htmlFor="channelId" className="block text-sm font-medium text-gray-700 mb-1">
-              チャンネルID
+          <div>
+            <label htmlFor="searchQuery" className="block text-sm font-medium text-gray-700 mb-1">
+              検索クエリ (例: <code className="text-xs">重要なキーワード in:#general after:2024-01-01</code>):
             </label>
             <input
               type="text"
-              id="channelId"
-              value={channelId}
-              onChange={(e) => setChannelId(e.target.value)}
+              id="searchQuery"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 sm:text-sm"
-              placeholder="C012AB345CD"
-              required
+              placeholder="Slackの検索演算子が利用可能"
             />
+            <p className="mt-2 text-xs text-gray-500">
+              ヘルプ: Slackの検索演算子は
+              <a
+                href="https://slack.com/intl/ja-jp/help/articles/202528808-Slack-%E3%81%A7%E6%A4%9C%E7%B4%A2%E3%81%99%E3%82%8B"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-indigo-600 hover:text-indigo-800 underline"
+              >
+                こちら
+              </a>
+              を参照。
+            </p>
           </div>
 
-          {error && (
-            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md">
-              <p>{error}</p>
-            </div>
-          )}
-
-          <button
-            type="submit"
-            disabled={isLoading}
-            className="w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 disabled:opacity-50"
-          >
-            {isLoading && messages.length === 0 ? '取得中...' : 'メッセージ取得'}
-          </button>
+          <div className="flex items-center space-x-3">
+            <button
+              type="submit"
+              disabled={isLoading || !token || !searchQuery}
+              className="px-4 py-2 bg-indigo-600 text-white font-semibold rounded-md shadow-sm hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:opacity-50 transition ease-in-out duration-150"
+            >
+              {isLoading ? '取得中...' : '検索・全件取得 (最大500件)'}
+            </button>
+          </div>
         </form>
 
+        {error && (
+          <div className="mt-6 p-3 bg-red-100 border border-red-400 text-red-700 rounded-md shadow-sm">
+            <p className="font-medium">エラーが発生しました:</p>
+            <p className="text-sm">{error}</p>
+          </div>
+        )}
+
         {messages.length > 0 && (
-          <div className="mt-8 max-w-xl mx-auto">
-            <h2 className="text-xl font-semibold mb-3">取得結果 ({messages.length}件):</h2>
-            <div className="bg-gray-50 p-4 rounded-md border max-h-96 overflow-y-auto">
+          <div className="mt-8">
+            <h2 className="text-2xl font-semibold mb-4 text-gray-800">
+              検索結果 ({messages.length}件表示 / API上の総結果: {paginationInfo.totalResults}件)
+            </h2>
+            <div className="space-y-4">
               {messages.map((msg) => (
-                <div key={msg.ts} className="mb-2 pb-2 border-b last:border-b-0">
-                  <div className="flex justify-between items-center mb-1">
-                    <span className="text-xs text-gray-600 font-medium">User: {msg.user || 'N/A'}</span>
-                    <span className="text-xs text-gray-500">{formatTimestamp(msg.ts)}</span>
+                <div
+                  key={msg.ts}
+                  className="p-4 border border-gray-200 rounded-lg shadow-sm bg-white hover:shadow-md transition-shadow"
+                >
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-semibold text-indigo-700">
+                      {msg.username || msg.user || 'Unknown User'} (
+                      {msg.channel.name ? `#${msg.channel.name}` : msg.channel.id})
+                    </span>
+                    <a
+                      href={msg.permalink}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-xs text-indigo-500 hover:underline"
+                    >
+                      {formatTimestamp(msg.ts)} (Slackで表示)
+                    </a>
                   </div>
-                  <div className="text-sm break-words whitespace-pre-wrap">{formatMessageText(msg.text || '')}</div>
+                  <div className="whitespace-pre-wrap text-sm text-gray-700">{msg.text || '(本文なし)'}</div>
                 </div>
               ))}
             </div>
-            {nextCursor && (
-              <button
-                type="button"
-                onClick={handleLoadMore}
-                disabled={isLoading}
-                className="mt-4 w-full flex justify-center py-2 px-4 border border-transparent rounded-md shadow-sm text-sm font-medium text-white bg-gray-500 hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400 disabled:opacity-50"
-              >
-                {isLoading ? 'さらに取得中...' : 'さらに読み込む'}
-              </button>
-            )}
+          </div>
+        )}
+
+        {currentPreviewMarkdown && (
+          <div className="mt-8">
+            <h2 className="text-xl font-semibold mb-3 text-gray-800">Markdownプレビュー:</h2>
+            <button
+              type="button"
+              onClick={() => {
+                navigator.clipboard.writeText(currentPreviewMarkdown)
+                toast.success('Markdownをクリップボードにコピーしました！')
+              }}
+              className="mb-2 px-3 py-1.5 bg-teal-500 text-white text-sm font-semibold rounded-md shadow-sm hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-1 transition ease-in-out duration-150"
+            >
+              Markdownをコピー
+            </button>
+            <textarea
+              readOnly
+              value={currentPreviewMarkdown}
+              className="w-full h-96 p-3 border border-gray-300 rounded-md bg-gray-50 font-mono text-xs shadow-inner"
+              placeholder="ここにMarkdownプレビューが表示されます"
+            />
           </div>
         )}
       </div>
