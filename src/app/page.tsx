@@ -8,7 +8,7 @@ import DocbaseFooter from '../components/DocbaseFooter' // 新しいフッター
 
 export default function Home() {
   return (
-    <main className="flex min-h-screen flex-col text-gray-800 selection:bg-blue-100 font-sans">
+    <main className="flex min-h-screen flex-col text-gray-800 selection:bg-docbase-primary font-sans">
       <DocbaseHeader /> {/* ヘッダーをここに配置 */}
       {/* 背景のパーティクルエフェクト (架空のコンポーネント) */}
       {/* <div className=\"absolute inset-0 w-full h-full z-0\"> */}
@@ -58,12 +58,12 @@ export default function Home() {
           </div>
         </section>
 
-        <div className="flex justify-center bg-[rgba(30,47,64,0.8)] w-full py-10">
+        <div className="flex justify-center bg-docbase-bg w-full py-10">
           <div className="flex flex-col items-center">
             <button
               type="button"
               onClick={() => document.getElementById('main-tool-section')?.scrollIntoView({ behavior: 'smooth' })}
-              className="px-8 py-3 bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded-md shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 ease-in-out text-lg"
+              className="px-8 py-3 bg-docbase-primary hover:bg-docbase-primary-dark text-white font-semibold rounded-md shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 ease-in-out text-lg"
             >
               今すぐMarkdownを生成
             </button>
@@ -75,7 +75,7 @@ export default function Home() {
 
         {/* 使い方説明セクション */}
         <section className="w-full mt-12">
-          <div className="max-w-screen-lg mx-auto px-6 sm:px-10 lg:px-24 py-16 rounded-xl border border-gray-200 bg-gray-50">
+          <div className="max-w-screen-lg mx-auto px-6 sm:px-10 lg:px-24 py-16 rounded-xl border border-gray-200 bg-docbase-bg-light">
             <h2 className="text-3xl md:text-4xl font-bold mb-20 text-center text-gray-800">利用はかんたん3ステップ</h2>
             <div className="grid md:grid-cols-3 gap-x-8 gap-y-10 relative">
               {[
@@ -103,7 +103,7 @@ export default function Home() {
               ].map((item, index) => (
                 <div key={item.step} className="text-center md:text-left">
                   <div className="flex items-center justify-center md:justify-start mb-4">
-                    <span className="flex items-center justify-center w-10 h-10 bg-blue-500 text-white text-xl font-bold rounded-full mr-4">
+                    <span className="flex items-center justify-center w-10 h-10 bg-docbase-primary text-white text-xl font-bold rounded-full mr-4">
                       {item.step}
                     </span>
                     <span className="text-3xl">{item.icon}</span>

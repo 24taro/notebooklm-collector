@@ -1,6 +1,34 @@
 @import "tailwindcss";
 
-:root {
+@theme {
+  --color-background: oklch(1 0 0);
+  --color-foreground: oklch(0 0 0);
+  --color-primary: oklch(64.49% 0.11 249.89);
+  --color-primary-dark: oklch(55.49% 0.11 249.89);
+  --color-primary-light: oklch(98.5% 0.002 247.839);
+  --color-background-light: oklch(98.5% 0.002 247.839);
+  --color-docbase-primary: oklch(64.49% 0.11 249.89);
+  --color-docbase-primary-dark: oklch(55.49% 0.11 249.89);
+  --color-docbase-bg: oklch(29.85% 0.0384 249.22deg);
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+}
+body {
+  color: var(--color-foreground);
+  background: var(--color-background);
+  font-family: system-ui, sans-serif, Helvetica, Arial;
+}
+
+@media (prefers-color-scheme: dark) {
+  body {
+    color: var(--color-background);
+    background: var(--color-foreground);
+  }
+}
+
+/* @import "tailwindcss"; */
+
+/* @theme {
   --docbase-primary: #3a89c9;
   --docbase-primary-dark: #2c6b9a;
   --docbase-text: #333333;
@@ -9,11 +37,9 @@
   --docbase-bg-alt: #f8f9fa;
   --docbase-accent-green: #28a745;
   --docbase-accent-orange: #fd7e14;
-
-  /* 既存の変数は一旦コメントアウト */
-  /* --background: #ffffff; */
-  /* --foreground: #171717; */
-}
+  --font-sans: var(--font-geist-sans);
+  --font-mono: var(--font-geist-mono);
+} */
 
 /* @theme inline {
   --color-background: var(--background);
@@ -22,16 +48,7 @@
   --font-mono: var(--font-geist-mono);
 } */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    /* ダークモードの色設定は後で調整 */
-    /* --background: #0a0a0a; */
-    /* --foreground: #ededed; */
-  }
-}
-
-body {
+/* body {
   background-color: var(--docbase-bg);
   color: var(--docbase-text);
-  /* font-family はTailwindの設定に任せるので削除 */
-}
+} */

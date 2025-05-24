@@ -25,19 +25,19 @@ export const MarkdownPreview: FC<MarkdownPreviewProps> = ({ markdown }) => {
   }
 
   return (
-    <div className="p-4 bg-docbase-bg rounded-md prose max-w-none prose-neutral prose-sm sm:prose-base lg:prose-lg xl:prose-xl">
+    <div className="p-4 rounded-md prose max-w-none prose-neutral prose-sm sm:prose-base lg:prose-lg xl:prose-xl">
       <ReactMarkdown
         remarkPlugins={[remarkGfm]}
         components={{
           // biome-ignore lint/suspicious/noExplicitAny: カスタムコンポーネントの型解決が複雑なため一時的にanyを使用
           h2: ({ node, children, ...props }: any) => (
-            <h2 className="text-3xl font-bold mt-8 mb-4 pb-2 border-b-2 border-docbase-primary" {...props}>
+            <h2 className="text-3xl font-bold mt-8 mb-4 pb-2 border-b-2 border-primary" {...props}>
               {children}
             </h2>
           ),
           // biome-ignore lint/suspicious/noExplicitAny: カスタムコンポーネントの型解決が複雑なため一時的にanyを使用
           blockquote: ({ node, children, ...props }: any) => (
-            <blockquote className="my-2 text-sm text-docbase-text-sub" {...props}>
+            <blockquote className="my-2 text-sm" {...props}>
               {children}
             </blockquote>
           ),
@@ -56,7 +56,7 @@ export const MarkdownPreview: FC<MarkdownPreviewProps> = ({ markdown }) => {
             ) : (
               <code
                 {...props}
-                className={className || 'px-1 py-0.5 bg-gray-200 text-docbase-text rounded-sm text-sm font-mono'}
+                className={className || 'px-1 py-0.5 bg-gray-200 text-text rounded-sm text-sm font-mono'}
               >
                 {children}
               </code>
@@ -64,7 +64,7 @@ export const MarkdownPreview: FC<MarkdownPreviewProps> = ({ markdown }) => {
           },
           // biome-ignore lint/suspicious/noExplicitAny: カスタムコンポーネントの型解決が複雑なため一時的にanyを使用
           a: ({ node, children, ...props }: any) => (
-            <a className="text-docbase-primary hover:underline hover:text-docbase-primary-dark" {...props}>
+            <a className="text-primary hover:underline hover:text-primary-dark" {...props}>
               {children}
             </a>
           ),
