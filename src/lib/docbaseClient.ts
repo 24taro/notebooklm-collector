@@ -139,7 +139,7 @@ export const fetchDocbasePosts = async (
             return fetchDocbasePosts(domain, token, keyword, advancedFilters, retries - 1, backoff * 2)
           }
           const error: RateLimitApiError = {
-            type: 'rateLimit',
+            type: 'rate_limit',
             message: `Docbase APIのレートリミットに達しました (ページ ${currentPage} 取得時)。何度か再試行しましたが改善しませんでした。`,
           }
           return err(error)
