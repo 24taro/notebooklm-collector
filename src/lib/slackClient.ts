@@ -1,155 +1,127 @@
-import { ok, err, type Result } from 'neverthrow'
-import type { SlackMessage, SlackConversationsHistoryResponse } from '../types/slack'
+import type { Result } from 'neverthrow'
+import { err, ok } from 'neverthrow'
+import type { SlackMessage, SlackSearchResponse } from '../types/slack'
 // ApiError と個別のエラー型を src/types/error.ts からインポート
 import type {
-  ApiError,
   NetworkApiError,
   UnknownApiError,
   UnauthorizedApiError,
   NotFoundApiError,
   RateLimitApiError,
+  ApiError,
+  ValidationApiError,
+  MissingScopeApiError,
+  SlackSpecificApiError,
 } from '../types/error'
 
 const SLACK_API_BASE_URL = 'https://slack.com/api'
 
-// この型を定義
-type ParsedErrorData = Partial<SlackConversationsHistoryResponse> & { error?: string }
-
-// Slack APIのエラーメッセージから適切なApiErrorTypeを推測するヘルパー
-function mapSlackErrorToApiErrorType(slackError: string | undefined): ApiError['type'] {
-  if (!slackError) return 'unknown'
-  switch (slackError) {
-    case 'invalid_auth':
-    case 'not_authed':
-    case 'token_revoked':
-    case 'account_inactive':
-      return 'unauthorized'
-    case 'channel_not_found':
-    case 'not_in_channel':
-      return 'notFound'
-    case 'ratelimited':
-      return 'rateLimit'
-    // DocbaseClientを参考に、他のSlackエラー文字列とApiErrorTypeのマッピングを追加できます。
-    // case 'permission_denied':
-    //   return 'forbidden'; // ForbiddenApiError を定義する場合
-    // case 'invalid_arg_name':
-    // case 'invalid_array_arg':
-    // case 'invalid_charset':
-    // case 'invalid_form_data':
-    // case 'invalid_post_type':
-    // case 'missing_post_type':
-    // case 'invalid_json':
-    // case 'json_not_object':
-    // case 'request_timeout':
-    // case 'upgrade_required':
-    //   return 'badRequest'; // BadRequestApiError を定義する場合
-    default:
-      return 'unknown'
+// 成功時のレスポンスの型 (新しい構造)
+export interface SearchSuccessResponse {
+  messages: SlackMessage[]
+  pagination: {
+    currentPage: number
+    totalPages: number
+    totalResults: number
+    perPage: number
   }
 }
 
-export async function fetchSlackMessages(
+/**
+ * Slack API を使用してメッセージを検索します。
+ *
+ * @param token Slack API トークン (User Token推奨: xoxp-)
+ * @param query 検索クエリ
+ * @param count 1ページあたりの取得件数 (デフォルト: 20)
+ * @param page 取得するページ番号 (1始まり、デフォルト: 1)
+ * @returns 検索結果またはAPIエラー
+ */
+export const fetchSlackMessages = async (
   token: string,
-  channelId: string,
-  limit = 20,
-  cursor?: string, // ページネーション用のカーソル
-): Promise<Result<SlackConversationsHistoryResponse, ApiError>> {
-  // レスポンス全体を返すように変更
-  if (!token) {
-    // UnauthorizedApiErrorとして型アサーション
-    return err({ type: 'unauthorized', message: 'Slack APIトークンが提供されていません。' } as UnauthorizedApiError)
-  }
-  if (!channelId) {
-    // NotFoundApiErrorとして型アサーション
-    return err({ type: 'notFound', message: 'チャンネルIDが提供されていません。' } as NotFoundApiError)
+  query: string,
+  count = 20,
+  page = 1,
+): Promise<Result<SearchSuccessResponse, ApiError>> => {
+  if (!token || !query) {
+    return err({ type: 'validation', message: 'トークンと検索クエリは必須です。' } as ValidationApiError)
   }
 
   const params = new URLSearchParams({
-    channel: channelId,
-    limit: limit.toString(),
+    token, // トークンをパラメータに追加
+    query,
+    count: count.toString(),
+    page: page.toString(),
   })
-  if (cursor) {
-    params.append('cursor', cursor)
-  }
-
-  const url = `${SLACK_API_BASE_URL}/conversations.history?${params.toString()}`
 
   try {
-    const response = await fetch(url, {
-      method: 'GET',
+    // POSTメソッドに変更し、Content-Type を application/x-www-form-urlencoded に設定
+    const response = await fetch(`${SLACK_API_BASE_URL}/search.messages`, {
+      method: 'POST',
       headers: {
-        Authorization: `Bearer ${token}`,
-        'Content-Type': 'application/json; charset=utf-8',
+        'Content-Type': 'application/x-www-form-urlencoded',
       },
+      body: params.toString(), // パラメータをボディに設定
     })
 
-    // response.ok でない場合、まずレスポンスボディを試みる
     if (!response.ok) {
-      const errorBase = { error: `HTTPエラー ${response.status}` }
-      // 明示的な型注釈を与える
-      let parsedErrorData: ParsedErrorData = { ...errorBase }
+      let errorPayload: { error?: string } = {}
       try {
-        // jsonData も同じ型で受けるか、as でキャストする
-        const jsonData: ParsedErrorData = await response.json()
-        parsedErrorData = { ...parsedErrorData, ...jsonData }
-
-        if (!parsedErrorData.error && errorBase.error) {
-          parsedErrorData.error = errorBase.error
-        }
+        errorPayload = await response.json()
       } catch (e) {
-        console.error('Slack API response JSON parse error:', e)
-        // JSONパース失敗時は、errorBase の情報が parsedErrorData に残っている
+        // JSONパースエラーの場合は、ステータスコードのみでエラーを返す
       }
-
-      const errorType = mapSlackErrorToApiErrorType(parsedErrorData.error)
-      const errorMessage = `Slack APIエラー: ${parsedErrorData.error || response.statusText} (Status: ${response.status})`
-      console.error('Slack API Error Response:', parsedErrorData)
-
-      // ApiError の各具象型に合わせてエラーオブジェクトを作成
-      switch (errorType) {
-        case 'unauthorized':
-          return err({ type: errorType, message: errorMessage } as UnauthorizedApiError)
-        case 'notFound':
-          return err({ type: errorType, message: errorMessage } as NotFoundApiError)
-        case 'rateLimit':
-          return err({ type: errorType, message: errorMessage } as RateLimitApiError)
-        // NetworkApiErrorはcatchブロックで処理
-        default: // unknown または他の未分類のエラー
-          return err({ type: 'unknown', message: errorMessage, cause: parsedErrorData } as UnknownApiError)
+      const errorMessage = errorPayload?.error || `APIリクエスト失敗: ${response.status}`
+      if (response.status === 401) {
+        return err({ type: 'unauthorized', message: 'Slack APIトークンが無効です。' } as UnauthorizedApiError)
       }
+      if (response.status === 429) {
+        return err({ type: 'rate_limit', message: 'APIレート制限に達しました。' } as RateLimitApiError)
+      }
+      return err({ type: 'network', message: errorMessage } as NetworkApiError)
     }
 
-    const data: SlackConversationsHistoryResponse = await response.json()
+    const data = (await response.json()) as SlackSearchResponse
 
     if (!data.ok) {
-      const errorType = mapSlackErrorToApiErrorType(data.error)
-      const errorMessage = `Slack APIエラー (data.ok is false): ${data.error || '不明なAPI内部エラー'}`
-      console.error(errorMessage, data)
-      // ApiError の各具象型に合わせてエラーオブジェクトを作成
-      switch (errorType) {
-        case 'unauthorized':
-          return err({ type: errorType, message: errorMessage } as UnauthorizedApiError)
-        case 'notFound':
-          return err({ type: errorType, message: errorMessage } as NotFoundApiError)
-        case 'rateLimit':
-          return err({ type: errorType, message: errorMessage } as RateLimitApiError)
-        default: // unknown または他の未分類のエラー
-          return err({ type: 'unknown', message: errorMessage, cause: data } as UnknownApiError)
+      if (
+        data.error === 'invalid_auth' ||
+        data.error === 'not_authed' ||
+        data.error === 'token_revoked' ||
+        data.error === 'account_inactive'
+      ) {
+        return err({ type: 'unauthorized', message: `Slack認証エラー: ${data.error}` } as UnauthorizedApiError)
       }
+      if (data.error?.startsWith('missing_scope')) {
+        return err({
+          type: 'missing_scope',
+          message: `必要なスコープがありません: ${data.error}`,
+        } as MissingScopeApiError)
+      }
+      return err({
+        type: 'slack_api',
+        message: data.error || 'Slack APIエラーが発生しました。',
+      } as SlackSpecificApiError)
     }
 
-    return ok(data) // messagesだけでなく、レスポンス全体を返す
-  } catch (e) {
-    console.error('Fetch Slack Messages Network/Unknown Error:', e)
-    if (e instanceof Error) {
-      // NetworkApiErrorとして型アサーション
-      return err({
-        type: 'network',
-        message: `ネットワークエラーまたは予期せぬエラー: ${e.message}`,
-        cause: e,
-      } as NetworkApiError)
+    const messages = data.messages?.matches ?? []
+    const paginationData = data.messages?.pagination
+
+    const responsePagination = {
+      currentPage: paginationData?.page ?? 1,
+      totalPages: paginationData?.page_count ?? 1,
+      totalResults: paginationData?.total_count ?? 0,
+      perPage: paginationData?.per_page ?? count,
     }
-    // UnknownApiErrorとして型アサーション
-    return err({ type: 'unknown', message: '予期せぬ不明なエラーが発生しました。', cause: e } as UnknownApiError)
+
+    return ok({ messages, pagination: responsePagination })
+  } catch (e) {
+    console.error('fetchSlackMessages Error:', e)
+    if (e instanceof Error) {
+      if (e.message.toLowerCase().includes('failed to fetch')) {
+        return err({ type: 'network', message: 'ネットワーク接続に失敗しました。' } as NetworkApiError)
+      }
+      return err({ type: 'unknown', message: e.message } as UnknownApiError)
+    }
+    return err({ type: 'unknown', message: '不明なエラーが発生しました。' } as UnknownApiError)
   }
 }
