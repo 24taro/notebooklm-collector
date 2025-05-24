@@ -78,6 +78,9 @@ export default function SlackPage() {
     perPage: 20,
   })
   const [currentPreviewMarkdown, setCurrentPreviewMarkdown] = useState<string>('')
+  const [startDate, setStartDate] = useState<string>('')
+  const [endDate, setEndDate] = useState<string>('')
+  const [customPerPage, setCustomPerPage] = useState<number>(20)
 
   // ローカルストレージからトークンを読み込み・保存するuseEffect
   useEffect(() => {
@@ -92,6 +95,19 @@ export default function SlackPage() {
       localStorage.setItem('slackApiToken', token)
     }
   }, [token])
+
+  // 検索クエリに期間・件数を反映するヘルパー
+  const buildQuery = () => {
+    let q = searchQuery.trim()
+    if (startDate && endDate) {
+      q += ` after:${startDate} before:${endDate}`
+    } else if (startDate) {
+      q += ` after:${startDate}`
+    } else if (endDate) {
+      q += ` before:${endDate}`
+    }
+    return q
+  }
 
   const handleFetchMessages = async () => {
     if (!token) {
@@ -126,7 +142,7 @@ export default function SlackPage() {
         )
 
         // APIから取得する件数は paginationInfo.perPage を使用
-        const result = await fetchSlackMessages(token, searchQuery, paginationInfo.perPage, currentPageInternal)
+        const result = await fetchSlackMessages(token, buildQuery(), customPerPage, currentPageInternal)
 
         if (result.isOk()) {
           const responseData = result.value
@@ -246,6 +262,47 @@ export default function SlackPage() {
             </p>
           </div>
 
+          <div className="flex flex-col md:flex-row md:space-x-4 space-y-2 md:space-y-0">
+            <div className="flex-1">
+              <label htmlFor="startDate" className="block text-xs font-medium text-gray-700 mb-1">
+                開始日 (after:)
+              </label>
+              <input
+                type="date"
+                id="startDate"
+                value={startDate}
+                onChange={(e) => setStartDate(e.target.value)}
+                className="block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs"
+              />
+            </div>
+            <div className="flex-1">
+              <label htmlFor="endDate" className="block text-xs font-medium text-gray-700 mb-1">
+                終了日 (before:)
+              </label>
+              <input
+                type="date"
+                id="endDate"
+                value={endDate}
+                onChange={(e) => setEndDate(e.target.value)}
+                className="block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs"
+              />
+            </div>
+            <div className="flex-1">
+              <label htmlFor="customPerPage" className="block text-xs font-medium text-gray-700 mb-1">
+                1ページ取得件数 (最大100)
+              </label>
+              <input
+                type="number"
+                id="customPerPage"
+                min={1}
+                max={100}
+                value={customPerPage}
+                onChange={(e) => setCustomPerPage(Number(e.target.value))}
+                className="block w-full px-2 py-1 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 text-xs"
+              />
+            </div>
+          </div>
+
           <div className="flex items-center space-x-3">
             <button
               type="submit"
@@ -299,16 +356,36 @@ export default function SlackPage() {
         {currentPreviewMarkdown && (
           <div className="mt-8">
             <h2 className="text-xl font-semibold mb-3 text-gray-800">Markdownプレビュー:</h2>
-            <button
-              type="button"
-              onClick={() => {
-                navigator.clipboard.writeText(currentPreviewMarkdown)
-                toast.success('Markdownをクリップボードにコピーしました！')
-              }}
-              className="mb-2 px-3 py-1.5 bg-teal-500 text-white text-sm font-semibold rounded-md shadow-sm hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-1 transition ease-in-out duration-150"
-            >
-              Markdownをコピー
-            </button>
+            <div className="flex items-center mb-2 space-x-2">
+              <button
+                type="button"
+                onClick={() => {
+                  const now = new Date()
+                  const ymdhms = `${now.getFullYear()}${String(now.getMonth() + 1).padStart(2, '0')}${String(now.getDate()).padStart(2, '0')}${String(now.getHours()).padStart(2, '0')}${String(now.getMinutes()).padStart(2, '0')}${String(now.getSeconds()).padStart(2, '0')}`
+                  const fileName = `notebooklm_slack_${searchQuery ? searchQuery.replace(/\s+/g, '_').slice(0, 20) : 'search'}_${ymdhms}.md`
+                  const blob = new Blob([currentPreviewMarkdown], { type: 'text/markdown' })
+                  const a = document.createElement('a')
+                  a.href = URL.createObjectURL(blob)
+                  a.download = fileName
+                  a.click()
+                  setTimeout(() => URL.revokeObjectURL(a.href), 1000)
+                  toast.success('Markdownファイルをダウンロードしました！')
+                }}
+                className="px-3 py-1.5 bg-green-600 text-white text-sm font-semibold rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-1 transition ease-in-out duration-150"
+              >
+                Markdownをダウンロード
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(currentPreviewMarkdown)
+                  toast.success('Markdownをクリップボードにコピーしました！')
+                }}
+                className="px-3 py-1.5 bg-teal-500 text-white text-sm font-semibold rounded-md shadow-sm hover:bg-teal-600 focus:outline-none focus:ring-2 focus:ring-teal-500 focus:ring-offset-1 transition ease-in-out duration-150"
+              >
+                Markdownをコピー
+              </button>
+            </div>
             <textarea
               readOnly
               value={currentPreviewMarkdown}
