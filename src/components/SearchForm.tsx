@@ -35,7 +35,7 @@ const SearchForm = () => {
 
   useEffect(() => {
     if (posts && posts.length > 0) {
-      const md = generateMarkdown(posts)
+      const md = generateMarkdown(posts.slice(0, 10))
       setMarkdownContent(md)
     } else {
       setMarkdownContent('')
@@ -187,8 +187,16 @@ const SearchForm = () => {
 
         {markdownContent && !isLoading && !error && (
           <div className="mt-6 pt-5 border-t border-gray-200">
-            <h3 className="text-lg font-semibold mb-3 text-docbase-text">Markdownプレビュー</h3>
+            <div className="flex justify-between items-center mb-3">
+              <h3 className="text-lg font-semibold text-docbase-text">Markdownプレビュー</h3>
+              {posts && posts.length > 0 && <p className="text-sm text-docbase-text-sub">取得件数: {posts.length}件</p>}
+            </div>
             <MarkdownPreview markdown={markdownContent} />
+            {posts && posts.length > 10 && (
+              <p className="mt-2 text-sm text-docbase-text-sub">
+                プレビューには最初の10件のみ表示されています。すべての内容を確認するには、ファイルをダウンロードしてください。
+              </p>
+            )}
           </div>
         )}
       </form>
