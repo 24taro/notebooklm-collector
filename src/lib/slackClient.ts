@@ -15,6 +15,14 @@ import type {
 import type { SlackMessage, SlackThread, SlackUser } from '../types/slack'
 
 const SLACK_API_BASE_URL = 'https://slack.com/api'
+const MAX_RETRIES = 3
+const INITIAL_BACKOFF_MS = 1000 // 1秒
+
+/**
+ * 指定されたミリ秒待機するPromiseを返すヘルパー関数
+ * @param ms 待機するミリ秒
+ */
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
 // 成功時のレスポンスの型 (新しい構造)
 export interface SearchSuccessResponse {
@@ -41,6 +49,8 @@ export const fetchSlackMessages = async (
   query: string,
   count = 20,
   page = 1,
+  retries = MAX_RETRIES,
+  backoff = INITIAL_BACKOFF_MS,
 ): Promise<Result<SearchSuccessResponse, ApiError>> => {
   if (!token || !query) {
     return err({
@@ -81,9 +91,17 @@ export const fetchSlackMessages = async (
         } as UnauthorizedApiError)
       }
       if (response.status === 429) {
+        // レートリミットの場合、リトライ処理を実行
+        if (retries > 0) {
+          console.warn(
+            `Slack API rate limit exceeded. Retrying in ${backoff}ms... (${retries} retries left)`,
+          )
+          await sleep(backoff)
+          return fetchSlackMessages(token, query, count, page, retries - 1, backoff * 2)
+        }
         return err({
           type: 'rate_limit',
-          message: 'APIレート制限に達しました。',
+          message: 'Slack APIのレート制限に達しました。何度か再試行しましたが改善しませんでした。',
         } as RateLimitApiError)
       }
       return err({ type: 'network', message: errorMessage } as NetworkApiError)
@@ -158,18 +176,35 @@ export const fetchSlackMessages = async (
     return ok({ messages, pagination: responsePagination })
   } catch (e) {
     console.error('fetchSlackMessages Error:', e)
+    // ネットワークエラーの場合、リトライ処理を実行
+    if (
+      retries > 0 &&
+      (e instanceof TypeError ||
+        (e instanceof Error && 
+         (e.message.toLowerCase().includes('failed to fetch') || 
+          e.message.toLowerCase().includes('network error'))))
+    ) {
+      console.warn(
+        `Network error occurred. Retrying in ${backoff}ms... (${retries} retries left)`,
+      )
+      await sleep(backoff)
+      return fetchSlackMessages(token, query, count, page, retries - 1, backoff * 2)
+    }
+
     if (e instanceof Error) {
       if (e.message.toLowerCase().includes('failed to fetch')) {
         return err({
           type: 'network',
-          message: 'ネットワーク接続に失敗しました。',
+          message: 'ネットワーク接続に失敗しました。何度か再試行しましたが改善しませんでした。',
+          cause: e,
         } as NetworkApiError)
       }
-      return err({ type: 'unknown', message: e.message } as UnknownApiError)
+      return err({ type: 'unknown', message: e.message, cause: e } as UnknownApiError)
     }
     return err({
       type: 'unknown',
       message: '不明なエラーが発生しました。',
+      cause: e,
     } as UnknownApiError)
   }
 }
