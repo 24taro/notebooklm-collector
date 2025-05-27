@@ -1,14 +1,17 @@
 /**
- * Markdown文字列をファイルとしてダウンロードする関数
+ * LLM最適化Markdown文字列をファイルとしてダウンロードする関数
+ * NotebookLM向けの命名規則を適用
  *
  * @param markdownContent ダウンロードするMarkdown文字列
  * @param keyword ファイル名に使用するキーワード
- * @param_posts 投稿があったかどうか
+ * @param postsExist 投稿があったかどうか
+ * @param sourceType ソースタイプ（'docbase' | 'slack'）
  */
 export const downloadMarkdownFile = (
   markdownContent: string,
   keyword: string,
-  postsExist: boolean, // 投稿が存在するかどうかを示すフラグを追加
+  postsExist: boolean,
+  sourceType: 'docbase' | 'slack' = 'docbase'
 ): { success: boolean; message?: string } => {
   // 投稿が存在しない、またはMarkdownコンテントが空の場合はダウンロードしない
   if (!postsExist || !markdownContent.trim()) {
@@ -27,20 +30,21 @@ export const downloadMarkdownFile = (
     const a = document.createElement('a')
     a.href = url
 
-    // 日本のタイムゾーンでYYYYMMDDHHmmss形式のタイムスタンプを生成
+    // LLM最適化ファイル命名規則: {source}_YYYY-MM-DD_{keyword}_{type}.md
     const now = new Date()
     const year = now.getFullYear()
     const month = String(now.getMonth() + 1).padStart(2, '0')
     const day = String(now.getDate()).padStart(2, '0')
-    const hours = String(now.getHours()).padStart(2, '0')
-    const minutes = String(now.getMinutes()).padStart(2, '0')
-    const seconds = String(now.getSeconds()).padStart(2, '0')
-    const timestamp = `${year}${month}${day}${hours}${minutes}${seconds}`
+    const dateStr = `${year}-${month}-${day}`
 
-    // キーワードが空の場合はデフォルトのファイル名の一部とする
-    const keywordPart = keyword.trim() || 'docbase'
+    // キーワードをファイル名に安全な形式に変換
+    const safeKeyword = keyword.trim() 
+      ? keyword.trim().replace(/[^a-zA-Z0-9\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/g, '_')
+      : 'search'
 
-    a.download = `notebooklm_${keywordPart}_${timestamp}.md`
+    // ソースタイプ別のファイル名
+    const contentType = sourceType === 'slack' ? 'threads' : 'articles'
+    a.download = `${sourceType}_${dateStr}_${safeKeyword}_${contentType}.md`
     document.body.appendChild(a)
     a.click()
     document.body.removeChild(a)

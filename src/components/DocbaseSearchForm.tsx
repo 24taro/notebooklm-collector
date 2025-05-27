@@ -50,12 +50,12 @@ const SearchForm = () => {
 
   useEffect(() => {
     if (posts && posts.length > 0) {
-      const md = generateMarkdown(posts.slice(0, 10))
+      const md = generateMarkdown(posts.slice(0, 10), keyword)
       setMarkdownContent(md)
     } else {
       setMarkdownContent('')
     }
-  }, [posts])
+  }, [posts, keyword])
 
   useEffect(() => {
     if (error?.type === 'unauthorized') {
@@ -65,7 +65,13 @@ const SearchForm = () => {
 
   const handleDownloadClick = () => {
     const postsExist = posts && posts.length > 0
-    handleDownload(markdownContent, keyword, postsExist)
+    if (postsExist) {
+      // ダウンロード時は全件のMarkdownを生成
+      const fullMarkdown = generateMarkdown(posts, keyword)
+      handleDownload(fullMarkdown, keyword, postsExist, 'docbase')
+    } else {
+      handleDownload(markdownContent, keyword, postsExist, 'docbase')
+    }
   }
 
   const renderErrorCause = (currentError: ApiError | null) => {
