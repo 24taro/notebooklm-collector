@@ -5,50 +5,16 @@
   --color-foreground: oklch(0 0 0);
   --color-primary: oklch(64.49% 0.11 249.89);
   --color-primary-dark: oklch(55.49% 0.11 249.89);
-  --color-primary-light: oklch(98.5% 0.002 247.839);
   --color-background-light: oklch(98.5% 0.002 247.839);
   --color-docbase-primary: oklch(64.49% 0.11 249.89);
   --color-docbase-primary-dark: oklch(55.49% 0.11 249.89);
   --color-docbase-bg: oklch(29.85% 0.0384 249.22deg);
-  --font-sans: var(--font-geist-sans);
+  --font-sans: var(--font-noto-sans-jp);
   --font-mono: var(--font-geist-mono);
 }
+
 body {
   color: var(--color-foreground);
   background: var(--color-background);
-  font-family: system-ui, sans-serif, Helvetica, Arial;
+  font-family: var(--font-noto-sans-jp), system-ui, sans-serif;
 }
-
-@media (prefers-color-scheme: dark) {
-  body {
-    color: var(--color-background);
-    background: var(--color-foreground);
-  }
-}
-
-/* @import "tailwindcss"; */
-
-/* @theme {
-  --docbase-primary: #3a89c9;
-  --docbase-primary-dark: #2c6b9a;
-  --docbase-text: #333333;
-  --docbase-text-sub: #6c757d;
-  --docbase-bg: #ffffff;
-  --docbase-bg-alt: #f8f9fa;
-  --docbase-accent-green: #28a745;
-  --docbase-accent-orange: #fd7e14;
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-} */
-
-/* @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-} */
-
-/* body {
-  background-color: var(--docbase-bg);
-  color: var(--docbase-text);
-} */

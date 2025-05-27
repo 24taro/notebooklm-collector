@@ -12,9 +12,11 @@
 
 - Docbase API からの記事検索・取得（最大 500 件）
 - Slack API からのメッセージ・スレッド検索・取得（最大 300 件）
-- 検索結果の Markdown 形式での出力
+- 検索結果の Markdown 形式での出力（YAML Front Matter 付き LLM 最適化）
 - NotebookLM 向けドキュメント生成
 - ブラウザ完結型でセキュアな処理
+- 統一エラーハンドリング（neverthrow Result 型）
+- ユーザーフレンドリーなエラーメッセージ
 
 ## TypeScript コーディング規約
 

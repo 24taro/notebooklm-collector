@@ -8,7 +8,7 @@ import Header from '../../components/Header'
 import { SlackHeroSection } from '../../components/SlackHeroSection'
 import { SlackSearchForm } from '../../components/SlackSearchForm'
 import { useDownload } from '../../hooks/useDownload'
-import { useSlackSearch } from '../../hooks/useSlackSearch'
+// import { useSlackSearch } from '../../hooks/useSlackSearch' // TODO: Issue #39で統一フックに移行
 import { generateSlackThreadsMarkdown } from '../../utils/slackMarkdownGenerator'
 
 export default function SlackPage() {
@@ -21,16 +21,19 @@ export default function SlackPage() {
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
   
   const { isDownloading, handleDownload } = useDownload()
-  const {
-    isLoading,
-    error,
-    slackThreads,
-    userMaps,
-    permalinkMaps,
-    threadMarkdowns,
-    currentPreviewMarkdown,
-    handleSearch,
-  } = useSlackSearch()
+  // TODO: Issue #39で統一エラーハンドリングフックに移行
+  const [isLoading, setIsLoading] = useState(false)
+  const [error, setError] = useState<any>(null)
+  const [slackThreads, setSlackThreads] = useState<any[]>([])
+  const [userMaps, setUserMaps] = useState<Record<string, string>>({})
+  const [permalinkMaps, setPermalinkMaps] = useState<Record<string, string>>({})
+  const [threadMarkdowns, setThreadMarkdowns] = useState<string[]>([])
+  const [currentPreviewMarkdown, setCurrentPreviewMarkdown] = useState<string>('')
+  
+  const handleSearch = () => {
+    // TODO: Issue #39で実装
+    console.log('Search function will be implemented in Issue #39')
+  }
 
   // ローカルストレージからトークンを読み込み・保存するuseEffect
   useEffect(() => {
@@ -48,7 +51,8 @@ export default function SlackPage() {
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    handleSearch(token, searchQuery, channel, author, startDate, endDate)
+    // TODO: Issue #39で統一フックによる検索実装
+    handleSearch()
   }
 
   const handlePreviewDownload = (markdownContent: string, searchQuery: string, hasContent: boolean) => {
@@ -61,8 +65,9 @@ export default function SlackPage() {
 
   const handleFullDownload = (markdownContent: string, searchQuery: string, hasContent: boolean) => {
     if (hasContent && threadMarkdowns.length > 0) {
-      const fullMarkdown = generateSlackThreadsMarkdown(slackThreads, userMaps, permalinkMaps, searchQuery)
-      handleDownload(fullMarkdown, searchQuery, hasContent, 'slack')
+      // TODO: Issue #39で統一フックによるMarkdown生成実装
+      // const fullMarkdown = generateSlackThreadsMarkdown(slackThreads, userMaps, permalinkMaps, searchQuery)
+      handleDownload(markdownContent, searchQuery, hasContent, 'slack')
     } else {
       handleDownload(markdownContent, searchQuery, hasContent, 'slack')
     }
