@@ -7,7 +7,7 @@ import { useSearch } from '../hooks/useSearch'
 import type { ApiError } from '../types/error'
 import { generateMarkdown } from '../utils/markdownGenerator'
 import { DocbaseDomainInput } from './DocbaseDomainInput'
-import { MarkdownPreview } from './DocbaseMarkdownPreview'
+import { MarkdownPreview } from './MarkdownPreview'
 import { DocbaseTokenInput } from './DocbaseTokenInput'
 
 const LOCAL_STORAGE_DOMAIN_KEY = 'docbaseDomain'
@@ -308,15 +308,19 @@ const SearchForm = () => {
 
         {posts && posts.length > 0 && !isLoading && !error && (
           <div className="mt-6 pt-5 border-t border-gray-200">
-            <div className="flex justify-between items-center mb-3">
-              <h3 className="text-lg font-semibold text-docbase-text">記事プレビュー</h3>
-              <p className="text-sm text-docbase-text-sub">取得件数: {posts.length}件</p>
-            </div>
-            <MarkdownPreview posts={posts} searchKeyword={keyword} />
-            {posts.length > 10 && (
+            <MarkdownPreview 
+              markdown={markdownContent}
+              title="Markdownプレビュー"
+              onDownload={handleDownloadClick}
+              emptyMessage="Docbase記事の検索結果がここに表示されます。"
+            />
+            {posts && posts.length > 10 && (
               <p className="mt-2 text-sm text-docbase-text-sub">
                 プレビューには最初の10件のMarkdownが生成されます。すべての内容を確認するには、ファイルをダウンロードしてください。
               </p>
+            )}
+            {posts && posts.length > 0 && (
+              <p className="mt-2 text-sm text-docbase-text-sub">取得件数: {posts.length}件</p>
             )}
           </div>
         )}
