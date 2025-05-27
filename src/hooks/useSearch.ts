@@ -1,7 +1,8 @@
 import type { Result } from 'neverthrow' // Resultを型としてインポート (typeキーワードを明示)
 import { useCallback, useState } from 'react'
 import toast from 'react-hot-toast' // react-hot-toastをインポート
-import { fetchDocbasePosts } from '../lib/docbaseClient'
+import { createDocbaseAdapter, type DocbaseAdapter } from '../adapters/docbaseAdapter'
+import { createFetchHttpClient } from '../adapters/fetchHttpClient'
 import type { DocbasePostListItem } from '../types/docbase'
 import type { ApiError } from '../types/error'
 import { getUserFriendlyErrorMessage, getErrorActionSuggestion } from '../utils/errorMessage'
@@ -32,10 +33,16 @@ interface UseSearchResult {
   getErrorSuggestion: () => string | null // エラーアクション提案
 }
 
+interface UseSearchOptions {
+  adapter?: DocbaseAdapter // アダプターを注入可能にする（テスト用）
+}
+
 /**
  * Docbaseの投稿を検索するためのカスタムフック
  */
-export const useSearch = (): UseSearchResult => {
+export const useSearch = (options?: UseSearchOptions): UseSearchResult => {
+  // アダプターの初期化（注入されていない場合はデフォルトを使用）
+  const adapter = options?.adapter || createDocbaseAdapter(createFetchHttpClient())
   const [posts, setPosts] = useState<DocbasePostListItem[]>([])
   const [isLoading, setIsLoading] = useState<boolean>(false)
   const [error, setError] = useState<ApiError | null>(null)
@@ -54,12 +61,12 @@ export const useSearch = (): UseSearchResult => {
       setCanRetry(false)
       setLastSearchParams({ domain, token, keyword, advancedFilters }) // 最後に検索したパラメータを保存
 
-      const result: Result<DocbasePostListItem[], ApiError> = await fetchDocbasePosts(
+      const result: Result<DocbasePostListItem[], ApiError> = await adapter.searchPosts({
         domain,
         token,
         keyword,
         advancedFilters, // advancedFilters を渡す
-      )
+      })
 
       if (result.isOk()) {
         setPosts(result.value)
@@ -81,7 +88,7 @@ export const useSearch = (): UseSearchResult => {
       }
       setIsLoading(false)
     },
-    [],
+    [adapter],
   )
 
   const searchPosts = useCallback(
@@ -116,7 +123,7 @@ export const useSearch = (): UseSearchResult => {
       }
       await executeSearch(domain, token, keyword, advancedFilters) // advancedFilters を渡す
     },
-    [executeSearch],
+    [executeSearch, adapter],
   )
 
   const retrySearch = useCallback(() => {

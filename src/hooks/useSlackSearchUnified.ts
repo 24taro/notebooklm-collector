@@ -1,269 +1,408 @@
-import { useState, useCallback } from 'react'
-import type { Result } from 'neverthrow'
-import { err, ok } from 'neverthrow'
-import type { ApiError } from '../types/error'
+// Slack検索機能のカスタムフック（アダプターパターン使用）
+// スレッド検索・取得・ユーザー情報取得・Markdown生成の統一実装
+
+'use client'
+
+import { useCallback, useState } from 'react'
+import toast from 'react-hot-toast'
+import { createSlackAdapter, type SlackAdapter } from '../adapters/slackAdapter'
+import { createFetchHttpClient } from '../adapters/fetchHttpClient'
 import type { SlackMessage, SlackThread, SlackUser } from '../types/slack'
-import {
-  fetchSlackMessages,
-  fetchSlackThreadMessages,
-  fetchSlackPermalink,
-  fetchSlackUserName,
-  type SearchSuccessResponse,
-} from '../lib/slackClient'
+import type { ApiError } from '../types/error'
 import { getUserFriendlyErrorMessage, getErrorActionSuggestion } from '../utils/errorMessage'
 
-export interface SlackAdvancedFilters {
+/**
+ * Slack検索パラメータ
+ */
+export interface SlackSearchParams {
+  token: string
+  searchQuery: string
   channel?: string
   author?: string
   startDate?: string
   endDate?: string
-  count?: number
-}
-
-export interface UseSlackSearchReturn {
-  messages: SlackMessage[]
-  threads: SlackThread[]
-  users: Map<string, SlackUser>
-  isLoading: boolean
-  error: ApiError | null
-  canRetry: boolean
-  searchMessages: (token: string, query: string, filters?: SlackAdvancedFilters) => Promise<void>
-  retrySearch: () => Promise<void>
-  clearResults: () => void
-  getUserFriendlyError: () => string | null
-  getErrorSuggestion: () => string | null
 }
 
 /**
- * Slack検索機能の統一エラーハンドリングフック
- * DocbaseのuseSearchと同等の機能を提供し、エラーハンドリングを統一
+ * Slack検索結果の状態
  */
-export const useSlackSearch = (): UseSlackSearchReturn => {
-  const [messages, setMessages] = useState<SlackMessage[]>([])
-  const [threads, setThreads] = useState<SlackThread[]>([])
-  const [users, setUsers] = useState<Map<string, SlackUser>>(new Map())
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<ApiError | null>(null)
-  const [lastSearchParams, setLastSearchParams] = useState<{
-    token: string
-    query: string
-    filters?: SlackAdvancedFilters
-  } | null>(null)
+interface UseSlackSearchState {
+  messages: SlackMessage[]
+  slackThreads: SlackThread[]
+  userMaps: Record<string, string>
+  permalinkMaps: Record<string, string>
+  threadMarkdowns: string[]
+  currentPreviewMarkdown: string
+  paginationInfo: {
+    currentPage: number
+    totalPages: number
+    totalResults: number
+    perPage: number
+  }
+  isLoading: boolean
+  error: ApiError | null
+}
 
-  /**
-   * ユーザー情報を取得してキャッシュする
-   */
-  const fetchAndCacheUser = useCallback(async (userId: string, token: string): Promise<void> => {
-    if (users.has(userId)) return
+/**
+ * フック戻り値の型
+ */
+interface UseSlackSearchResult extends UseSlackSearchState {
+  handleSearch: (params: SlackSearchParams) => Promise<void>
+  canRetry: boolean
+  retrySearch: () => void
+}
 
-    const userResult = await fetchSlackUserName(userId, token)
-    if (userResult.isOk()) {
-      setUsers(prev => new Map(prev).set(userId, userResult.value))
-    }
-  }, [users])
+/**
+ * フックオプション（アダプター注入用）
+ */
+interface UseSlackSearchOptions {
+  adapter?: SlackAdapter
+}
 
-  /**
-   * スレッド情報を取得してメッセージにパーマリンクを追加
-   */
-  const enrichMessagesWithThreadsAndPermalinks = useCallback(
-    async (
-      searchMessages: SlackMessage[],
-      token: string,
-    ): Promise<Result<{ messages: SlackMessage[]; threads: SlackThread[] }, ApiError>> => {
-      try {
-        const enrichedMessages: SlackMessage[] = []
-        const threadsMap = new Map<string, SlackThread>()
+/**
+ * Slack検索機能のカスタムフック（アダプターパターン使用）
+ */
+export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlackSearchResult {
+  // アダプターの初期化
+  const adapter = options?.adapter || createSlackAdapter(createFetchHttpClient())
 
-        // 各メッセージにパーマリンクを追加し、スレッドを取得
-        for (const message of searchMessages) {
-          // パーマリンクを取得
-          const permalinkResult = await fetchSlackPermalink(message.channel.id, message.ts, token)
-          const permalink = permalinkResult.isOk() ? permalinkResult.value : undefined
-
-          const enrichedMessage: SlackMessage = {
-            ...message,
-            permalink,
-          }
-
-          // ユーザー情報をキャッシュ
-          await fetchAndCacheUser(message.user, token)
-
-          // スレッドの場合は、スレッド全体を取得
-          const threadTs = message.thread_ts || message.ts
-          if (!threadsMap.has(threadTs)) {
-            const threadResult = await fetchSlackThreadMessages(message.channel.id, threadTs, token)
-            if (threadResult.isOk()) {
-              // スレッド内の各メッセージにもパーマリンクを追加
-              const threadWithPermalinks: SlackThread = {
-                ...threadResult.value,
-                parent: {
-                  ...threadResult.value.parent,
-                  permalink: enrichedMessage.permalink,
-                },
-                replies: await Promise.all(
-                  threadResult.value.replies.map(async (reply) => {
-                    const replyPermalinkResult = await fetchSlackPermalink(
-                      reply.channel.id,
-                      reply.ts,
-                      token,
-                    )
-                    await fetchAndCacheUser(reply.user, token)
-                    return {
-                      ...reply,
-                      permalink: replyPermalinkResult.isOk() ? replyPermalinkResult.value : undefined,
-                    }
-                  }),
-                ),
-              }
-              threadsMap.set(threadTs, threadWithPermalinks)
-            }
-          }
-
-          enrichedMessages.push(enrichedMessage)
-        }
-
-        return ok({
-          messages: enrichedMessages,
-          threads: Array.from(threadsMap.values()),
-        })
-      } catch (e) {
-        return err({
-          type: 'unknown',
-          message: 'メッセージの詳細情報取得中にエラーが発生しました。',
-          cause: e,
-        } as ApiError)
-      }
+  // 状態管理
+  const [state, setState] = useState<UseSlackSearchState>({
+    messages: [],
+    slackThreads: [],
+    userMaps: {},
+    permalinkMaps: {},
+    threadMarkdowns: [],
+    currentPreviewMarkdown: '',
+    paginationInfo: {
+      currentPage: 1,
+      totalPages: 1,
+      totalResults: 0,
+      perPage: 20,
     },
-    [fetchAndCacheUser],
-  )
+    isLoading: false,
+    error: null,
+  })
+
+  const [lastSearchParams, setLastSearchParams] = useState<SlackSearchParams | null>(null)
+  const [canRetry, setCanRetry] = useState(false)
 
   /**
-   * Slackメッセージ検索の実行
+   * 検索クエリを構築
    */
-  const searchMessages = useCallback(
-    async (token: string, query: string, filters?: SlackAdvancedFilters): Promise<void> => {
-      setIsLoading(true)
-      setError(null)
-      setLastSearchParams({ token, query, filters })
+  const buildSearchQuery = (params: SlackSearchParams): string => {
+    let query = params.searchQuery.trim()
 
-      try {
-        // 詳細検索条件をクエリに追加
-        let searchQuery = query
-        if (filters) {
-          if (filters.channel) {
-            searchQuery += ` in:#${filters.channel}`
-          }
-          if (filters.author) {
-            searchQuery += ` from:@${filters.author}`
-          }
-          if (filters.startDate) {
-            searchQuery += ` after:${filters.startDate}`
-          }
-          if (filters.endDate) {
-            searchQuery += ` before:${filters.endDate}`
-          }
+    if (params.channel?.trim()) {
+      query += ` in:#${params.channel.trim().replace(/^#/, '')}`
+    }
+
+    if (params.author?.trim()) {
+      query += ` from:@${params.author.trim().replace(/^@/, '')}`
+    }
+
+    if (params.startDate?.trim()) {
+      query += ` after:${params.startDate.trim()}`
+    }
+
+    if (params.endDate?.trim()) {
+      query += ` before:${params.endDate.trim()}`
+    }
+
+    return query.trim()
+  }
+
+  /**
+   * メッセージをスレッド単位でユニーク化
+   */
+  const groupMessagesByThread = (messages: SlackMessage[]): SlackMessage[] => {
+    const threadMap = new Map<string, SlackMessage>()
+    
+    for (const message of messages) {
+      const threadKey = message.thread_ts || message.ts
+      if (!threadMap.has(threadKey) || !message.thread_ts) {
+        threadMap.set(threadKey, message)
+      }
+    }
+    
+    return Array.from(threadMap.values())
+  }
+
+  /**
+   * スレッド詳細情報を取得
+   */
+  const fetchThreadDetails = async (
+    uniqueMessages: SlackMessage[],
+    token: string
+  ): Promise<{
+    threads: SlackThread[]
+    userMaps: Record<string, string>
+    permalinkMaps: Record<string, string>
+  }> => {
+    const threads: SlackThread[] = []
+    const userMaps: Record<string, string> = {}
+    const permalinkMaps: Record<string, string> = {}
+    const userIdSet = new Set<string>()
+
+    // 各スレッドの詳細を取得
+    for (const message of uniqueMessages) {
+      const threadTs = message.thread_ts || message.ts
+
+      // スレッド取得
+      const threadResult = await adapter.getThreadMessages({
+        token,
+        channel: message.channel.id,
+        threadTs,
+      })
+
+      if (threadResult.isOk()) {
+        const thread = threadResult.value
+        threads.push(thread)
+
+        // ユーザーIDを収集
+        userIdSet.add(thread.parent.user)
+        thread.replies.forEach(reply => userIdSet.add(reply.user))
+
+        // パーマリンク取得（親メッセージ）
+        const parentPermalinkResult = await adapter.getPermalink({
+          token,
+          channel: message.channel.id,
+          messageTs: thread.parent.ts,
+        })
+        if (parentPermalinkResult.isOk()) {
+          permalinkMaps[thread.parent.ts] = parentPermalinkResult.value
         }
 
-        const count = filters?.count || 20
+        // 返信のパーマリンクも取得
+        for (const reply of thread.replies) {
+          const replyPermalinkResult = await adapter.getPermalink({
+            token,
+            channel: message.channel.id,
+            messageTs: reply.ts,
+          })
+          if (replyPermalinkResult.isOk()) {
+            permalinkMaps[reply.ts] = replyPermalinkResult.value
+          }
+        }
+      }
+    }
 
-        // メッセージ検索を実行
-        const searchResult = await fetchSlackMessages(token, searchQuery, count, 1)
+    // ユーザー情報を一括取得
+    for (const userId of userIdSet) {
+      const userResult = await adapter.getUserInfo({ token, userId })
+      if (userResult.isOk()) {
+        const user = userResult.value
+        userMaps[userId] = user.real_name || user.name || userId
+      }
+    }
+
+    return { threads, userMaps, permalinkMaps }
+  }
+
+  /**
+   * 検索実行
+   */
+  const handleSearch = useCallback(async (params: SlackSearchParams) => {
+    if (!params.token?.trim()) {
+      toast.error('Slack API トークンを入力してください。')
+      return
+    }
+
+    if (!params.searchQuery?.trim()) {
+      toast.error('検索クエリを入力してください。')
+      return
+    }
+
+    setState(prev => ({ ...prev, isLoading: true, error: null }))
+    setCanRetry(false)
+    setLastSearchParams(params)
+
+    try {
+      const query = buildSearchQuery(params)
+      const MAX_PAGES = 3
+      const COUNT_PER_PAGE = 100
+      const allMessages: SlackMessage[] = []
+      let totalResults = 0
+
+      // ページネーション処理
+      for (let page = 1; page <= MAX_PAGES; page++) {
+        const searchResult = await adapter.searchMessages({
+          token: params.token,
+          query,
+          count: COUNT_PER_PAGE,
+          page,
+        })
 
         if (searchResult.isErr()) {
-          setError(searchResult.error)
-          return
+          throw searchResult.error
         }
 
-        const { messages: searchMessages } = searchResult.value
+        const { messages, pagination } = searchResult.value
+        allMessages.push(...messages)
+        totalResults = pagination.totalResults
 
-        if (searchMessages.length === 0) {
-          setMessages([])
-          setThreads([])
-          return
+        // 結果が COUNT_PER_PAGE 未満なら最終ページ
+        if (messages.length < COUNT_PER_PAGE) {
+          break
         }
-
-        // メッセージを詳細情報で拡張
-        const enrichResult = await enrichMessagesWithThreadsAndPermalinks(searchMessages, token)
-
-        if (enrichResult.isErr()) {
-          setError(enrichResult.error)
-          return
-        }
-
-        const { messages: enrichedMessages, threads: enrichedThreads } = enrichResult.value
-
-        setMessages(enrichedMessages)
-        setThreads(enrichedThreads)
-      } catch (e) {
-        const unknownError: ApiError = {
-          type: 'unknown',
-          message: '検索処理中に予期しないエラーが発生しました。',
-          cause: e,
-        }
-        setError(unknownError)
-      } finally {
-        setIsLoading(false)
       }
-    },
-    [enrichMessagesWithThreadsAndPermalinks],
-  )
 
-  /**
-   * 最後の検索を再実行
-   */
-  const retrySearch = useCallback(async (): Promise<void> => {
-    if (lastSearchParams) {
-      await searchMessages(lastSearchParams.token, lastSearchParams.query, lastSearchParams.filters)
+      // スレッド単位でユニーク化
+      const uniqueMessages = groupMessagesByThread(allMessages)
+
+      // スレッド詳細情報を取得
+      const { threads, userMaps, permalinkMaps } = await fetchThreadDetails(
+        uniqueMessages.slice(0, 300), // 最大300件に制限
+        params.token
+      )
+
+      // Markdown生成（最初の10スレッドのみプレビュー用）
+      const previewThreads = threads.slice(0, 10)
+      const previewMarkdown = generateThreadsMarkdown(previewThreads, userMaps, permalinkMaps, query)
+
+      // 全体のMarkdown生成
+      const fullMarkdowns = threads.map(thread => 
+        generateSingleThreadMarkdown(thread, userMaps, permalinkMaps)
+      )
+
+      setState(prev => ({
+        ...prev,
+        messages: allMessages,
+        slackThreads: threads,
+        userMaps,
+        permalinkMaps,
+        threadMarkdowns: fullMarkdowns,
+        currentPreviewMarkdown: previewMarkdown,
+        paginationInfo: {
+          currentPage: 1,
+          totalPages: Math.ceil(totalResults / COUNT_PER_PAGE),
+          totalResults,
+          perPage: COUNT_PER_PAGE,
+        },
+        isLoading: false,
+        error: null,
+      }))
+
+      if (threads.length === 0) {
+        toast.success('検索結果が見つかりませんでした。')
+      } else {
+        toast.success(`${threads.length}件のスレッドが見つかりました。`)
+      }
+
+    } catch (error) {
+      const apiError = error as ApiError
+      setState(prev => ({
+        ...prev,
+        isLoading: false,
+        error: apiError,
+        messages: [],
+        slackThreads: [],
+        userMaps: {},
+        permalinkMaps: {},
+        threadMarkdowns: [],
+        currentPreviewMarkdown: '',
+      }))
+
+      // エラーメッセージ表示
+      const friendlyMessage = getUserFriendlyErrorMessage(apiError)
+      const actionSuggestion = getErrorActionSuggestion(apiError)
+      
+      toast.error(friendlyMessage)
+      if (actionSuggestion) {
+        toast(actionSuggestion, { icon: '💡' })
+      }
+
+      // リトライ可能性判定
+      setCanRetry(apiError.type === 'network' || apiError.type === 'rate_limit')
     }
-  }, [lastSearchParams, searchMessages])
+  }, [adapter])
 
   /**
-   * 検索結果をクリア
+   * 再試行
    */
-  const clearResults = useCallback((): void => {
-    setMessages([])
-    setThreads([])
-    setUsers(new Map())
-    setError(null)
-    setLastSearchParams(null)
-  }, [])
-
-  /**
-   * ユーザーフレンドリーなエラーメッセージを取得
-   */
-  const getUserFriendlyError = useCallback((): string | null => {
-    if (!error) return null
-    return getUserFriendlyErrorMessage(error)
-  }, [error])
-
-  /**
-   * エラーに対するアクション提案を取得
-   */
-  const getErrorSuggestion = useCallback((): string | null => {
-    if (!error) return null
-    return getErrorActionSuggestion(error)
-  }, [error])
-
-  /**
-   * リトライ可能かどうかを判定
-   */
-  const canRetry = Boolean(
-    lastSearchParams &&
-      error &&
-      (error.type === 'network' || error.type === 'rate_limit' || error.type === 'unknown'),
-  )
+  const retrySearch = useCallback(() => {
+    if (lastSearchParams) {
+      toast.dismiss()
+      handleSearch(lastSearchParams)
+    }
+  }, [lastSearchParams, handleSearch])
 
   return {
-    messages,
-    threads,
-    users,
-    isLoading,
-    error,
+    ...state,
+    handleSearch,
     canRetry,
-    searchMessages,
     retrySearch,
-    clearResults,
-    getUserFriendlyError,
-    getErrorSuggestion,
   }
+}
+
+/**
+ * スレッド用のMarkdown生成（簡易版）
+ */
+function generateThreadsMarkdown(
+  threads: SlackThread[],
+  userMaps: Record<string, string>,
+  permalinkMaps: Record<string, string>,
+  query: string
+): string {
+  const header = `---
+title: "Slack検索結果: ${query}"
+source: "Slack"
+total_threads: ${threads.length}
+generated_at: "${new Date().toISOString()}"
+search_query: "${query}"
+llm_optimized: true
+---
+
+# Slack検索結果: ${query}
+
+## 検索条件
+- **クエリ**: ${query}
+- **取得スレッド数**: ${threads.length}件
+
+`
+
+  const threadsMarkdown = threads.map(thread => 
+    generateSingleThreadMarkdown(thread, userMaps, permalinkMaps)
+  ).join('\n\n')
+
+  return header + threadsMarkdown
+}
+
+/**
+ * 単一スレッド用のMarkdown生成
+ */
+function generateSingleThreadMarkdown(
+  thread: SlackThread,
+  userMaps: Record<string, string>,
+  permalinkMaps: Record<string, string>
+): string {
+  const parentUser = userMaps[thread.parent.user] || thread.parent.user
+  const parentPermalink = permalinkMaps[thread.parent.ts] || '#'
+  const parentDate = new Date(parseFloat(thread.parent.ts) * 1000).toLocaleString('ja-JP')
+
+  let markdown = `## 🧵 スレッド: ${thread.parent.text.slice(0, 50)}...
+
+### 👤 ${parentUser} - ${parentDate}
+> ${thread.parent.text}
+
+[🔗 メッセージリンク](${parentPermalink})
+`
+
+  // 返信がある場合
+  if (thread.replies.length > 0) {
+    thread.replies.forEach((reply, index) => {
+      const replyUser = userMaps[reply.user] || reply.user
+      const replyPermalink = permalinkMaps[reply.ts] || '#'
+      const replyDate = new Date(parseFloat(reply.ts) * 1000).toLocaleString('ja-JP')
+
+      markdown += `
+#### 💬 返信 ${index + 1}: ${replyUser} - ${replyDate}
+${reply.text}
+
+[🔗 メッセージリンク](${replyPermalink})
+`
+    })
+  }
+
+  return markdown
 }
