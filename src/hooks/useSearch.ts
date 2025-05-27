@@ -1,9 +1,9 @@
-import { useState, useCallback } from 'react'
+import type { Result } from 'neverthrow' // Resultを型としてインポート (typeキーワードを明示)
+import { useCallback, useState } from 'react'
+import toast from 'react-hot-toast' // react-hot-toastをインポート
 import { fetchDocbasePosts } from '../lib/docbaseClient'
 import type { DocbasePostListItem } from '../types/docbase'
 import type { ApiError } from '../types/error'
-import type { Result } from 'neverthrow' // Resultを型としてインポート (typeキーワードを明示)
-import toast from 'react-hot-toast' // react-hot-toastをインポート
 
 // 詳細検索条件の型定義
 export interface AdvancedFilters {

@@ -1,14 +1,14 @@
-import { ok, err, type Result } from 'neverthrow'
-import type { DocbasePostsResponse, DocbasePostListItem } from '../types/docbase'
+import { type Result, err, ok } from 'neverthrow'
+import type { AdvancedFilters } from '../hooks/useSearch'
+import type { DocbasePostListItem, DocbasePostsResponse } from '../types/docbase'
 import type {
   ApiError,
   NetworkApiError,
-  UnknownApiError,
-  UnauthorizedApiError,
   NotFoundApiError,
   RateLimitApiError,
+  UnauthorizedApiError,
+  UnknownApiError,
 } from '../types/error'
-import type { AdvancedFilters } from '../hooks/useSearch'
 
 const DOCBASE_API_BASE_URL = 'https://api.docbase.io/teams'
 const MAX_RETRIES = 3
