@@ -4,6 +4,7 @@ import toast from 'react-hot-toast' // react-hot-toastをインポート
 import { fetchDocbasePosts } from '../lib/docbaseClient'
 import type { DocbasePostListItem } from '../types/docbase'
 import type { ApiError } from '../types/error'
+import { getUserFriendlyErrorMessage, getErrorActionSuggestion } from '../utils/errorMessage'
 
 // 詳細検索条件の型定義
 export interface AdvancedFilters {
@@ -27,6 +28,8 @@ interface UseSearchResult {
   ) => Promise<void>
   canRetry: boolean // 再試行可能かどうかのフラグ
   retrySearch: () => void // 再試行用の関数
+  getUserFriendlyError: () => string | null // ユーザーフレンドリーエラーメッセージ
+  getErrorSuggestion: () => string | null // エラーアクション提案
 }
 
 /**
@@ -67,28 +70,13 @@ export const useSearch = (): UseSearchResult => {
         const apiError = result.error
         setError(apiError)
         setPosts([])
-        // エラータイプに応じたトースト通知
-        switch (apiError.type) {
-          case 'unauthorized':
-            toast.error('トークンが無効です。入力内容を確認してください。')
-            // 必要であればトークン入力フィールドにフォーカスを当てるなどのUI操作をここから呼び出す
-            // (例: document.getElementById("docbase-token")?.focus();)
-            // ただし、フックから直接DOM操作するのは避けた方が良い場合もあるので、コンポーネント側で対応する方が望ましい
-            break
-          case 'rate_limit':
-            toast.error('Docbase APIが混み合っています。しばらくしてから再試行してください。')
-            setCanRetry(true) // レートリミットの場合は手動再試行を許可
-            break
-          case 'network':
-            toast.error(`ネットワークエラー: ${apiError.message} 再試行ボタンで再試行できます。`)
-            setCanRetry(true) // ネットワークエラーの場合も手動再試行を許可
-            break
-          case 'notFound':
-            toast.error('指定されたチームが見つからないか、URLが誤っています。')
-            break
-          default:
-            toast.error(`不明なエラーが発生しました: ${apiError.message}`)
-            break
+        // ユーザーフレンドリーなエラーメッセージでトースト通知
+        const friendlyMessage = getUserFriendlyErrorMessage(apiError)
+        toast.error(friendlyMessage)
+        
+        // リトライ可能なエラーの場合は手動再試行を許可
+        if (apiError.type === 'rate_limit' || apiError.type === 'network' || apiError.type === 'unknown') {
+          setCanRetry(true)
         }
       }
       setIsLoading(false)
@@ -143,5 +131,30 @@ export const useSearch = (): UseSearchResult => {
     }
   }, [lastSearchParams, executeSearch])
 
-  return { posts, isLoading, error, searchPosts, canRetry, retrySearch }
+  /**
+   * ユーザーフレンドリーなエラーメッセージを取得
+   */
+  const getUserFriendlyError = useCallback((): string | null => {
+    if (!error) return null
+    return getUserFriendlyErrorMessage(error)
+  }, [error])
+
+  /**
+   * エラーに対するアクション提案を取得
+   */
+  const getErrorSuggestion = useCallback((): string | null => {
+    if (!error) return null
+    return getErrorActionSuggestion(error)
+  }, [error])
+
+  return { 
+    posts, 
+    isLoading, 
+    error, 
+    searchPosts, 
+    canRetry, 
+    retrySearch,
+    getUserFriendlyError,
+    getErrorSuggestion
+  }
 }
