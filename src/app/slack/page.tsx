@@ -1,62 +1,73 @@
-'use client'
+"use client";
 
-import { useState, useEffect } from 'react'
-import type React from 'react'
-import Header from '../../components/Header'
-import Footer from '../../components/Footer'
-import { fetchSlackMessages, type SearchSuccessResponse } from '@/lib/slackClient'
-import { convertToSlackMarkdown } from '../../lib/slackdown'
-import type { SlackMessage } from '../../types/slack'
-import { toast, Toaster } from 'react-hot-toast'
-import { useDownload } from '../../hooks/useDownload'
-import { MarkdownPreview } from '../../components/DocbaseMarkdownPreview'
+import { useState, useEffect } from "react";
+import type React from "react";
+import Header from "../../components/Header";
+import Footer from "../../components/Footer";
+import {
+  fetchSlackMessages,
+  type SearchSuccessResponse,
+  fetchSlackThreadMessages,
+  fetchSlackUserName,
+  fetchSlackPermalink,
+} from "@/lib/slackClient";
+import {
+  convertToSlackMarkdown,
+  convertToSlackThreadMarkdown,
+} from "../../lib/slackdown";
+import type { SlackMessage } from "../../types/slack";
+import { toast, Toaster } from "react-hot-toast";
+import { useDownload } from "../../hooks/useDownload";
+import { MarkdownPreview } from "../../components/DocbaseMarkdownPreview";
 
 // タイムスタンプをフォーマットするヘルパー関数
 const formatTimestamp = (ts: string): string => {
-  const date = new Date(Number.parseFloat(ts) * 1000)
-  return date.toLocaleString('ja-JP', {
-    year: 'numeric',
-    month: '2-digit',
-    day: '2-digit',
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit',
-  })
-}
+  const date = new Date(Number.parseFloat(ts) * 1000);
+  return date.toLocaleString("ja-JP", {
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    second: "2-digit",
+  });
+};
 
 // 簡単なmrkdwnをHTMLに変換する
 const formatMessageText = (text: string) => {
-  let formattedText = text
+  let formattedText = text;
 
   // HTMLエンティティをエスケープする（基本的なもののみ）
   formattedText = formattedText
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#039;')
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
 
   // URLをリンクに変換 (エスケープ後に実行)
   formattedText = formattedText.replace(
     /(https?:\/\/[^\s&<>"'`]+)/g, // URLの正規表現を少し安全に
     (url) =>
-      `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">${url}</a>`,
-  )
+      `<a href="${url}" target="_blank" rel="noopener noreferrer" class="text-blue-600 hover:underline">${url}</a>`
+  );
 
   // 太字: *text* -> <strong>text</strong>
-  formattedText = formattedText.replace(/\*(.+?)\*/g, '<strong>$1</strong>')
+  formattedText = formattedText.replace(/\*(.+?)\*/g, "<strong>$1</strong>");
   // イタリック: _text_ -> <em>text</em>
-  formattedText = formattedText.replace(/_(.+?)_/g, '<em>$1</em>')
+  formattedText = formattedText.replace(/_(.+?)_/g, "<em>$1</em>");
   // 取り消し線: ~text~ -> <del>text</del>
-  formattedText = formattedText.replace(/~(.+?)~/g, '<del>$1</del>')
+  formattedText = formattedText.replace(/~(.+?)~/g, "<del>$1</del>");
   // コード: `text` -> <code>text</code>
-  formattedText = formattedText.replace(/`(.+?)`/g, '<code>$1</code>')
+  formattedText = formattedText.replace(/`(.+?)`/g, "<code>$1</code>");
   // プレーンテキストブロック: ```text``` -> <pre><code>text</code></pre>
   formattedText = formattedText.replace(
     /```([\s\S]+?)```/g,
     (match, p1) =>
-      `<pre class="bg-gray-100 p-2 my-1 rounded text-sm whitespace-pre-wrap"><code>${p1.trim() /* .replace(/\n/g, '<br />') */}</code></pre>`,
-  )
+      `<pre class="bg-gray-100 p-2 my-1 rounded text-sm whitespace-pre-wrap"><code>${
+        p1.trim() /* .replace(/\n/g, '<br />') */
+      }</code></pre>`
+  );
 
   // 通常の改行を <br> に変換 (preブロック処理後)
   // preブロック内の改行はそのまま活かしたいので、この処理は pre の外側に適用されるようにする
@@ -64,145 +75,250 @@ const formatMessageText = (text: string) => {
   // 今回は、preブロック以外での改行はそのまま表示されることを期待し、明示的な <br> 変換は一旦見送る
 
   // biome-ignore lint/security/noDangerouslySetInnerHtml: <explanation>
-  return <span dangerouslySetInnerHTML={{ __html: formattedText }} />
+  return <span dangerouslySetInnerHTML={{ __html: formattedText }} />;
+};
+
+// thread_tsでユニーク化するユーティリティ
+function uniqByThreadTs<T extends { thread_ts: string }>(arr: T[]): T[] {
+  const seen = new Set<string>();
+  return arr.filter((item) => {
+    if (seen.has(item.thread_ts)) return false;
+    seen.add(item.thread_ts);
+    return true;
+  });
 }
 
 export default function SlackPage() {
-  const [token, setToken] = useState<string>('')
-  const [searchQuery, setSearchQuery] = useState<string>('')
-  const [messages, setMessages] = useState<SlackMessage[]>([])
-  const [isLoading, setIsLoading] = useState<boolean>(false)
-  const [error, setError] = useState<string | null>(null)
-  const [paginationInfo, setPaginationInfo] = useState<SearchSuccessResponse['pagination']>({
+  const [token, setToken] = useState<string>("");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [messages, setMessages] = useState<SlackMessage[]>([]);
+  const [isLoading, setIsLoading] = useState<boolean>(false);
+  const [error, setError] = useState<string | null>(null);
+  const [paginationInfo, setPaginationInfo] = useState<
+    SearchSuccessResponse["pagination"]
+  >({
     currentPage: 1,
     totalPages: 1,
     totalResults: 0,
     perPage: 20,
-  })
-  const [currentPreviewMarkdown, setCurrentPreviewMarkdown] = useState<string>('')
-  const [startDate, setStartDate] = useState<string>('')
-  const [endDate, setEndDate] = useState<string>('')
-  const [customPerPage, setCustomPerPage] = useState<number>(20)
-  const [channel, setChannel] = useState<string>('')
-  const [author, setAuthor] = useState<string>('')
-  const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
-  const { isDownloading, handleDownload } = useDownload()
+  });
+  const [currentPreviewMarkdown, setCurrentPreviewMarkdown] =
+    useState<string>("");
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  const [channel, setChannel] = useState<string>("");
+  const [author, setAuthor] = useState<string>("");
+  const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
+  const { isDownloading, handleDownload } = useDownload();
+  const [threadMarkdowns, setThreadMarkdowns] = useState<string[]>([]);
 
   // ローカルストレージからトークンを読み込み・保存するuseEffect
   useEffect(() => {
-    const storedToken = localStorage.getItem('slackApiToken')
+    const storedToken = localStorage.getItem("slackApiToken");
     if (storedToken) {
-      setToken(storedToken)
+      setToken(storedToken);
     }
-  }, [])
+  }, []);
 
   useEffect(() => {
     if (token) {
-      localStorage.setItem('slackApiToken', token)
+      localStorage.setItem("slackApiToken", token);
     }
-  }, [token])
+  }, [token]);
 
   // 検索クエリに期間・件数を反映するヘルパー
   const buildQuery = () => {
-    let q = searchQuery.trim()
-    if (channel) q += ` in:${channel.startsWith('#') ? channel : `#${channel}`}`
-    if (author) q += ` from:${author.startsWith('@') ? author : `@${author}`}`
-    if (startDate) q += ` after:${startDate}`
-    if (endDate) q += ` before:${endDate}`
-    return q
-  }
+    let q = searchQuery.trim();
+    // 常に完全一致検索（ダブルクォートで囲む）
+    if (q && !(q.startsWith('"') && q.endsWith('"'))) q = `"${q}"`;
+    if (channel)
+      q += ` in:${channel.startsWith("#") ? channel : `#${channel}`}`;
+    if (author) q += ` from:${author.startsWith("@") ? author : `@${author}`}`;
+    if (startDate) q += ` after:${startDate}`;
+    if (endDate) q += ` before:${endDate}`;
+    return q;
+  };
 
   const handleFetchMessages = async () => {
     if (!token) {
-      toast.error('Slack API トークンを入力してください。')
-      return
+      toast.error("Slack API トークンを入力してください。");
+      return;
     }
     if (!searchQuery) {
-      toast.error('検索クエリを入力してください。')
-      return
+      toast.error("検索クエリを入力してください。");
+      return;
     }
 
-    setIsLoading(true)
-    setError(null)
-    setMessages([])
-    setCurrentPreviewMarkdown('')
-    setPaginationInfo((prev) => ({ ...prev, currentPage: 1, totalPages: 1, totalResults: 0 }))
+    setIsLoading(true);
+    setError(null);
+    setMessages([]);
+    setCurrentPreviewMarkdown("");
+    setThreadMarkdowns([]);
+    setPaginationInfo((prev) => ({
+      ...prev,
+      currentPage: 1,
+      totalPages: 1,
+      totalResults: 0,
+    }));
 
-    let currentPageInternal = 1
-    const allFetchedMessages: SlackMessage[] = []
-    const maxTotalMessagesToFetch = 500
-    let totalMessagesFetchedSoFar = 0
-    let currentApiTotalPages = 1 // APIから返される最新の総ページ数
-    let loopError = false
+    let currentPageInternal = 1;
+    const allFetchedMessages: SlackMessage[] = [];
+    const maxTotalMessagesToFetch = 300;
+    let totalMessagesFetchedSoFar = 0;
+    let currentApiTotalPages = 1; // APIから返される最新の総ページ数
+    let loopError = false;
 
-    const loadingToastId = toast.loading('Slackからメッセージを検索・取得準備中...')
+    const loadingToastId = toast.loading(
+      "Slackからメッセージを検索・取得準備中... (最大300件)"
+    );
 
     try {
       while (totalMessagesFetchedSoFar < maxTotalMessagesToFetch) {
         toast.loading(
-          `取得中 (${totalMessagesFetchedSoFar}件 / 最大${maxTotalMessagesToFetch}件) - Page ${currentPageInternal}${currentApiTotalPages > 1 ? `/${currentApiTotalPages}` : ''}`,
-          { id: loadingToastId },
-        )
+          `取得中 (${totalMessagesFetchedSoFar}件 / 最大${maxTotalMessagesToFetch}件) - Page ${currentPageInternal}${
+            currentApiTotalPages > 1 ? `/${currentApiTotalPages}` : ""
+          }`,
+          { id: loadingToastId }
+        );
 
         // APIから取得する件数は paginationInfo.perPage を使用
-        const result = await fetchSlackMessages(token, buildQuery(), customPerPage, currentPageInternal)
+        const result = await fetchSlackMessages(
+          token,
+          buildQuery(),
+          100,
+          currentPageInternal
+        );
 
         if (result.isOk()) {
-          const responseData = result.value
-          currentApiTotalPages = responseData.pagination.totalPages // 最新の総ページ数を更新
-          setPaginationInfo(responseData.pagination) // APIからの最新のページネーション情報でstateを更新
+          const responseData = result.value;
+          currentApiTotalPages = responseData.pagination.totalPages; // 最新の総ページ数を更新
+          setPaginationInfo(responseData.pagination); // APIからの最新のページネーション情報でstateを更新
 
           if (responseData.messages && responseData.messages.length > 0) {
-            allFetchedMessages.push(...responseData.messages)
-            totalMessagesFetchedSoFar = allFetchedMessages.length
-            setMessages([...allFetchedMessages])
-
-            const newMarkdownChunk = responseData.messages.map(convertToSlackMarkdown).join('\n\n---\n\n')
-            setCurrentPreviewMarkdown((prev) => (prev ? `${prev}\n\n---\n\n${newMarkdownChunk}` : newMarkdownChunk))
+            allFetchedMessages.push(...responseData.messages);
+            totalMessagesFetchedSoFar = allFetchedMessages.length;
+            setMessages([...allFetchedMessages]);
           } else {
-            // APIからメッセージが返ってこなかった場合 (該当ページにメッセージがないか、全ページ取得完了)
-            break
+            break;
           }
 
-          if (currentPageInternal >= currentApiTotalPages || totalMessagesFetchedSoFar >= maxTotalMessagesToFetch) {
-            break // 全ページ取得完了、または最大件数に達した
+          if (
+            currentPageInternal >= currentApiTotalPages ||
+            totalMessagesFetchedSoFar >= maxTotalMessagesToFetch
+          ) {
+            break; // 全ページ取得完了、または最大件数に達した
           }
-          currentPageInternal++
+          currentPageInternal++;
         } else {
-          const apiError = result.error
-          console.error('Slack API Error during auto-pagination:', apiError)
-          setError(`エラー (Page ${currentPageInternal}, Type: ${apiError.type}): ${apiError.message}`)
-          toast.error(`ページ ${currentPageInternal} の取得中にエラー: ${apiError.message}`, {
-            id: loadingToastId,
-            duration: 4000,
-          })
-          if (apiError.type === 'unauthorized' || apiError.type === 'missing_scope') {
-            toast.error('トークンが無効か、必要な権限 (search:read) がありません。', { duration: 6000 })
+          const apiError = result.error;
+          console.error("Slack API Error during auto-pagination:", apiError);
+          setError(
+            `エラー (Page ${currentPageInternal}, Type: ${apiError.type}): ${apiError.message}`
+          );
+          toast.error(
+            `ページ ${currentPageInternal} の取得中にエラー: ${apiError.message}`,
+            {
+              id: loadingToastId,
+              duration: 4000,
+            }
+          );
+          if (
+            apiError.type === "unauthorized" ||
+            apiError.type === "missing_scope"
+          ) {
+            toast.error(
+              "トークンが無効か、必要な権限 (search:read) がありません。",
+              { duration: 6000 }
+            );
           }
-          loopError = true
-          break // エラーが発生したらループを抜ける
+          loopError = true;
+          break; // エラーが発生したらループを抜ける
         }
       }
       if (!loopError) {
-        toast.success(`合計 ${totalMessagesFetchedSoFar} 件のメッセージを取得しました。`, { id: loadingToastId })
+        // スレッド単位でまとめる
+        // 1. thread_tsがあればそれでグループ化、なければts自身が親
+        const threadRoots = uniqByThreadTs(
+          allFetchedMessages.map((msg) => ({
+            thread_ts: msg.thread_ts || msg.ts,
+            channel: msg.channel.id,
+          }))
+        );
+        const threadMarkdowns: string[] = [];
+        for (const { thread_ts, channel } of threadRoots) {
+          // スレッド全体取得
+          const threadResult = await fetchSlackThreadMessages(
+            channel,
+            thread_ts,
+            token
+          );
+          if (!threadResult.isOk()) continue;
+          const thread = threadResult.value;
+
+          // 親・返信メッセージにpermalinkをセット
+          // allFetchedMessagesから該当tsのpermalinkを探す
+          const setPermalink = (msg: SlackMessage) => {
+            const found = allFetchedMessages.find((m) => m.ts === msg.ts);
+            return found?.permalink;
+          };
+          thread.parent.permalink = setPermalink(thread.parent);
+          thread.replies = thread.replies.map((r) => ({
+            ...r,
+            permalink: setPermalink(r),
+          }));
+
+          // ユーザーID一覧
+          const userIds = [
+            thread.parent.user,
+            ...thread.replies.map((r) => r.user),
+          ];
+          const userMap: Record<string, string> = {};
+          for (const userId of userIds) {
+            if (userMap[userId]) continue;
+            const userResult = await fetchSlackUserName(userId, token);
+            userMap[userId] = userResult.isOk()
+              ? userResult.value.name
+              : userId;
+          }
+          // パーマリンク取得処理は不要
+          // Markdown生成
+          const md = convertToSlackThreadMarkdown(
+            thread,
+            userMap,
+            // ts→permalinkマップを作る
+            Object.fromEntries([
+              [thread.parent.ts, thread.parent.permalink ?? ""],
+              ...thread.replies.map((r) => [r.ts, r.permalink ?? ""]),
+            ])
+          );
+          threadMarkdowns.push(md);
+        }
+        setThreadMarkdowns(threadMarkdowns);
+        setCurrentPreviewMarkdown(
+          threadMarkdowns.slice(0, 10).join("\n\n---\n\n")
+        );
+        toast.success(
+          `合計 ${threadMarkdowns.length} スレッドを取得・Markdown化しました。`,
+          { id: loadingToastId }
+        );
       } else {
-        // ループ中にエラーがあった場合、エラー用のトーストを維持するか、別途表示
-        // ここでは上記toast.errorで表示しているので、loadingトーストをdismissするだけでも良い
-        toast.dismiss(loadingToastId)
+        toast.dismiss(loadingToastId);
       }
     } catch (e) {
-      console.error('Unexpected error during message fetching loop:', e)
-      toast.error('メッセージの自動取得中に予期せぬエラーが発生しました。', { id: loadingToastId })
-      setError('予期せぬエラーが発生しました。')
+      console.error("Unexpected error during message fetching loop:", e);
+      toast.error("メッセージの自動取得中に予期せぬエラーが発生しました。", {
+        id: loadingToastId,
+      });
+      setError("予期せぬエラーが発生しました。");
     } finally {
-      setIsLoading(false)
+      setIsLoading(false);
     }
-  }
+  };
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    handleFetchMessages()
-  }
+    event.preventDefault();
+    handleFetchMessages();
+  };
 
   return (
     <main className="flex min-h-screen flex-col text-gray-800 selection:bg-blue-100 font-sans">
@@ -210,17 +326,18 @@ export default function SlackPage() {
       <Toaster
         position="top-center"
         toastOptions={{
-          className: '!border !border-gray-200 !bg-white !text-gray-700 !shadow-lg !rounded-md',
+          className:
+            "!border !border-gray-200 !bg-white !text-gray-700 !shadow-lg !rounded-md",
           success: {
             iconTheme: {
-              primary: '#36C5F0', // Slackブルー
-              secondary: '#FFFFFF',
+              primary: "#36C5F0", // Slackブルー
+              secondary: "#FFFFFF",
             },
           },
           error: {
             iconTheme: {
-              primary: '#EF4444',
-              secondary: '#FFFFFF',
+              primary: "#EF4444",
+              secondary: "#FFFFFF",
             },
           },
         }}
@@ -242,27 +359,31 @@ export default function SlackPage() {
         {/* 使い方説明セクション */}
         <section className="w-full mt-12">
           <div className="max-w-screen-lg mx-auto px-6 sm:px-10 lg:px-24 py-16 rounded-xl border border-gray-200 bg-background-light">
-            <h2 className="text-3xl md:text-4xl font-bold mb-20 text-center text-gray-800">利用はかんたん3ステップ</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-20 text-center text-gray-800">
+              利用はかんたん3ステップ
+            </h2>
             <div className="grid md:grid-cols-3 gap-x-8 gap-y-10 relative">
               {[
                 {
-                  step: '1',
-                  title: '情報を入力',
-                  description: 'Slackトークン、検索キーワード、期間などを入力します。トークンは保存可能です。',
-                  icon: '⌨️',
-                },
-                {
-                  step: '2',
-                  title: '検索して生成',
+                  step: "1",
+                  title: "情報を入力",
                   description:
-                    '「検索実行」ボタンでSlackからメッセージを取得し、NotebookLM用Markdownをプレビューします。',
-                  icon: '🔍',
+                    "Slackトークン、検索キーワード、期間などを入力します。トークンは保存可能です。",
+                  icon: "⌨️",
                 },
                 {
-                  step: '3',
-                  title: 'ダウンロード',
-                  description: '生成されたMarkdownを「ダウンロード」ボタンで保存。すぐにAIに学習させられます。',
-                  icon: '💾',
+                  step: "2",
+                  title: "検索して生成",
+                  description:
+                    "「検索実行」ボタンでSlackからメッセージを取得し、NotebookLM用Markdownをプレビューします。",
+                  icon: "🔍",
+                },
+                {
+                  step: "3",
+                  title: "ダウンロード",
+                  description:
+                    "生成されたMarkdownを「ダウンロード」ボタンで保存。すぐにAIに学習させられます。",
+                  icon: "💾",
                 },
               ].map((item) => (
                 <div key={item.step} className="text-center md:text-left">
@@ -272,8 +393,12 @@ export default function SlackPage() {
                     </span>
                     <span className="text-3xl">{item.icon}</span>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-gray-800">{item.title}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{item.description}</p>
+                  <h3 className="text-lg font-semibold mb-2 text-gray-800">
+                    {item.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    {item.description}
+                  </p>
                 </div>
               ))}
             </div>
@@ -283,9 +408,12 @@ export default function SlackPage() {
         <section className="w-full mt-12">
           <div className="max-w-screen-lg mx-auto px-6 sm:px-10 lg:px-24 py-16 rounded-xl border border-gray-200 bg-background-light">
             <div className="text-center">
-              <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-gray-800">🔒 セキュリティについて</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-gray-800">
+                🔒 セキュリティについて
+              </h2>
               <p className="text-gray-600 text-lg leading-relaxed max-w-3xl mx-auto">
-                入力されたSlack APIトークンや取得したメッセージ内容は、お使いのブラウザ内でのみ処理されます。
+                入力されたSlack
+                APIトークンや取得したメッセージ内容は、お使いのブラウザ内でのみ処理されます。
                 これらの情報が外部サーバーに送信されたり、保存されたりすることは一切ありませんので、安心してご利用いただけます。
               </p>
             </div>
@@ -295,12 +423,17 @@ export default function SlackPage() {
         <section id="main-tool-section" className="w-full my-12 bg-white">
           <div className="max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12 shadow-md rounded-lg border border-gray-200">
             <div className="px-0">
-              <h2 className="text-4xl font-bold mb-6 text-center text-gray-800">Slack メッセージ検索・収集</h2>
+              <h2 className="text-4xl font-bold mb-6 text-center text-gray-800">
+                Slack メッセージ検索・収集
+              </h2>
               <div className="max-w-3xl mx-auto">
                 <form onSubmit={handleFormSubmit} className="space-y-6">
                   <div className="space-y-4">
                     <div>
-                      <label htmlFor="searchQuery" className="block text-base font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="searchQuery"
+                        className="block text-base font-medium text-gray-700 mb-1"
+                      >
                         検索キーワード
                       </label>
                       <input
@@ -315,7 +448,10 @@ export default function SlackPage() {
                       />
                     </div>
                     <div>
-                      <label htmlFor="token" className="block text-base font-medium text-gray-700 mb-1">
+                      <label
+                        htmlFor="token"
+                        className="block text-base font-medium text-gray-700 mb-1"
+                      >
                         Slack API トークン
                       </label>
                       <input
@@ -336,12 +472,17 @@ export default function SlackPage() {
                       onClick={() => setShowAdvanced(!showAdvanced)}
                       className="text-sm text-blue-600 hover:text-blue-800 focus:outline-none"
                     >
-                      {showAdvanced ? '詳細な条件を閉じる ▲' : 'もっと詳細な条件を追加する ▼'}
+                      {showAdvanced
+                        ? "詳細な条件を閉じる ▲"
+                        : "もっと詳細な条件を追加する ▼"}
                     </button>
                     {showAdvanced && (
                       <div className="space-y-4 p-4 border border-gray-300 rounded-md bg-gray-50">
                         <div>
-                          <label htmlFor="channel" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label
+                            htmlFor="channel"
+                            className="block text-sm font-medium text-gray-700 mb-1"
+                          >
                             チャンネル (例: #general)
                           </label>
                           <input
@@ -355,7 +496,10 @@ export default function SlackPage() {
                           />
                         </div>
                         <div>
-                          <label htmlFor="author" className="block text-sm font-medium text-gray-700 mb-1">
+                          <label
+                            htmlFor="author"
+                            className="block text-sm font-medium text-gray-700 mb-1"
+                          >
                             投稿者 (例: @user)
                           </label>
                           <input
@@ -370,7 +514,10 @@ export default function SlackPage() {
                         </div>
                         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                           <div>
-                            <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
+                            <label
+                              htmlFor="startDate"
+                              className="block text-sm font-medium text-gray-700 mb-1"
+                            >
                               投稿期間 (開始日)
                             </label>
                             <input
@@ -383,7 +530,10 @@ export default function SlackPage() {
                             />
                           </div>
                           <div>
-                            <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
+                            <label
+                              htmlFor="endDate"
+                              className="block text-sm font-medium text-gray-700 mb-1"
+                            >
                               投稿期間 (終了日)
                             </label>
                             <input
@@ -396,22 +546,6 @@ export default function SlackPage() {
                             />
                           </div>
                         </div>
-                        <div>
-                          <label htmlFor="customPerPage" className="block text-sm font-medium text-gray-700 mb-1">
-                            1ページ取得件数 (最大100)
-                          </label>
-                          <input
-                            id="customPerPage"
-                            type="number"
-                            min={1}
-                            max={100}
-                            value={customPerPage}
-                            onChange={(e) => setCustomPerPage(Number(e.target.value))}
-                            placeholder="20"
-                            className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
-                            disabled={isLoading || isDownloading}
-                          />
-                        </div>
                       </div>
                     )}
                   </div>
@@ -419,7 +553,9 @@ export default function SlackPage() {
                     <button
                       type="submit"
                       className="w-full inline-flex items-center justify-center py-2.5 px-4 border border-transparent shadow-sm text-sm font-medium rounded-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors duration-150 ease-in-out"
-                      disabled={isLoading || isDownloading || !token || !searchQuery}
+                      disabled={
+                        isLoading || isDownloading || !token || !searchQuery
+                      }
                     >
                       {isLoading ? (
                         <>
@@ -447,14 +583,22 @@ export default function SlackPage() {
                           検索中...
                         </>
                       ) : (
-                        '検索実行'
+                        "検索実行"
                       )}
                     </button>
                     <button
                       type="button"
-                      onClick={() => handleDownload(currentPreviewMarkdown, searchQuery, !!currentPreviewMarkdown)}
+                      onClick={() =>
+                        handleDownload(
+                          currentPreviewMarkdown,
+                          searchQuery,
+                          !!currentPreviewMarkdown
+                        )
+                      }
                       className="w-full inline-flex items-center justify-center py-2.5 px-4 border border-blue-600 shadow-sm text-sm font-medium rounded-sm text-blue-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 disabled:bg-gray-50 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed transition-colors duration-150 ease-in-out"
-                      disabled={isLoading || isDownloading || !currentPreviewMarkdown}
+                      disabled={
+                        isLoading || isDownloading || !currentPreviewMarkdown
+                      }
                     >
                       {isDownloading ? (
                         <>
@@ -482,7 +626,7 @@ export default function SlackPage() {
                           生成中...
                         </>
                       ) : (
-                        'Markdownダウンロード'
+                        "Markdownダウンロード"
                       )}
                     </button>
                   </div>
@@ -511,18 +655,46 @@ export default function SlackPage() {
                     </div>
                   )}
                   {/* プレビュー */}
-                  {currentPreviewMarkdown && !isLoading && !error && (
+                  {threadMarkdowns.length > 0 && !isLoading && !error && (
                     <div className="mt-6 pt-5 border-t border-gray-200">
                       <div className="flex justify-between items-center mb-3">
-                        <h3 className="text-lg font-semibold text-gray-800">Markdownプレビュー</h3>
-                        <p className="text-sm text-gray-500">取得件数: {messages.length}件</p>
+                        <h3 className="text-lg font-semibold text-gray-800">
+                          スレッド単位のMarkdownプレビュー（親＋返信まとめて）
+                        </h3>
+                        <p className="text-sm text-gray-500">
+                          取得スレッド数: {threadMarkdowns.length}件
+                        </p>
                       </div>
                       <MarkdownPreview markdown={currentPreviewMarkdown} />
-                      {messages.length > 10 && (
+                      {threadMarkdowns.length > 10 && (
                         <p className="mt-2 text-sm text-gray-500">
-                          プレビューには最初の10件のみ表示されています。すべての内容を確認するには、ファイルをダウンロードしてください。
+                          プレビューには最初の10スレッドのみ表示されています。すべてのスレッド内容を確認・保存するには、下の「スレッド単位でMarkdownダウンロード」ボタンを使ってください。
                         </p>
                       )}
+                      <button
+                        type="button"
+                        onClick={() =>
+                          handleDownload(
+                            threadMarkdowns.join("\n\n---\n\n"),
+                            searchQuery,
+                            !!threadMarkdowns.length
+                          )
+                        }
+                        className="mt-4 w-full inline-flex items-center justify-center py-2.5 px-4 border border-blue-600 shadow-sm text-sm font-medium rounded-sm text-blue-600 bg-white hover:bg-blue-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-600 disabled:bg-gray-50 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed transition-colors duration-150 ease-in-out"
+                        disabled={
+                          isLoading || isDownloading || !threadMarkdowns.length
+                        }
+                      >
+                        {isDownloading
+                          ? "生成中..."
+                          : "スレッド単位でMarkdownダウンロード"}
+                      </button>
+                    </div>
+                  )}
+                  {/* スレッドが0件のときの案内 */}
+                  {threadMarkdowns.length === 0 && !isLoading && !error && (
+                    <div className="mt-6 pt-5 border-t border-gray-200 text-gray-500 text-center">
+                      検索条件に該当するスレッドは見つかりませんでした。
                     </div>
                   )}
                 </form>
@@ -533,5 +705,5 @@ export default function SlackPage() {
       </div>
       <Footer />
     </main>
-  )
+  );
 }
