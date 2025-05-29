@@ -1,7 +1,6 @@
 'use client' // クライアントコンポーネントとしてマーク
 
 import { Toaster } from 'react-hot-toast' // Toasterをインポート
-import { ErrorBoundary } from '../../components/ErrorBoundary'
 import SearchForm from '../../components/DocbaseSearchForm' // パスを修正
 import Footer from '../../components/Footer'
 // import { SparklesCore } from "../../components/ui/sparkles"; // 架空のUIコンポーネントなのだ -> 一旦コメントアウト
@@ -136,13 +135,7 @@ export default function DocbasePage() {
           <div className="max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12 shadow-md rounded-lg border border-gray-200">
             <div className="px-0">
               <h2 className="text-4xl font-bold mb-6 text-center text-gray-800">DocBase 記事検索・収集</h2>
-              <ErrorBoundary
-                onError={(error, errorInfo) => {
-                  console.error('Docbase search form error:', error, errorInfo)
-                }}
-              >
-                <SearchForm />
-              </ErrorBoundary>
+              <SearchForm />
             </div>
           </div>
         </section>

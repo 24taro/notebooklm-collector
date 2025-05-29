@@ -1,7 +1,7 @@
 import type { Metadata } from 'next'
 import { Geist_Mono, Noto_Sans_JP } from 'next/font/google'
 import './globals.css'
-import { ErrorBoundary } from '@/components/ErrorBoundary'
+import { ErrorBoundaryProvider } from '@/components/ErrorBoundaryProvider'
 // import Header from '@/components/Header'
 // import Footer from '@/components/Footer'
 
@@ -29,15 +29,11 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className={`${notoSansJP.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}>
-        <ErrorBoundary
-          onError={(error, errorInfo) => {
-            console.error('Application-level error caught:', error, errorInfo)
-          }}
-        >
+        <ErrorBoundaryProvider>
           {/* <Header /> */}
           <main className="flex-grow">{children}</main>
           {/* <Footer /> */}
-        </ErrorBoundary>
+        </ErrorBoundaryProvider>
       </body>
     </html>
   )

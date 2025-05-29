@@ -3,7 +3,6 @@
 import { useEffect, useState } from 'react'
 import type React from 'react'
 import { Toaster } from 'react-hot-toast'
-import { ErrorBoundary } from '../../components/ErrorBoundary'
 import Footer from '../../components/Footer'
 import Header from '../../components/Header'
 import { SlackHeroSection } from '../../components/SlackHeroSection'
@@ -98,12 +97,7 @@ export default function SlackPage() {
           <div className="max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12 shadow-md rounded-lg border border-gray-200">
             <div className="px-0">
               <h2 className="text-4xl font-bold mb-6 text-center text-gray-800">Slack メッセージ検索・収集</h2>
-              <ErrorBoundary
-                onError={(error, errorInfo) => {
-                  console.error('Slack search form error:', error, errorInfo)
-                }}
-              >
-                <SlackSearchForm
+              <SlackSearchForm
                   searchQuery={searchQuery}
                   onSearchQueryChange={setSearchQuery}
                   token={token}
@@ -130,7 +124,6 @@ export default function SlackPage() {
                   onDownload={handlePreviewDownload}
                   onFullDownload={handleFullDownload}
                 />
-              </ErrorBoundary>
             </div>
           </div>
         </section>
