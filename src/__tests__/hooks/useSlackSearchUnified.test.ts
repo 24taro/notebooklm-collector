@@ -7,14 +7,16 @@ import type { SlackMessage, SlackThread, SlackUser } from '../../types/slack'
 import type { ApiError } from '../../types/error'
 
 // react-hot-toastのモック
-vi.mock('react-hot-toast', () => ({
-  default: {
-    success: vi.fn(),
-    error: vi.fn(),
-    dismiss: vi.fn(),
-    __esModule: true,
-  },
-}))
+vi.mock('react-hot-toast', () => {
+  const mockToast = vi.fn((message, options) => 'toast-id')
+  mockToast.success = vi.fn()
+  mockToast.error = vi.fn()
+  mockToast.dismiss = vi.fn()
+  
+  return {
+    default: mockToast,
+  }
+})
 
 describe('useSlackSearchUnified', () => {
   let mockAdapter: SlackAdapter

@@ -284,7 +284,7 @@ describe('slackMarkdownGenerator', () => {
         mockPermalinkMap
       )
 
-      expect(result).toContain('"これは非常に長いテキストメッセージです。50文字を超える場合は省略されるはずです。確認用..."')
+      expect(result).toContain('"これは非常に長いテキストメッセージです。50文字を超える場合は省略されるはずです。確認用の追加テキス..."')
     })
 
     it('50文字以下のテキストは省略されない', () => {
@@ -311,26 +311,18 @@ describe('slackMarkdownGenerator', () => {
   })
 
   describe('スレッド内容生成', () => {
-    it('convertToSlackThreadMarkdownが各スレッドで呼ばれる', () => {
-      const { convertToSlackThreadMarkdown } = require('../../lib/slackdown')
-      
-      generateSlackThreadsMarkdown(
+    it('スレッド内容が正しく生成される', () => {
+      const result = generateSlackThreadsMarkdown(
         mockThreads,
         mockUserMap,
         mockPermalinkMap
       )
 
-      expect(convertToSlackThreadMarkdown).toHaveBeenCalledTimes(2)
-      expect(convertToSlackThreadMarkdown).toHaveBeenCalledWith(
-        mockThreads[0],
-        mockUserMap,
-        mockPermalinkMap
-      )
-      expect(convertToSlackThreadMarkdown).toHaveBeenCalledWith(
-        mockThreads[1],
-        mockUserMap,
-        mockPermalinkMap
-      )
+      // 両方のスレッドの内容が含まれることを確認
+      expect(result).toContain('田中太郎 - 2023/1/1')
+      expect(result).toContain('新年の目標について話し合いましょう')
+      expect(result).toContain('佐藤花子 - 2023/1/2')
+      expect(result).toContain('昨日の会議の議事録です')
     })
 
     it('各スレッドに適切なヘッダーとIDが付けられる', () => {

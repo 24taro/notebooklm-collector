@@ -22,11 +22,12 @@ export const downloadMarkdownFile = (
     }
   }
 
+  let url: string | null = null
   try {
     const blob = new Blob([markdownContent], {
       type: 'text/markdown;charset=utf-8',
     })
-    const url = URL.createObjectURL(blob)
+    url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
 
@@ -52,6 +53,10 @@ export const downloadMarkdownFile = (
     return { success: true }
   } catch (error) {
     console.error('Markdown file download error:', error)
+    // エラーの場合でもリソースをクリーンアップ
+    if (url) {
+      URL.revokeObjectURL(url)
+    }
     return {
       success: false,
       message: 'ファイルのダウンロード中にエラーが発生しました。',
