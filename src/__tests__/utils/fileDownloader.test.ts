@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, vi, afterEach } from 'vitest'
+import { describe, expect, it, beforeEach, vi, afterEach, type Mock } from 'vitest'
 import { downloadMarkdownFile } from '../../utils/fileDownloader'
 
 // DOM操作のモック
@@ -31,7 +31,7 @@ describe('fileDownloader', () => {
     global.URL = {
       createObjectURL: mockCreateObjectURL.mockReturnValue('blob:mock-url'),
       revokeObjectURL: mockRevokeObjectURL,
-    } as unknown as Document
+    } as unknown as typeof URL
 
     // Blob のモック
     global.Blob = vi.fn().mockImplementation((content, options) => ({

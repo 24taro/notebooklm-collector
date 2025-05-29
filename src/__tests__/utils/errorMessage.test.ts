@@ -194,7 +194,7 @@ describe('errorMessage', () => {
         const error = {
           type: 'custom_error',
           message: 'カスタムエラー',
-        } as ApiError
+        } as unknown as ApiError
 
         const result = getUserFriendlyErrorMessage(error)
         expect(result).toBe('エラーが発生しました。再試行してください。')
@@ -291,7 +291,7 @@ describe('errorMessage', () => {
         const error = {
           type: 'custom_error',
           message: 'カスタムエラー',
-        } as ApiError
+        } as unknown as ApiError
 
         const result = getErrorActionSuggestion(error)
         expect(result).toBeNull()
@@ -391,7 +391,7 @@ describe('errorMessage', () => {
         const error = {
           type: 'custom_error',
           message: 'カスタムエラー',
-        } as ApiError
+        } as unknown as ApiError
 
         const result = getErrorSeverity(error)
         expect(result).toBe('medium')

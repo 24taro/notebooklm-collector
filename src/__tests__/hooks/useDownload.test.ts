@@ -36,7 +36,7 @@ describe('useDownload', () => {
       const { downloadMarkdownFile } = await import('../../utils/fileDownloader')
       ;(downloadMarkdownFile as Mock<typeof downloadMarkdownFileType>).mockReturnValue({
         success: true,
-        message: null,
+        message: undefined,
       })
 
       const { result } = renderHook(() => useDownload())
@@ -63,7 +63,7 @@ describe('useDownload', () => {
       const { downloadMarkdownFile } = await import('../../utils/fileDownloader')
       ;(downloadMarkdownFile as Mock<typeof downloadMarkdownFileType>).mockReturnValue({
         success: true,
-        message: null,
+        message: undefined,
       })
 
       const { result } = renderHook(() => useDownload())
@@ -89,7 +89,7 @@ describe('useDownload', () => {
       const { downloadMarkdownFile } = await import('../../utils/fileDownloader')
       ;(downloadMarkdownFile as Mock<typeof downloadMarkdownFileType>).mockReturnValue({
         success: true,
-        message: null,
+        message: undefined,
       })
 
       const { result } = renderHook(() => useDownload())
@@ -187,7 +187,7 @@ describe('useDownload', () => {
       const { downloadMarkdownFile } = await import('../../utils/fileDownloader')
       ;(downloadMarkdownFile as Mock<typeof downloadMarkdownFileType>).mockReturnValue({
         success: true,
-        message: null,
+        message: undefined,
       })
 
       const { result } = renderHook(() => useDownload())
@@ -263,7 +263,7 @@ describe('useDownload', () => {
       const { downloadMarkdownFile } = await import('../../utils/fileDownloader')
       ;(downloadMarkdownFile as Mock).mockReturnValue({
         success: true,
-        message: null,
+        message: undefined,
       })
 
       const { result } = renderHook(() => useDownload())
@@ -292,7 +292,7 @@ describe('useDownload', () => {
       const { downloadMarkdownFile } = await import('../../utils/fileDownloader')
       ;(downloadMarkdownFile as Mock).mockReturnValue({
         success: true,
-        message: null,
+        message: undefined,
       })
 
       const { result } = renderHook(() => useDownload())

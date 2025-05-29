@@ -34,6 +34,8 @@ Object.defineProperty(window, 'localStorage', {
   value: localStorageMock
 });
 
+import { vi, beforeAll, afterAll, beforeEach } from 'vitest';
+
 // fetchのモック設定
 global.fetch = vi.fn();
 
