@@ -152,12 +152,12 @@ describe('useErrorRecovery', () => {
       expect(success2).toBe(false) // 重複実行は失敗
 
       // カスタム復旧処理を完了させる
-      resolveCustomRecovery!()
+      resolveCustomRecovery?.()
 
       // 最初の復旧完了を待つ
       let success1: boolean
       await act(async () => {
-        success1 = await promise1!
+        success1 = await promise1
       })
       expect(success1).toBe(true)
     })
