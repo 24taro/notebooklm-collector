@@ -1,4 +1,4 @@
-import { type Result } from 'neverthrow'
+import type { Result } from 'neverthrow'
 import { createDocbaseAdapter, type DocbaseSearchParams } from '../adapters/docbaseAdapter'
 import { createFetchHttpClient } from '../adapters/fetchHttpClient'
 import type { AdvancedFilters } from '../hooks/useSearch'

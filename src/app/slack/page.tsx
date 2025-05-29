@@ -9,10 +9,12 @@ import { SlackHeroSection } from '../../components/SlackHeroSection'
 import { SlackSearchForm } from '../../components/SlackSearchForm'
 import { useDownload } from '../../hooks/useDownload'
 import { useSlackSearchUnified } from '../../hooks/useSlackSearchUnified'
+import useLocalStorage from '../../hooks/useLocalStorage'
 import { generateSlackThreadsMarkdown } from '../../utils/slackMarkdownGenerator'
+import type { SlackThread } from '@/types/slack'
 
 export default function SlackPage() {
-  const [token, setToken] = useState<string>('')
+  const [token, setToken] = useLocalStorage<string>('slackApiToken', '')
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [startDate, setStartDate] = useState<string>('')
   const [endDate, setEndDate] = useState<string>('')
@@ -34,20 +36,6 @@ export default function SlackPage() {
     currentPreviewMarkdown,
     handleSearch: searchSlack,
   } = useSlackSearchUnified()
-  
-  // ローカルストレージからトークンを読み込み・保存するuseEffect
-  useEffect(() => {
-    const storedToken = localStorage.getItem('slackApiToken')
-    if (storedToken) {
-      setToken(storedToken)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (token) {
-      localStorage.setItem('slackApiToken', token)
-    }
-  }, [token])
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()

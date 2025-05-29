@@ -123,7 +123,7 @@ export const useSearch = (options?: UseSearchOptions): UseSearchResult => {
       }
       await executeSearch(domain, token, keyword, advancedFilters) // advancedFilters を渡す
     },
-    [executeSearch, adapter],
+    [executeSearch],
   )
 
   const retrySearch = useCallback(() => {

@@ -36,7 +36,7 @@ export function createFetchHttpClient(
         try {
           // 指数バックオフによる待機（初回は待機なし）
           if (attempt > 0) {
-            const backoffMs = retryConfig.initialBackoffMs * Math.pow(2, attempt - 1)
+            const backoffMs = retryConfig.initialBackoffMs * 2 ** (attempt - 1)
             await sleep(backoffMs)
           }
 
