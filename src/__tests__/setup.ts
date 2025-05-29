@@ -34,13 +34,15 @@ Object.defineProperty(window, 'localStorage', {
   value: localStorageMock
 });
 
+import { vi, beforeAll, afterAll, beforeEach } from 'vitest';
+
 // fetchのモック設定
 global.fetch = vi.fn();
 
 // console.errorのモック（テスト中の不要なエラー出力を抑制）
 const originalError = console.error;
 beforeAll(() => {
-  console.error = (...args: any[]) => {
+  console.error = (...args: unknown[]) => {
     if (
       typeof args[0] === 'string' &&
       args[0].includes('Warning: ReactDOM.render')

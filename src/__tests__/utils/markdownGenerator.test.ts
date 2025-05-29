@@ -34,8 +34,8 @@ describe('markdownGenerator', () => {
     })
 
     it('nullまたはundefinedの場合は空文字列を返す', () => {
-      expect(generateMarkdown(null as any)).toBe('')
-      expect(generateMarkdown(undefined as any)).toBe('')
+      expect(generateMarkdown(null as unknown as DocbasePostListItem[])).toBe('')
+      expect(generateMarkdown(undefined as unknown as DocbasePostListItem[])).toBe('')
     })
 
     it('記事リストから正しいMarkdownを生成する', () => {

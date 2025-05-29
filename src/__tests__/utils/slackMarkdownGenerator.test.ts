@@ -12,7 +12,7 @@ vi.mock('../../lib/slackdown', () => ({
     markdown += `> ${thread.parent.text}\n\n`
     
     if (thread.replies && thread.replies.length > 0) {
-      thread.replies.forEach((reply, index) => {
+      thread.replies.forEach((reply: SlackMessage, index: number) => {
         const replyUser = userMap[reply.user] || reply.user
         const replyDate = new Date(Number.parseFloat(reply.ts) * 1000).toLocaleString('ja-JP')
         markdown += `##### 💬 返信 ${index + 1}: ${replyUser} - ${replyDate}\n`
@@ -92,8 +92,8 @@ describe('slackMarkdownGenerator', () => {
     })
 
     it('nullまたはundefinedの場合は空文字列を返す', () => {
-      expect(generateSlackThreadsMarkdown(null as any, {}, {})).toBe('')
-      expect(generateSlackThreadsMarkdown(undefined as any, {}, {})).toBe('')
+      expect(generateSlackThreadsMarkdown(null as unknown as SlackThread[], {}, {})).toBe('')
+      expect(generateSlackThreadsMarkdown(undefined as unknown as SlackThread[], {}, {})).toBe('')
     })
 
     it('スレッドリストから正しいMarkdownを生成する', () => {

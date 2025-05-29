@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, vi, afterEach } from 'vitest'
+import { describe, expect, it, beforeEach, vi, afterEach, type Mock } from 'vitest'
 import { downloadMarkdownFile } from '../../utils/fileDownloader'
 
 // DOM操作のモック
@@ -25,19 +25,19 @@ describe('fileDownloader', () => {
         appendChild: mockAppendChild,
         removeChild: mockRemoveChild,
       },
-    } as any
+    } as unknown as Document
 
     // URL のモック
     global.URL = {
       createObjectURL: mockCreateObjectURL.mockReturnValue('blob:mock-url'),
       revokeObjectURL: mockRevokeObjectURL,
-    } as any
+    } as unknown as typeof URL
 
     // Blob のモック
     global.Blob = vi.fn().mockImplementation((content, options) => ({
       content,
       options,
-    })) as any
+    })) as unknown as typeof Blob
 
     // console.error のモック
     vi.spyOn(console, 'error').mockImplementation(() => {})
@@ -87,7 +87,7 @@ describe('fileDownloader', () => {
       expect(result.success).toBe(true)
 
       // ファイル名にslackとthreadsが含まれることを確認
-      const anchorElement = (document.createElement as any).mock.results[0].value
+      const anchorElement = (document.createElement as Mock).mock.results[0].value
       expect(anchorElement.download).toMatch(/^slack_\d{4}-\d{2}-\d{2}_slack_search_threads\.md$/)
     })
 
@@ -102,7 +102,7 @@ describe('fileDownloader', () => {
       expect(result.success).toBe(true)
 
       // ファイル名にdocbaseとarticlesが含まれることを確認
-      const anchorElement = (document.createElement as any).mock.results[0].value
+      const anchorElement = (document.createElement as Mock).mock.results[0].value
       expect(anchorElement.download).toMatch(/^docbase_\d{4}-\d{2}-\d{2}_default_keyword_articles\.md$/)
     })
   })
@@ -114,7 +114,7 @@ describe('fileDownloader', () => {
 
       downloadMarkdownFile('# Test', 'keyword', true, 'docbase')
 
-      const anchorElement = (document.createElement as any).mock.results[0].value
+      const anchorElement = (document.createElement as Mock).mock.results[0].value
       expect(anchorElement.download).toBe('docbase_2023-05-15_keyword_articles.md')
 
       vi.useRealTimers()
@@ -123,28 +123,28 @@ describe('fileDownloader', () => {
     it('特殊文字を含むキーワードが安全な形式に変換される', () => {
       downloadMarkdownFile('# Test', 'キーワード/with*special&chars!', true, 'docbase')
 
-      const anchorElement = (document.createElement as any).mock.results[0].value
+      const anchorElement = (document.createElement as Mock).mock.results[0].value
       expect(anchorElement.download).toMatch(/docbase_\d{4}-\d{2}-\d{2}_キーワード_with_special_chars__articles\.md/)
     })
 
     it('空のキーワードがデフォルト値に置き換えられる', () => {
       downloadMarkdownFile('# Test', '', true, 'docbase')
 
-      const anchorElement = (document.createElement as any).mock.results[0].value
+      const anchorElement = (document.createElement as Mock).mock.results[0].value
       expect(anchorElement.download).toMatch(/docbase_\d{4}-\d{2}-\d{2}_search_articles\.md/)
     })
 
     it('空白のみのキーワードがデフォルト値に置き換えられる', () => {
       downloadMarkdownFile('# Test', '   ', true, 'docbase')
 
-      const anchorElement = (document.createElement as any).mock.results[0].value
+      const anchorElement = (document.createElement as Mock).mock.results[0].value
       expect(anchorElement.download).toMatch(/docbase_\d{4}-\d{2}-\d{2}_search_articles\.md/)
     })
 
     it('日本語文字が正しく保持される', () => {
       downloadMarkdownFile('# Test', '日本語キーワード', true, 'slack')
 
-      const anchorElement = (document.createElement as any).mock.results[0].value
+      const anchorElement = (document.createElement as Mock).mock.results[0].value
       expect(anchorElement.download).toMatch(/slack_\d{4}-\d{2}-\d{2}_日本語キーワード_threads\.md/)
     })
   })
@@ -197,7 +197,7 @@ describe('fileDownloader', () => {
       // Blobコンストラクタでエラーを発生させる
       global.Blob = vi.fn().mockImplementation(() => {
         throw new Error('Blob creation failed')
-      }) as any
+      }) as unknown as typeof Blob
 
       const result = downloadMarkdownFile(
         '# Test Content',
@@ -270,7 +270,7 @@ describe('fileDownloader', () => {
     it('アンカー要素の属性が正しく設定される', () => {
       downloadMarkdownFile('# Test Content', 'test-keyword', true, 'docbase')
 
-      const anchorElement = (document.createElement as any).mock.results[0].value
+      const anchorElement = (document.createElement as Mock).mock.results[0].value
       expect(anchorElement.href).toBe('blob:mock-url')
       expect(anchorElement.download).toMatch(/^docbase_\d{4}-\d{2}-\d{2}_test_keyword_articles\.md$/)
     })
@@ -289,14 +289,14 @@ describe('fileDownloader', () => {
     it('docbaseソースの場合、ファイル名にarticlesが含まれる', () => {
       downloadMarkdownFile('# Test', 'keyword', true, 'docbase')
 
-      const anchorElement = (document.createElement as any).mock.results[0].value
+      const anchorElement = (document.createElement as Mock).mock.results[0].value
       expect(anchorElement.download).toContain('_articles.md')
     })
 
     it('slackソースの場合、ファイル名にthreadsが含まれる', () => {
       downloadMarkdownFile('# Test', 'keyword', true, 'slack')
 
-      const anchorElement = (document.createElement as any).mock.results[0].value
+      const anchorElement = (document.createElement as Mock).mock.results[0].value
       expect(anchorElement.download).toContain('_threads.md')
     })
   })

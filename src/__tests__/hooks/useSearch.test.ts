@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, vi } from 'vitest'
+import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { ok, err } from 'neverthrow'
 import { useSearch, type AdvancedFilters } from '../../hooks/useSearch'
@@ -59,7 +59,7 @@ describe('useSearch', () => {
 
   describe('検索成功', () => {
     it('検索が成功した場合、結果を正しく更新する', async () => {
-      ;(mockAdapter.searchPosts as any).mockResolvedValue(ok(mockPosts))
+      ;(mockAdapter.searchPosts as Mock).mockResolvedValue(ok(mockPosts))
       
       const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
 
@@ -74,7 +74,7 @@ describe('useSearch', () => {
     })
 
     it('検索結果が0件の場合、適切にメッセージを表示する', async () => {
-      ;(mockAdapter.searchPosts as any).mockResolvedValue(ok([]))
+      ;(mockAdapter.searchPosts as Mock).mockResolvedValue(ok([]))
       
       const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
 
@@ -88,7 +88,7 @@ describe('useSearch', () => {
     })
 
     it('詳細検索条件付きで検索が成功する', async () => {
-      ;(mockAdapter.searchPosts as any).mockResolvedValue(ok(mockPosts))
+      ;(mockAdapter.searchPosts as Mock).mockResolvedValue(ok(mockPosts))
       
       const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
       
@@ -121,7 +121,7 @@ describe('useSearch', () => {
         type: 'unauthorized',
         message: '認証に失敗しました',
       }
-      ;(mockAdapter.searchPosts as any).mockResolvedValue(err(error))
+      ;(mockAdapter.searchPosts as Mock).mockResolvedValue(err(error))
       
       const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
 
@@ -140,7 +140,7 @@ describe('useSearch', () => {
         type: 'network',
         message: 'ネットワークエラー',
       }
-      ;(mockAdapter.searchPosts as any).mockResolvedValue(err(error))
+      ;(mockAdapter.searchPosts as Mock).mockResolvedValue(err(error))
       
       const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
 
@@ -157,7 +157,7 @@ describe('useSearch', () => {
         type: 'rate_limit',
         message: 'レート制限',
       }
-      ;(mockAdapter.searchPosts as any).mockResolvedValue(err(error))
+      ;(mockAdapter.searchPosts as Mock).mockResolvedValue(err(error))
       
       const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
 
@@ -174,7 +174,7 @@ describe('useSearch', () => {
         type: 'unknown',
         message: '不明なエラー',
       }
-      ;(mockAdapter.searchPosts as any).mockResolvedValue(err(error))
+      ;(mockAdapter.searchPosts as Mock).mockResolvedValue(err(error))
       
       const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
 
@@ -234,7 +234,7 @@ describe('useSearch', () => {
     })
 
     it('キーワードが空でも詳細検索条件があれば検索を実行する', async () => {
-      ;(mockAdapter.searchPosts as any).mockResolvedValue(ok(mockPosts))
+      ;(mockAdapter.searchPosts as Mock).mockResolvedValue(ok(mockPosts))
       
       const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
 
@@ -275,7 +275,7 @@ describe('useSearch', () => {
         type: 'network',
         message: 'ネットワークエラー',
       }
-      ;(mockAdapter.searchPosts as any)
+      ;(mockAdapter.searchPosts as Mock)
         .mockResolvedValueOnce(err(error))
         .mockResolvedValueOnce(ok(mockPosts))
       
@@ -315,11 +315,11 @@ describe('useSearch', () => {
 
   describe('ローディング状態', () => {
     it('検索中はローディング状態になる', async () => {
-      let resolveSearch: (value: any) => void
+      let resolveSearch: (value: unknown) => void
       const searchPromise = new Promise((resolve) => {
         resolveSearch = resolve
       })
-      ;(mockAdapter.searchPosts as any).mockReturnValue(searchPromise)
+      ;(mockAdapter.searchPosts as Mock).mockReturnValue(searchPromise)
       
       const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
 
@@ -333,7 +333,7 @@ describe('useSearch', () => {
 
       // 検索完了
       await act(async () => {
-        resolveSearch!(ok(mockPosts))
+        resolveSearch?.(ok(mockPosts))
         await searchPromise
       })
 
@@ -347,7 +347,7 @@ describe('useSearch', () => {
         type: 'unauthorized',
         message: '認証エラー',
       }
-      ;(mockAdapter.searchPosts as any).mockResolvedValue(err(error))
+      ;(mockAdapter.searchPosts as Mock).mockResolvedValue(err(error))
       
       const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
 
@@ -365,7 +365,7 @@ describe('useSearch', () => {
         type: 'unauthorized',
         message: '認証エラー',
       }
-      ;(mockAdapter.searchPosts as any).mockResolvedValue(err(error))
+      ;(mockAdapter.searchPosts as Mock).mockResolvedValue(err(error))
       
       const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
 
