@@ -94,8 +94,8 @@ describe('useLocalStorage', () => {
 
     it('localStorageの読み込みでエラーが発生した場合は初期値を返す', () => {
       // localStorageのgetItemをモックしてエラーを発生させる
-      const originalGetItem = Storage.prototype.getItem
-      Storage.prototype.getItem = vi.fn(() => {
+      const originalGetItem = localStorage.getItem
+      localStorage.getItem = vi.fn(() => {
         throw new Error('Storage error')
       })
       
@@ -107,7 +107,7 @@ describe('useLocalStorage', () => {
       expect(consoleSpy).toHaveBeenCalled()
       
       // 元の関数を復元
-      Storage.prototype.getItem = originalGetItem
+      localStorage.getItem = originalGetItem
       consoleSpy.mockRestore()
     })
 
@@ -115,8 +115,8 @@ describe('useLocalStorage', () => {
       const { result } = renderHook(() => useLocalStorage('test-key', 'initial'))
       
       // localStorageのsetItemをモックしてエラーを発生させる
-      const originalSetItem = Storage.prototype.setItem
-      Storage.prototype.setItem = vi.fn(() => {
+      const originalSetItem = localStorage.setItem
+      localStorage.setItem = vi.fn(() => {
         throw new Error('Storage full')
       })
       
@@ -131,7 +131,7 @@ describe('useLocalStorage', () => {
       expect(consoleSpy).toHaveBeenCalled()
       
       // 元の関数を復元
-      Storage.prototype.setItem = originalSetItem
+      localStorage.setItem = originalSetItem
       consoleSpy.mockRestore()
     })
   })
@@ -146,7 +146,7 @@ describe('useLocalStorage', () => {
           key: 'shared-key',
           newValue: JSON.stringify('changed-from-another-tab'),
           oldValue: JSON.stringify('initial'),
-          storageArea: localStorage,
+          url: 'http://localhost',
         })
         window.dispatchEvent(storageEvent)
       })
@@ -162,7 +162,7 @@ describe('useLocalStorage', () => {
           key: 'other-key',
           newValue: JSON.stringify('other-value'),
           oldValue: null,
-          storageArea: localStorage,
+          url: 'http://localhost',
         })
         window.dispatchEvent(storageEvent)
       })
@@ -180,7 +180,7 @@ describe('useLocalStorage', () => {
           key: 'test-key',
           newValue: 'invalid-json{',
           oldValue: JSON.stringify('initial'),
-          storageArea: localStorage,
+          url: 'http://localhost',
         })
         window.dispatchEvent(storageEvent)
       })
@@ -243,16 +243,16 @@ describe('useLocalStorage', () => {
   describe('SSR対応', () => {
     it('windowが未定義の場合は初期値を返す', () => {
       // windowオブジェクトを一時的に削除
-      const originalWindow = global.window
+      const originalWindow = globalThis.window
       // @ts-ignore
-      delete global.window
+      delete globalThis.window
       
       const { result } = renderHook(() => useLocalStorage('ssr-key', 'ssr-default'))
       
       expect(result.current[0]).toBe('ssr-default')
       
       // windowオブジェクトを復元
-      global.window = originalWindow
+      globalThis.window = originalWindow
     })
   })
 })

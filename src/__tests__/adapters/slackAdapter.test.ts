@@ -42,8 +42,14 @@ describe('SlackAdapter', () => {
       }
 
       // モックHTTPクライアントのセットアップ
-      const mockHttpClient = createMockHttpClient()
-      mockHttpClient.setResponse(ok(mockResponse))
+      const mockHttpClient = createMockHttpClient([
+        {
+          url: 'https://slack.com/api/search.messages',
+          method: 'POST',
+          status: 200,
+          data: mockResponse,
+        }
+      ])
 
       // アダプターの作成とテスト実行
       const adapter = createSlackAdapter(mockHttpClient)
@@ -74,8 +80,14 @@ describe('SlackAdapter', () => {
         error: 'invalid_auth',
       }
 
-      const mockHttpClient = createMockHttpClient()
-      mockHttpClient.setResponse(ok(mockResponse))
+      const mockHttpClient = createMockHttpClient([
+        {
+          url: 'https://slack.com/api/search.messages',
+          method: 'POST',
+          status: 200,
+          data: mockResponse,
+        }
+      ])
 
       const adapter = createSlackAdapter(mockHttpClient)
       const result = await adapter.searchMessages({
@@ -92,7 +104,7 @@ describe('SlackAdapter', () => {
     })
 
     it('パラメータが不足している場合はバリデーションエラーを返す', async () => {
-      const mockHttpClient = createMockHttpClient()
+      const mockHttpClient = createMockHttpClient([])
       const adapter = createSlackAdapter(mockHttpClient)
 
       // トークンが空の場合
@@ -124,8 +136,14 @@ describe('SlackAdapter', () => {
         error: 'rate_limited',
       }
 
-      const mockHttpClient = createMockHttpClient()
-      mockHttpClient.setResponse(ok(mockResponse))
+      const mockHttpClient = createMockHttpClient([
+        {
+          url: 'https://slack.com/api/search.messages',
+          method: 'POST',
+          status: 200,
+          data: mockResponse,
+        }
+      ])
 
       const adapter = createSlackAdapter(mockHttpClient)
       const result = await adapter.searchMessages({
@@ -161,8 +179,14 @@ describe('SlackAdapter', () => {
         ],
       }
 
-      const mockHttpClient = createMockHttpClient()
-      mockHttpClient.setResponse(ok(mockResponse))
+      const mockHttpClient = createMockHttpClient([
+        {
+          url: 'https://slack.com/api/conversations.replies',
+          method: 'POST',
+          status: 200,
+          data: mockResponse,
+        }
+      ])
 
       const adapter = createSlackAdapter(mockHttpClient)
       const result = await adapter.getThreadMessages({
@@ -186,8 +210,14 @@ describe('SlackAdapter', () => {
         error: 'thread_not_found',
       }
 
-      const mockHttpClient = createMockHttpClient()
-      mockHttpClient.setResponse(ok(mockResponse))
+      const mockHttpClient = createMockHttpClient([
+        {
+          url: 'https://slack.com/api/conversations.replies',
+          method: 'POST',
+          status: 200,
+          data: mockResponse,
+        }
+      ])
 
       const adapter = createSlackAdapter(mockHttpClient)
       const result = await adapter.getThreadMessages({
@@ -208,8 +238,14 @@ describe('SlackAdapter', () => {
         messages: [],
       }
 
-      const mockHttpClient = createMockHttpClient()
-      mockHttpClient.setResponse(ok(mockResponse))
+      const mockHttpClient = createMockHttpClient([
+        {
+          url: 'https://slack.com/api/conversations.replies',
+          method: 'POST',
+          status: 200,
+          data: mockResponse,
+        }
+      ])
 
       const adapter = createSlackAdapter(mockHttpClient)
       const result = await adapter.getThreadMessages({
@@ -234,8 +270,14 @@ describe('SlackAdapter', () => {
         permalink: mockPermalink,
       }
 
-      const mockHttpClient = createMockHttpClient()
-      mockHttpClient.setResponse(ok(mockResponse))
+      const mockHttpClient = createMockHttpClient([
+        {
+          url: 'https://slack.com/api/chat.getPermalink?channel=C123456&message_ts=1234567890.123456',
+          method: 'GET',
+          status: 200,
+          data: mockResponse,
+        }
+      ])
 
       const adapter = createSlackAdapter(mockHttpClient)
       const result = await adapter.getPermalink({
@@ -256,8 +298,14 @@ describe('SlackAdapter', () => {
         error: 'message_not_found',
       }
 
-      const mockHttpClient = createMockHttpClient()
-      mockHttpClient.setResponse(ok(mockResponse))
+      const mockHttpClient = createMockHttpClient([
+        {
+          url: 'https://slack.com/api/chat.getPermalink?channel=C123456&message_ts=invalid-ts',
+          method: 'GET',
+          status: 200,
+          data: mockResponse,
+        }
+      ])
 
       const adapter = createSlackAdapter(mockHttpClient)
       const result = await adapter.getPermalink({
@@ -290,8 +338,14 @@ describe('SlackAdapter', () => {
         },
       }
 
-      const mockHttpClient = createMockHttpClient()
-      mockHttpClient.setResponse(ok(mockResponse))
+      const mockHttpClient = createMockHttpClient([
+        {
+          url: 'https://slack.com/api/users.info',
+          method: 'POST',
+          status: 200,
+          data: mockResponse,
+        }
+      ])
 
       const adapter = createSlackAdapter(mockHttpClient)
       const result = await adapter.getUserInfo({
@@ -311,8 +365,14 @@ describe('SlackAdapter', () => {
         error: 'user_not_found',
       }
 
-      const mockHttpClient = createMockHttpClient()
-      mockHttpClient.setResponse(ok(mockResponse))
+      const mockHttpClient = createMockHttpClient([
+        {
+          url: 'https://slack.com/api/users.info',
+          method: 'POST',
+          status: 200,
+          data: mockResponse,
+        }
+      ])
 
       const adapter = createSlackAdapter(mockHttpClient)
       const result = await adapter.getUserInfo({
@@ -336,8 +396,14 @@ describe('SlackAdapter', () => {
         },
       }
 
-      const mockHttpClient = createMockHttpClient()
-      mockHttpClient.setResponse(ok(mockResponse))
+      const mockHttpClient = createMockHttpClient([
+        {
+          url: 'https://slack.com/api/users.info',
+          method: 'POST',
+          status: 200,
+          data: mockResponse,
+        }
+      ])
 
       const adapter = createSlackAdapter(mockHttpClient)
       const result = await adapter.getUserInfo({
@@ -370,8 +436,14 @@ describe('SlackAdapter', () => {
           error: slackError,
         }
 
-        const mockHttpClient = createMockHttpClient()
-        mockHttpClient.setResponse(ok(mockResponse))
+        const mockHttpClient = createMockHttpClient([
+          {
+            url: 'https://slack.com/api/search.messages',
+            method: 'POST',
+            status: 200,
+            data: mockResponse,
+          }
+        ])
 
         const adapter = createSlackAdapter(mockHttpClient)
         const result = await adapter.searchMessages({
@@ -394,8 +466,14 @@ describe('SlackAdapter', () => {
         message: 'ネットワーク接続に失敗しました',
       }
 
-      const mockHttpClient = createMockHttpClient()
-      mockHttpClient.setResponse(err(networkError))
+      const mockHttpClient = createMockHttpClient([
+        {
+          url: 'https://slack.com/api/search.messages',
+          method: 'POST',
+          status: 500,
+          error: networkError,
+        }
+      ])
 
       const adapter = createSlackAdapter(mockHttpClient)
       const result = await adapter.searchMessages({

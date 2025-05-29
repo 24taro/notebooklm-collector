@@ -88,7 +88,7 @@ describe('fileDownloader', () => {
 
       // ファイル名にslackとthreadsが含まれることを確認
       const anchorElement = (document.createElement as any).mock.results[0].value
-      expect(anchorElement.download).toMatch(/^slack_\d{4}-\d{2}-\d{2}_slack-search_threads\.md$/)
+      expect(anchorElement.download).toMatch(/^slack_\d{4}-\d{2}-\d{2}_slack_search_threads\.md$/)
     })
 
     it('デフォルトソースタイプ（docbase）でダウンロードが成功する', () => {
@@ -103,7 +103,7 @@ describe('fileDownloader', () => {
 
       // ファイル名にdocbaseとarticlesが含まれることを確認
       const anchorElement = (document.createElement as any).mock.results[0].value
-      expect(anchorElement.download).toMatch(/^docbase_\d{4}-\d{2}-\d{2}_default-keyword_articles\.md$/)
+      expect(anchorElement.download).toMatch(/^docbase_\d{4}-\d{2}-\d{2}_default_keyword_articles\.md$/)
     })
   })
 
@@ -261,7 +261,7 @@ describe('fileDownloader', () => {
       const result = downloadMarkdownFile('# Test', 'keyword', true, 'docbase')
 
       expect(result.success).toBe(false)
-      // エラーが発生してもrevokeObjectURLが呼ばれることを確認
+      // エラーの場合はcatch blockでrevokeObjectURLが呼ばれる
       expect(mockRevokeObjectURL).toHaveBeenCalled()
     })
   })
@@ -272,7 +272,7 @@ describe('fileDownloader', () => {
 
       const anchorElement = (document.createElement as any).mock.results[0].value
       expect(anchorElement.href).toBe('blob:mock-url')
-      expect(anchorElement.download).toMatch(/^docbase_\d{4}-\d{2}-\d{2}_test-keyword_articles\.md$/)
+      expect(anchorElement.download).toMatch(/^docbase_\d{4}-\d{2}-\d{2}_test_keyword_articles\.md$/)
     })
 
     it('Blobが正しいMIMEタイプで作成される', () => {

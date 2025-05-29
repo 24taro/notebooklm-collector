@@ -90,6 +90,10 @@ describe('useSlackSearchUnified', () => {
       expect(result.current.threadMarkdowns).toEqual([])
       expect(result.current.currentPreviewMarkdown).toBe('')
       expect(result.current.isLoading).toBe(false)
+      expect(result.current.progressStatus).toEqual({
+        phase: 'idle',
+        message: '',
+      })
       expect(result.current.error).toBeNull()
       expect(result.current.canRetry).toBe(false)
       expect(result.current.paginationInfo).toEqual({
