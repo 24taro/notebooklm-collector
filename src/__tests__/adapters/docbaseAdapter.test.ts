@@ -1,8 +1,7 @@
 // Docbaseアダプターのテスト
 // モックHTTPクライアントを使用してアダプターの動作を検証
 
-// @ts-expect-error Jest型定義の一時的な回避策
-import { describe, expect, it } from '@jest/globals'
+import { describe, expect, it } from 'vitest'
 import { createDocbaseAdapter } from '../../adapters/docbaseAdapter'
 import { createMockHttpClient, createSuccessResponse, createErrorResponse } from '../../adapters/mockHttpClient'
 import type { DocbasePostsResponse } from '../../types/docbase'
