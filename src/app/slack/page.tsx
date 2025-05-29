@@ -8,8 +8,8 @@ import Header from '../../components/Header'
 import { SlackHeroSection } from '../../components/SlackHeroSection'
 import { SlackSearchForm } from '../../components/SlackSearchForm'
 import { useDownload } from '../../hooks/useDownload'
+import { useSlackSearchUnified } from '../../hooks/useSlackSearchUnified'
 import useLocalStorage from '../../hooks/useLocalStorage'
-// import { useSlackSearch } from '../../hooks/useSlackSearch' // TODO: Issue #39で統一フックに移行
 import { generateSlackThreadsMarkdown } from '../../utils/slackMarkdownGenerator'
 import type { SlackThread } from '@/types/slack'
 
@@ -23,24 +23,30 @@ export default function SlackPage() {
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
   
   const { isDownloading, handleDownload } = useDownload()
-  // TODO: Issue #39で統一エラーハンドリングフックに移行
-  const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-  const [slackThreads, setSlackThreads] = useState<SlackThread[]>([])
-  const [userMaps, setUserMaps] = useState<Record<string, string>>({})
-  const [permalinkMaps, setPermalinkMaps] = useState<Record<string, string>>({})
-  const [threadMarkdowns, setThreadMarkdowns] = useState<string[]>([])
-  const [currentPreviewMarkdown, setCurrentPreviewMarkdown] = useState<string>('')
   
-  const handleSearch = () => {
-    // TODO: Issue #39で実装
-    console.log('Search function will be implemented in Issue #39')
-  }
+  // 統一Slack検索フック
+  const {
+    isLoading,
+    progressStatus,
+    error,
+    slackThreads,
+    userMaps,
+    permalinkMaps,
+    threadMarkdowns,
+    currentPreviewMarkdown,
+    handleSearch: searchSlack,
+  } = useSlackSearchUnified()
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
-    // TODO: Issue #39で統一フックによる検索実装
-    handleSearch()
+    searchSlack({
+      token,
+      searchQuery,
+      channel,
+      author,
+      startDate,
+      endDate,
+    })
   }
 
   const handlePreviewDownload = (markdownContent: string, searchQuery: string, hasContent: boolean) => {
@@ -107,7 +113,8 @@ export default function SlackPage() {
                 onEndDateChange={setEndDate}
                 isLoading={isLoading}
                 isDownloading={isDownloading}
-                error={error}
+                progressStatus={progressStatus}
+                error={error?.message || null}
                 slackThreads={slackThreads}
                 userMaps={userMaps}
                 permalinkMaps={permalinkMaps}
