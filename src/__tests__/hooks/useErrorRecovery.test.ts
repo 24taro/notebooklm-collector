@@ -50,6 +50,14 @@ describe('useErrorRecovery', () => {
     consoleWarnSpy.mockClear()
     vi.clearAllTimers()
     vi.useFakeTimers()
+
+    // デフォルトのモック実装を設定
+    localStorageMock.getItem.mockImplementation((key: string) => {
+      if (key === 'notebooklm_error_logs') return '[]'
+      return null
+    })
+    localStorageMock.setItem.mockImplementation(() => {})
+    localStorageMock.removeItem.mockImplementation(() => {})
   })
 
   afterEach(() => {
@@ -116,22 +124,42 @@ describe('useErrorRecovery', () => {
     })
 
     test('復旧中は重複実行を防ぐ', async () => {
+      // カスタム復旧処理を遅延させて復旧中状態をテストできるようにする
+      let resolveCustomRecovery: () => void
+      const customRecoveryPromise = new Promise<void>((resolve) => {
+        resolveCustomRecovery = resolve
+      })
+      const customRecovery = vi.fn().mockReturnValue(customRecoveryPromise)
+
       localStorageMock.getItem.mockReturnValue(null)
 
-      const { result } = renderHook(() => useErrorRecovery())
+      const { result } = renderHook(() => useErrorRecovery({ customRecovery }))
 
       // 最初の復旧を開始
-      const promise1 = act(async () => {
-        return result.current.recover()
+      let promise1: Promise<boolean>
+      act(() => {
+        promise1 = result.current.recover()
       })
+
+      // 復旧中状態を確認
+      expect(result.current.isRecovering).toBe(true)
 
       // 復旧中に2回目を実行
+      let success2: boolean
       await act(async () => {
-        const success = await result.current.recover()
-        expect(success).toBe(false) // 重複実行は失敗
+        success2 = await result.current.recover()
       })
+      expect(success2).toBe(false) // 重複実行は失敗
 
-      await promise1 // 最初の復旧完了を待つ
+      // カスタム復旧処理を完了させる
+      resolveCustomRecovery!()
+
+      // 最初の復旧完了を待つ
+      let success1: boolean
+      await act(async () => {
+        success1 = await promise1!
+      })
+      expect(success1).toBe(true)
     })
 
     test('最大リトライ回数を超えた場合は実行しない', async () => {
@@ -141,6 +169,9 @@ describe('useErrorRecovery', () => {
       localStorageMock.getItem.mockReturnValue(JSON.stringify(savedState))
 
       const { result } = renderHook(() => useErrorRecovery())
+
+      expect(result.current).not.toBeNull()
+      expect(result.current.canRetry).toBe(false)
 
       await act(async () => {
         const success = await result.current.recover()
@@ -156,6 +187,8 @@ describe('useErrorRecovery', () => {
       localStorageMock.getItem.mockReturnValue(null)
 
       const { result } = renderHook(() => useErrorRecovery())
+
+      expect(result.current).not.toBeNull()
 
       await act(async () => {
         const success = await result.current.recoverWithStorageReset()
@@ -180,6 +213,8 @@ describe('useErrorRecovery', () => {
 
       const { result } = renderHook(() => useErrorRecovery())
 
+      expect(result.current).not.toBeNull()
+
       act(() => {
         result.current.recoverWithReload()
       })
@@ -198,6 +233,8 @@ describe('useErrorRecovery', () => {
 
       const { result } = renderHook(() => useErrorRecovery())
 
+      expect(result.current).not.toBeNull()
+
       await act(async () => {
         const success = await result.current.recoverWithLogClear()
         expect(success).toBe(true)
@@ -215,6 +252,8 @@ describe('useErrorRecovery', () => {
 
       const { result } = renderHook(() => useErrorRecovery({ customRecovery }))
 
+      expect(result.current).not.toBeNull()
+
       await act(async () => {
         const success = await result.current.recoverWithCustom()
         expect(success).toBe(true)
@@ -227,6 +266,8 @@ describe('useErrorRecovery', () => {
       localStorageMock.getItem.mockReturnValue(null)
 
       const { result } = renderHook(() => useErrorRecovery())
+
+      expect(result.current).not.toBeNull()
 
       await act(async () => {
         const success = await result.current.recoverWithCustom()
@@ -246,6 +287,8 @@ describe('useErrorRecovery', () => {
 
       const { result } = renderHook(() => useErrorRecovery())
 
+      expect(result.current).not.toBeNull()
+
       act(() => {
         result.current.resetRetryCount()
       })
@@ -260,6 +303,8 @@ describe('useErrorRecovery', () => {
       localStorageMock.getItem.mockReturnValue('[]')
 
       const { result } = renderHook(() => useErrorRecovery())
+
+      expect(result.current).not.toBeNull()
 
       act(() => {
         result.current.refreshErrorStats()
@@ -276,9 +321,12 @@ describe('useErrorRecovery', () => {
       }
       localStorageMock.getItem.mockReturnValue(JSON.stringify(savedState))
 
-      renderHook(() => useErrorRecovery({ autoReload: true }))
+      const { result } = renderHook(() => useErrorRecovery({ autoReload: true }))
 
-      // 5秒進める
+      expect(result.current).not.toBeNull()
+      expect(result.current.retryCount).toBe(1)
+
+      // 5秒進める（RECOVERY_COOLDOWN_MS）
       act(() => {
         vi.advanceTimersByTime(5000)
       })
