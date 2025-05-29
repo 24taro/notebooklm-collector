@@ -109,7 +109,7 @@ describe('useSlackSearchUnified', () => {
 
   describe('検索クエリ構築', () => {
     it('基本的な検索クエリが正しく構築される', async () => {
-      ;(mockAdapter.searchMessages as any).mockResolvedValue(ok({
+      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(ok({
         messages: [],
         pagination: { currentPage: 1, totalPages: 1, totalResults: 0, perPage: 20 }
       }))
@@ -133,7 +133,7 @@ describe('useSlackSearchUnified', () => {
     })
 
     it('詳細検索条件を含むクエリが正しく構築される', async () => {
-      ;(mockAdapter.searchMessages as any).mockResolvedValue(ok({
+      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(ok({
         messages: [],
         pagination: { currentPage: 1, totalPages: 1, totalResults: 0, perPage: 20 }
       }))
@@ -161,7 +161,7 @@ describe('useSlackSearchUnified', () => {
     })
 
     it('チャンネル名から#プレフィックスを除去する', async () => {
-      ;(mockAdapter.searchMessages as any).mockResolvedValue(ok({
+      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(ok({
         messages: [],
         pagination: { currentPage: 1, totalPages: 1, totalResults: 0, perPage: 20 }
       }))
@@ -186,7 +186,7 @@ describe('useSlackSearchUnified', () => {
     })
 
     it('作者名から@プレフィックスを除去する', async () => {
-      ;(mockAdapter.searchMessages as any).mockResolvedValue(ok({
+      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(ok({
         messages: [],
         pagination: { currentPage: 1, totalPages: 1, totalResults: 0, perPage: 20 }
       }))
@@ -241,13 +241,13 @@ describe('useSlackSearchUnified', () => {
 
   describe('検索成功', () => {
     it('検索が成功した場合、結果を正しく更新する', async () => {
-      ;(mockAdapter.searchMessages as any).mockResolvedValue(ok({
+      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(ok({
         messages: mockMessages,
         pagination: { currentPage: 1, totalPages: 1, totalResults: 2, perPage: 20 }
       }))
-      ;(mockAdapter.getThreadMessages as any).mockResolvedValue(ok(mockThread))
-      ;(mockAdapter.getPermalink as any).mockResolvedValue(ok('https://slack.com/permalink'))
-      ;(mockAdapter.getUserInfo as any).mockResolvedValue(ok(mockUser))
+      ;(mockAdapter.getThreadMessages as Mock).mockResolvedValue(ok(mockThread))
+      ;(mockAdapter.getPermalink as Mock).mockResolvedValue(ok('https://slack.com/permalink'))
+      ;(mockAdapter.getUserInfo as Mock).mockResolvedValue(ok(mockUser))
 
       const { result } = renderHook(() => useSlackSearchUnified({ adapter: mockAdapter }))
 
@@ -267,7 +267,7 @@ describe('useSlackSearchUnified', () => {
     })
 
     it('検索結果が0件の場合、適切にメッセージを表示する', async () => {
-      ;(mockAdapter.searchMessages as any).mockResolvedValue(ok({
+      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(ok({
         messages: [],
         pagination: { currentPage: 1, totalPages: 1, totalResults: 0, perPage: 20 }
       }))
@@ -300,13 +300,13 @@ describe('useSlackSearchUnified', () => {
         }
       ]
 
-      ;(mockAdapter.searchMessages as any).mockResolvedValue(ok({
+      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(ok({
         messages: duplicateMessages,
         pagination: { currentPage: 1, totalPages: 1, totalResults: 3, perPage: 20 }
       }))
-      ;(mockAdapter.getThreadMessages as any).mockResolvedValue(ok(mockThread))
-      ;(mockAdapter.getPermalink as any).mockResolvedValue(ok('https://slack.com/permalink'))
-      ;(mockAdapter.getUserInfo as any).mockResolvedValue(ok(mockUser))
+      ;(mockAdapter.getThreadMessages as Mock).mockResolvedValue(ok(mockThread))
+      ;(mockAdapter.getPermalink as Mock).mockResolvedValue(ok('https://slack.com/permalink'))
+      ;(mockAdapter.getUserInfo as Mock).mockResolvedValue(ok(mockUser))
 
       const { result } = renderHook(() => useSlackSearchUnified({ adapter: mockAdapter }))
 
@@ -341,7 +341,7 @@ describe('useSlackSearchUnified', () => {
         channel: { id: 'C123456' },
       }))
 
-      ;(mockAdapter.searchMessages as any)
+      ;(mockAdapter.searchMessages as Mock)
         .mockResolvedValueOnce(ok({
           messages: page1Messages,
           pagination: { currentPage: 1, totalPages: 2, totalResults: 150, perPage: 100 }
@@ -351,9 +351,9 @@ describe('useSlackSearchUnified', () => {
           pagination: { currentPage: 2, totalPages: 2, totalResults: 150, perPage: 100 }
         }))
 
-      ;(mockAdapter.getThreadMessages as any).mockResolvedValue(ok(mockThread))
-      ;(mockAdapter.getPermalink as any).mockResolvedValue(ok('https://slack.com/permalink'))
-      ;(mockAdapter.getUserInfo as any).mockResolvedValue(ok(mockUser))
+      ;(mockAdapter.getThreadMessages as Mock).mockResolvedValue(ok(mockThread))
+      ;(mockAdapter.getPermalink as Mock).mockResolvedValue(ok('https://slack.com/permalink'))
+      ;(mockAdapter.getUserInfo as Mock).mockResolvedValue(ok(mockUser))
 
       const { result } = renderHook(() => useSlackSearchUnified({ adapter: mockAdapter }))
 
@@ -377,7 +377,7 @@ describe('useSlackSearchUnified', () => {
         type: 'unauthorized',
         message: '認証エラー'
       }
-      ;(mockAdapter.searchMessages as any).mockResolvedValue(err(error))
+      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(err(error))
 
       const { result } = renderHook(() => useSlackSearchUnified({ adapter: mockAdapter }))
 
@@ -398,7 +398,7 @@ describe('useSlackSearchUnified', () => {
         type: 'network',
         message: 'ネットワークエラー'
       }
-      ;(mockAdapter.searchMessages as any).mockResolvedValue(err(error))
+      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(err(error))
 
       const { result } = renderHook(() => useSlackSearchUnified({ adapter: mockAdapter }))
 
@@ -417,7 +417,7 @@ describe('useSlackSearchUnified', () => {
         type: 'rate_limit',
         message: 'レート制限エラー'
       }
-      ;(mockAdapter.searchMessages as any).mockResolvedValue(err(error))
+      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(err(error))
 
       const { result } = renderHook(() => useSlackSearchUnified({ adapter: mockAdapter }))
 
@@ -438,15 +438,15 @@ describe('useSlackSearchUnified', () => {
         type: 'network',
         message: 'ネットワークエラー'
       }
-      ;(mockAdapter.searchMessages as any)
+      ;(mockAdapter.searchMessages as Mock)
         .mockResolvedValueOnce(err(error))
         .mockResolvedValueOnce(ok({
           messages: mockMessages,
           pagination: { currentPage: 1, totalPages: 1, totalResults: 2, perPage: 20 }
         }))
-      ;(mockAdapter.getThreadMessages as any).mockResolvedValue(ok(mockThread))
-      ;(mockAdapter.getPermalink as any).mockResolvedValue(ok('https://slack.com/permalink'))
-      ;(mockAdapter.getUserInfo as any).mockResolvedValue(ok(mockUser))
+      ;(mockAdapter.getThreadMessages as Mock).mockResolvedValue(ok(mockThread))
+      ;(mockAdapter.getPermalink as Mock).mockResolvedValue(ok('https://slack.com/permalink'))
+      ;(mockAdapter.getUserInfo as Mock).mockResolvedValue(ok(mockUser))
 
       const { result } = renderHook(() => useSlackSearchUnified({ adapter: mockAdapter }))
 
@@ -485,11 +485,11 @@ describe('useSlackSearchUnified', () => {
 
   describe('ローディング状態', () => {
     it('検索中はローディング状態になる', async () => {
-      let resolveSearch: (value: any) => void
+      let resolveSearch: (value: unknown) => void
       const searchPromise = new Promise((resolve) => {
         resolveSearch = resolve
       })
-      ;(mockAdapter.searchMessages as any).mockReturnValue(searchPromise)
+      ;(mockAdapter.searchMessages as Mock).mockReturnValue(searchPromise)
 
       const { result } = renderHook(() => useSlackSearchUnified({ adapter: mockAdapter }))
 
@@ -506,7 +506,7 @@ describe('useSlackSearchUnified', () => {
 
       // 検索完了
       await act(async () => {
-        resolveSearch!(ok({
+        resolveSearch?.(ok({
           messages: [],
           pagination: { currentPage: 1, totalPages: 1, totalResults: 0, perPage: 20 }
         }))
@@ -519,13 +519,13 @@ describe('useSlackSearchUnified', () => {
 
   describe('Markdown生成', () => {
     it('検索結果からMarkdownが生成される', async () => {
-      ;(mockAdapter.searchMessages as any).mockResolvedValue(ok({
+      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(ok({
         messages: mockMessages,
         pagination: { currentPage: 1, totalPages: 1, totalResults: 2, perPage: 20 }
       }))
-      ;(mockAdapter.getThreadMessages as any).mockResolvedValue(ok(mockThread))
-      ;(mockAdapter.getPermalink as any).mockResolvedValue(ok('https://slack.com/permalink'))
-      ;(mockAdapter.getUserInfo as any).mockResolvedValue(ok(mockUser))
+      ;(mockAdapter.getThreadMessages as Mock).mockResolvedValue(ok(mockThread))
+      ;(mockAdapter.getPermalink as Mock).mockResolvedValue(ok('https://slack.com/permalink'))
+      ;(mockAdapter.getUserInfo as Mock).mockResolvedValue(ok(mockUser))
 
       const { result } = renderHook(() => useSlackSearchUnified({ adapter: mockAdapter }))
 
@@ -546,13 +546,13 @@ describe('useSlackSearchUnified', () => {
 
   describe('ユーザー情報とパーマリンク取得', () => {
     it('ユーザー情報が正しくマッピングされる', async () => {
-      ;(mockAdapter.searchMessages as any).mockResolvedValue(ok({
+      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(ok({
         messages: mockMessages,
         pagination: { currentPage: 1, totalPages: 1, totalResults: 2, perPage: 20 }
       }))
-      ;(mockAdapter.getThreadMessages as any).mockResolvedValue(ok(mockThread))
-      ;(mockAdapter.getPermalink as any).mockResolvedValue(ok('https://slack.com/permalink'))
-      ;(mockAdapter.getUserInfo as any).mockResolvedValue(ok(mockUser))
+      ;(mockAdapter.getThreadMessages as Mock).mockResolvedValue(ok(mockThread))
+      ;(mockAdapter.getPermalink as Mock).mockResolvedValue(ok('https://slack.com/permalink'))
+      ;(mockAdapter.getUserInfo as Mock).mockResolvedValue(ok(mockUser))
 
       const { result } = renderHook(() => useSlackSearchUnified({ adapter: mockAdapter }))
 
@@ -564,7 +564,7 @@ describe('useSlackSearchUnified', () => {
       })
 
       await waitFor(() => {
-        expect(result.current.userMaps['U123456']).toBe('Test User')
+        expect(result.current.userMaps.U123456).toBe('Test User')
         expect(result.current.permalinkMaps).toHaveProperty('1234567890.123456')
       })
     })
@@ -572,13 +572,13 @@ describe('useSlackSearchUnified', () => {
     it('real_nameが無い場合はnameを使用する', async () => {
       const userWithoutRealName = { ...mockUser, real_name: undefined }
       
-      ;(mockAdapter.searchMessages as any).mockResolvedValue(ok({
+      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(ok({
         messages: mockMessages,
         pagination: { currentPage: 1, totalPages: 1, totalResults: 2, perPage: 20 }
       }))
-      ;(mockAdapter.getThreadMessages as any).mockResolvedValue(ok(mockThread))
-      ;(mockAdapter.getPermalink as any).mockResolvedValue(ok('https://slack.com/permalink'))
-      ;(mockAdapter.getUserInfo as any).mockResolvedValue(ok(userWithoutRealName))
+      ;(mockAdapter.getThreadMessages as Mock).mockResolvedValue(ok(mockThread))
+      ;(mockAdapter.getPermalink as Mock).mockResolvedValue(ok('https://slack.com/permalink'))
+      ;(mockAdapter.getUserInfo as Mock).mockResolvedValue(ok(userWithoutRealName))
 
       const { result } = renderHook(() => useSlackSearchUnified({ adapter: mockAdapter }))
 
@@ -590,7 +590,7 @@ describe('useSlackSearchUnified', () => {
       })
 
       await waitFor(() => {
-        expect(result.current.userMaps['U123456']).toBe('testuser')
+        expect(result.current.userMaps.U123456).toBe('testuser')
       })
     })
   })

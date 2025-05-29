@@ -1,6 +1,7 @@
-import { describe, expect, it, beforeEach, vi } from 'vitest'
+import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest'
 import { renderHook, act, waitFor } from '@testing-library/react'
 import { useDownload } from '../../hooks/useDownload'
+import type { downloadMarkdownFile as downloadMarkdownFileType } from '../../utils/fileDownloader'
 
 // react-hot-toastのモック
 vi.mock('react-hot-toast', () => ({
@@ -33,7 +34,7 @@ describe('useDownload', () => {
   describe('ダウンロード成功', () => {
     it('正常なダウンロード処理が成功する', async () => {
       const { downloadMarkdownFile } = await import('../../utils/fileDownloader')
-      ;(downloadMarkdownFile as any).mockReturnValue({
+      ;(downloadMarkdownFile as Mock<typeof downloadMarkdownFileType>).mockReturnValue({
         success: true,
         message: null,
       })
@@ -60,7 +61,7 @@ describe('useDownload', () => {
 
     it('Slackソースタイプでダウンロード処理が成功する', async () => {
       const { downloadMarkdownFile } = await import('../../utils/fileDownloader')
-      ;(downloadMarkdownFile as any).mockReturnValue({
+      ;(downloadMarkdownFile as Mock<typeof downloadMarkdownFileType>).mockReturnValue({
         success: true,
         message: null,
       })
@@ -86,7 +87,7 @@ describe('useDownload', () => {
 
     it('ソースタイプが指定されない場合はデフォルトでdocbaseを使用する', async () => {
       const { downloadMarkdownFile } = await import('../../utils/fileDownloader')
-      ;(downloadMarkdownFile as any).mockReturnValue({
+      ;(downloadMarkdownFile as Mock<typeof downloadMarkdownFileType>).mockReturnValue({
         success: true,
         message: null,
       })
@@ -113,7 +114,7 @@ describe('useDownload', () => {
   describe('ダウンロード失敗', () => {
     it('投稿が存在しない場合はエラーメッセージを表示する', async () => {
       const { downloadMarkdownFile } = await import('../../utils/fileDownloader')
-      ;(downloadMarkdownFile as any).mockReturnValue({
+      ;(downloadMarkdownFile as Mock<typeof downloadMarkdownFileType>).mockReturnValue({
         success: false,
         message: 'ダウンロード可能な投稿がありません',
       })
@@ -140,7 +141,7 @@ describe('useDownload', () => {
 
     it('Markdownコンテンツが空の場合はエラーメッセージを表示する', async () => {
       const { downloadMarkdownFile } = await import('../../utils/fileDownloader')
-      ;(downloadMarkdownFile as any).mockReturnValue({
+      ;(downloadMarkdownFile as Mock<typeof downloadMarkdownFileType>).mockReturnValue({
         success: false,
         message: 'Markdownコンテンツが空です',
       })
@@ -161,7 +162,7 @@ describe('useDownload', () => {
 
     it('fileDownloaderからエラーが返された場合は適切に処理する', async () => {
       const { downloadMarkdownFile } = await import('../../utils/fileDownloader')
-      ;(downloadMarkdownFile as any).mockReturnValue({
+      ;(downloadMarkdownFile as Mock<typeof downloadMarkdownFileType>).mockReturnValue({
         success: false,
         message: 'ファイル作成に失敗しました',
       })
@@ -184,7 +185,7 @@ describe('useDownload', () => {
   describe('ローディング状態', () => {
     it('ダウンロード中はローディング状態になる', async () => {
       const { downloadMarkdownFile } = await import('../../utils/fileDownloader')
-      ;(downloadMarkdownFile as any).mockReturnValue({
+      ;(downloadMarkdownFile as Mock<typeof downloadMarkdownFileType>).mockReturnValue({
         success: true,
         message: null,
       })
@@ -210,7 +211,7 @@ describe('useDownload', () => {
 
     it('投稿が存在しない場合でもローディング状態が適切に管理される', async () => {
       const { downloadMarkdownFile } = await import('../../utils/fileDownloader')
-      ;(downloadMarkdownFile as any).mockReturnValue({
+      ;(downloadMarkdownFile as Mock<typeof downloadMarkdownFileType>).mockReturnValue({
         success: false,
         message: 'ダウンロード可能な投稿がありません',
       })
@@ -233,7 +234,7 @@ describe('useDownload', () => {
   describe('エラーハンドリング', () => {
     it('予期せぬエラーが発生した場合は適切に処理する', async () => {
       const { downloadMarkdownFile } = await import('../../utils/fileDownloader')
-      ;(downloadMarkdownFile as any).mockImplementation(() => {
+      ;(downloadMarkdownFile as Mock<typeof downloadMarkdownFileType>).mockImplementation(() => {
         throw new Error('予期せぬエラー')
       })
 
@@ -260,7 +261,7 @@ describe('useDownload', () => {
   describe('遅延処理', () => {
     it('ダウンロード処理に適切な遅延が含まれる', async () => {
       const { downloadMarkdownFile } = await import('../../utils/fileDownloader')
-      ;(downloadMarkdownFile as any).mockReturnValue({
+      ;(downloadMarkdownFile as Mock).mockReturnValue({
         success: true,
         message: null,
       })
@@ -289,7 +290,7 @@ describe('useDownload', () => {
   describe('並行実行', () => {
     it('複数のダウンロードが同時に実行されても適切に処理される', async () => {
       const { downloadMarkdownFile } = await import('../../utils/fileDownloader')
-      ;(downloadMarkdownFile as any).mockReturnValue({
+      ;(downloadMarkdownFile as Mock).mockReturnValue({
         success: true,
         message: null,
       })

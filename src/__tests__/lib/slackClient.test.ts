@@ -41,7 +41,7 @@ describe('slackClient', () => {
       }
 
       // fetchモックの設定
-      ;(global.fetch as any).mockResolvedValueOnce({
+      ;(global.fetch as Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
       })
@@ -86,7 +86,7 @@ describe('slackClient', () => {
     })
 
     it('401エラーの場合は認証エラーを返す', async () => {
-      ;(global.fetch as any).mockResolvedValueOnce({
+      ;(global.fetch as Mock).mockResolvedValueOnce({
         ok: false,
         status: 401,
         json: async () => ({ error: 'invalid_auth' }),
@@ -110,7 +110,7 @@ describe('slackClient', () => {
         },
       }
 
-      ;(global.fetch as any)
+      ;(global.fetch as Mock)
         .mockResolvedValueOnce({
           ok: false,
           status: 429,
@@ -139,7 +139,7 @@ describe('slackClient', () => {
         error: 'missing_scope',
       }
 
-      ;(global.fetch as any).mockResolvedValueOnce({
+      ;(global.fetch as Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
       })
@@ -162,7 +162,7 @@ describe('slackClient', () => {
       }
 
       // 最初はネットワークエラー、2回目で成功
-      ;(global.fetch as any)
+      ;(global.fetch as Mock)
         .mockRejectedValueOnce(new TypeError('Failed to fetch'))
         .mockResolvedValueOnce({
           ok: true,
@@ -195,7 +195,7 @@ describe('slackClient', () => {
         ],
       }
 
-      ;(global.fetch as any).mockResolvedValueOnce({
+      ;(global.fetch as Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
       })
@@ -217,7 +217,7 @@ describe('slackClient', () => {
         error: 'thread_not_found',
       }
 
-      ;(global.fetch as any).mockResolvedValueOnce({
+      ;(global.fetch as Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
       })
@@ -231,7 +231,7 @@ describe('slackClient', () => {
     })
 
     it('ネットワークエラーを適切に処理する', async () => {
-      ;(global.fetch as any).mockRejectedValueOnce(new Error('Network error'))
+      ;(global.fetch as Mock).mockRejectedValueOnce(new Error('Network error'))
 
       const result = await fetchSlackThreadMessages('C123456', '1234567890.123456', 'xoxp-test-token')
 
@@ -250,7 +250,7 @@ describe('slackClient', () => {
         permalink: mockPermalink,
       }
 
-      ;(global.fetch as any).mockResolvedValueOnce({
+      ;(global.fetch as Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
       })
@@ -279,7 +279,7 @@ describe('slackClient', () => {
         error: 'message_not_found',
       }
 
-      ;(global.fetch as any).mockResolvedValueOnce({
+      ;(global.fetch as Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
       })
@@ -304,7 +304,7 @@ describe('slackClient', () => {
         },
       }
 
-      ;(global.fetch as any).mockResolvedValueOnce({
+      ;(global.fetch as Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
       })
@@ -325,7 +325,7 @@ describe('slackClient', () => {
         error: 'user_not_found',
       }
 
-      ;(global.fetch as any).mockResolvedValueOnce({
+      ;(global.fetch as Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
       })
@@ -344,7 +344,7 @@ describe('slackClient', () => {
         error: 'token_revoked',
       }
 
-      ;(global.fetch as any).mockResolvedValueOnce({
+      ;(global.fetch as Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
       })

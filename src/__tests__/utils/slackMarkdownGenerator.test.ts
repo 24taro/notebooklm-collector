@@ -92,8 +92,8 @@ describe('slackMarkdownGenerator', () => {
     })
 
     it('nullまたはundefinedの場合は空文字列を返す', () => {
-      expect(generateSlackThreadsMarkdown(null as any, {}, {})).toBe('')
-      expect(generateSlackThreadsMarkdown(undefined as any, {}, {})).toBe('')
+      expect(generateSlackThreadsMarkdown(null as unknown as SlackThread[], {}, {})).toBe('')
+      expect(generateSlackThreadsMarkdown(undefined as unknown as SlackThread[], {}, {})).toBe('')
     })
 
     it('スレッドリストから正しいMarkdownを生成する', () => {

@@ -148,9 +148,9 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
   /**
    * 進捗状況を更新するヘルパー関数
    */
-  const updateProgress = (status: ProgressStatus) => {
+  const updateProgress = useCallback((status: ProgressStatus) => {
     setState(prev => ({ ...prev, progressStatus: status }))
-  }
+  }, [])
 
   /**
    * スレッド詳細情報を取得
@@ -176,7 +176,7 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
       // 進捗更新
       updateProgress({
         phase: 'fetching_threads',
-        message: `🧵 スレッド詳細を取得中...`,
+        message: '🧵 スレッド詳細を取得中...',
         current: i + 1,
         total: totalMessages,
       })
@@ -202,7 +202,7 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
         // 進捗更新（パーマリンク生成）
         updateProgress({
           phase: 'generating_permalinks',
-          message: `🔗 パーマリンクを生成中...`,
+          message: '🔗 パーマリンクを生成中...',
           current: i + 1,
           total: totalMessages,
         })
@@ -240,7 +240,7 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
       // 進捗更新（ユーザー情報取得）
       updateProgress({
         phase: 'fetching_users',
-        message: `👤 ユーザー情報を取得中...`,
+        message: '👤 ユーザー情報を取得中...',
         current: userIndex,
         total: userIdArray.length,
       })
@@ -253,7 +253,7 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
     }
 
     return { threads, userMaps, permalinkMaps }
-  }, [adapter])
+  }, [adapter, updateProgress])
 
   /**
    * 検索実行
@@ -294,7 +294,7 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
         // 進捗更新（検索中）
         updateProgress({
           phase: 'searching',
-          message: `🔍 メッセージを検索中...`,
+          message: '🔍 メッセージを検索中...',
           current: page,
           total: MAX_PAGES,
         })
@@ -401,7 +401,7 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
       // リトライ可能性判定
       setCanRetry(apiError.type === 'network' || apiError.type === 'rate_limit')
     }
-  }, [adapter, buildSearchQuery, groupMessagesByThread, fetchThreadDetails])
+  }, [adapter, buildSearchQuery, groupMessagesByThread, fetchThreadDetails, updateProgress])
 
   /**
    * 再試行
