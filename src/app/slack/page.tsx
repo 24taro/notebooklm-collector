@@ -98,32 +98,32 @@ export default function SlackPage() {
             <div className="px-0">
               <h2 className="text-4xl font-bold mb-6 text-center text-gray-800">Slack メッセージ検索・収集</h2>
               <SlackSearchForm
-                searchQuery={searchQuery}
-                onSearchQueryChange={setSearchQuery}
-                token={token}
-                onTokenChange={setToken}
-                showAdvanced={showAdvanced}
-                onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
-                channel={channel}
-                onChannelChange={setChannel}
-                author={author}
-                onAuthorChange={setAuthor}
-                startDate={startDate}
-                onStartDateChange={setStartDate}
-                endDate={endDate}
-                onEndDateChange={setEndDate}
-                isLoading={isLoading}
-                isDownloading={isDownloading}
-                progressStatus={progressStatus}
-                hasSearched={hasSearched}
-                error={error?.message || null}
-                slackThreads={slackThreads}
-                userMaps={userMaps}
-                permalinkMaps={permalinkMaps}
-                onSubmit={handleFormSubmit}
-                onDownload={handlePreviewDownload}
-                onFullDownload={handleFullDownload}
-              />
+                  searchQuery={searchQuery}
+                  onSearchQueryChange={setSearchQuery}
+                  token={token}
+                  onTokenChange={setToken}
+                  showAdvanced={showAdvanced}
+                  onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
+                  channel={channel}
+                  onChannelChange={setChannel}
+                  author={author}
+                  onAuthorChange={setAuthor}
+                  startDate={startDate}
+                  onStartDateChange={setStartDate}
+                  endDate={endDate}
+                  onEndDateChange={setEndDate}
+                  isLoading={isLoading}
+                  isDownloading={isDownloading}
+                  progressStatus={progressStatus}
+                  hasSearched={hasSearched}
+                  error={error?.message || null}
+                  slackThreads={slackThreads}
+                  userMaps={userMaps}
+                  permalinkMaps={permalinkMaps}
+                  onSubmit={handleFormSubmit}
+                  onDownload={handlePreviewDownload}
+                  onFullDownload={handleFullDownload}
+                />
             </div>
           </div>
         </section>

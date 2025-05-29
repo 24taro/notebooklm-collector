@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Geist_Mono, Noto_Sans_JP } from 'next/font/google'
 import './globals.css'
+import { ErrorBoundaryProvider } from '@/components/ErrorBoundaryProvider'
 // import Header from '@/components/Header'
 // import Footer from '@/components/Footer'
 
@@ -28,9 +29,11 @@ export default function RootLayout({
   return (
     <html lang="ja">
       <body className={`${notoSansJP.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}>
-        {/* <Header /> */}
-        <main className="flex-grow">{children}</main>
-        {/* <Footer /> */}
+        <ErrorBoundaryProvider>
+          {/* <Header /> */}
+          <main className="flex-grow">{children}</main>
+          {/* <Footer /> */}
+        </ErrorBoundaryProvider>
       </body>
     </html>
   )
