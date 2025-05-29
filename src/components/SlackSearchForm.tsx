@@ -37,6 +37,7 @@ type SlackSearchFormProps = {
   isLoading: boolean
   isDownloading: boolean
   progressStatus: ProgressStatus
+  hasSearched: boolean
   error: string | null
   
   // 結果
@@ -68,6 +69,7 @@ export function SlackSearchForm({
   isLoading,
   isDownloading,
   progressStatus,
+  hasSearched,
   error,
   slackThreads,
   userMaps,
@@ -251,7 +253,7 @@ export function SlackSearchForm({
         )}
         
         {/* スレッドが0件のときの案内 */}
-        {slackThreads.length === 0 && !isLoading && !error && (
+        {slackThreads.length === 0 && !isLoading && !error && hasSearched && (
           <div className="mt-6 pt-5 border-t border-gray-200 text-gray-500 text-center">
             検索条件に該当するスレッドは見つかりませんでした。
           </div>

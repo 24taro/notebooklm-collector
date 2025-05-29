@@ -51,6 +51,7 @@ interface UseSlackSearchState {
   }
   isLoading: boolean
   progressStatus: ProgressStatus
+  hasSearched: boolean
   error: ApiError | null
 }
 
@@ -96,6 +97,7 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
       phase: 'idle',
       message: '',
     },
+    hasSearched: false,
     error: null,
   })
 
@@ -270,6 +272,7 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
     setState(prev => ({ 
       ...prev, 
       isLoading: true, 
+      hasSearched: true,
       error: null,
       progressStatus: {
         phase: 'searching',
