@@ -12,6 +12,16 @@ import type { ApiError } from '../types/error'
 import { getUserFriendlyErrorMessage, getErrorActionSuggestion } from '../utils/errorMessage'
 
 /**
+ * 進捗ステータスの型定義
+ */
+export interface ProgressStatus {
+  phase: 'idle' | 'searching' | 'fetching_threads' | 'fetching_users' | 'generating_permalinks' | 'completed'
+  message: string
+  current?: number
+  total?: number
+}
+
+/**
  * Slack検索パラメータ
  */
 export interface SlackSearchParams {
@@ -40,6 +50,7 @@ interface UseSlackSearchState {
     perPage: number
   }
   isLoading: boolean
+  progressStatus: ProgressStatus
   error: ApiError | null
 }
 
@@ -81,6 +92,10 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
       perPage: 20,
     },
     isLoading: false,
+    progressStatus: {
+      phase: 'idle',
+      message: '',
+    },
     error: null,
   })
 
@@ -129,6 +144,13 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
   }, [])
 
   /**
+   * 進捗状況を更新するヘルパー関数
+   */
+  const updateProgress = (status: ProgressStatus) => {
+    setState(prev => ({ ...prev, progressStatus: status }))
+  }
+
+  /**
    * スレッド詳細情報を取得
    */
   const fetchThreadDetails = useCallback(async (
@@ -143,9 +165,19 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
     const userMaps: Record<string, string> = {}
     const permalinkMaps: Record<string, string> = {}
     const userIdSet = new Set<string>()
+    const totalMessages = uniqueMessages.length
 
     // 各スレッドの詳細を取得
-    for (const message of uniqueMessages) {
+    for (let i = 0; i < uniqueMessages.length; i++) {
+      const message = uniqueMessages[i]
+      
+      // 進捗更新
+      updateProgress({
+        phase: 'fetching_threads',
+        message: `🧵 スレッド詳細を取得中...`,
+        current: i + 1,
+        total: totalMessages,
+      })
       const threadTs = message.thread_ts || message.ts
 
       // スレッド取得
@@ -164,6 +196,14 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
         for (const reply of thread.replies) {
           userIdSet.add(reply.user)
         }
+
+        // 進捗更新（パーマリンク生成）
+        updateProgress({
+          phase: 'generating_permalinks',
+          message: `🔗 パーマリンクを生成中...`,
+          current: i + 1,
+          total: totalMessages,
+        })
 
         // パーマリンク取得（親メッセージ）
         const parentPermalinkResult = await adapter.getPermalink({
@@ -190,7 +230,19 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
     }
 
     // ユーザー情報を一括取得
+    const userIdArray = Array.from(userIdSet)
+    let userIndex = 0
     for (const userId of userIdSet) {
+      userIndex++
+      
+      // 進捗更新（ユーザー情報取得）
+      updateProgress({
+        phase: 'fetching_users',
+        message: `👤 ユーザー情報を取得中...`,
+        current: userIndex,
+        total: userIdArray.length,
+      })
+      
       const userResult = await adapter.getUserInfo({ token, userId })
       if (userResult.isOk()) {
         const user = userResult.value
@@ -215,7 +267,15 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
       return
     }
 
-    setState(prev => ({ ...prev, isLoading: true, error: null }))
+    setState(prev => ({ 
+      ...prev, 
+      isLoading: true, 
+      error: null,
+      progressStatus: {
+        phase: 'searching',
+        message: '🔍 メッセージを検索中...',
+      }
+    }))
     setCanRetry(false)
     setLastSearchParams(params)
 
@@ -228,6 +288,13 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
 
       // ページネーション処理
       for (let page = 1; page <= MAX_PAGES; page++) {
+        // 進捗更新（検索中）
+        updateProgress({
+          phase: 'searching',
+          message: `🔍 メッセージを検索中...`,
+          current: page,
+          total: MAX_PAGES,
+        })
         const searchResult = await adapter.searchMessages({
           token: params.token,
           query,
@@ -267,6 +334,12 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
         generateSingleThreadMarkdown(thread, userMaps, permalinkMaps)
       )
 
+      // 完了状態を更新
+      updateProgress({
+        phase: 'completed',
+        message: '✅ 完了しました！',
+      })
+
       setState(prev => ({
         ...prev,
         messages: allMessages,
@@ -282,6 +355,10 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
           perPage: COUNT_PER_PAGE,
         },
         isLoading: false,
+        progressStatus: {
+          phase: 'completed',
+          message: '✅ 完了しました！',
+        },
         error: null,
       }))
 
@@ -297,6 +374,10 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
         ...prev,
         isLoading: false,
         error: apiError,
+        progressStatus: {
+          phase: 'idle',
+          message: '',
+        },
         messages: [],
         slackThreads: [],
         userMaps: {},

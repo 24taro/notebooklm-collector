@@ -34,6 +34,11 @@ describe('DocbaseAdapter', () => {
           url: 'https://test.docbase.io/posts/2',
         },
       ],
+      meta: {
+        previous_page: null,
+        next_page: null,
+        total: 2,
+      },
     }
 
     const mockHttpClient = createMockHttpClient([
@@ -71,7 +76,14 @@ describe('DocbaseAdapter', () => {
   })
 
   it('詳細検索条件を含む検索クエリを正しく構築する', async () => {
-    const mockPosts: DocbasePostsResponse = { posts: [] }
+    const mockPosts: DocbasePostsResponse = { 
+      posts: [],
+      meta: {
+        previous_page: null,
+        next_page: null,
+        total: 0,
+      },
+    }
     const expectedUrl = `https://api.docbase.io/teams/${mockDomain}/posts?q=%22%E3%83%86%E3%82%B9%E3%83%88%22+tag%3AAPI+author%3Auser123&page=1&per_page=100`
 
     const mockHttpClient = createMockHttpClient([
@@ -127,6 +139,11 @@ describe('DocbaseAdapter', () => {
         created_at: '2023-01-01T00:00:00Z',
         url: `https://test.docbase.io/posts/${i + 1}`,
       })),
+      meta: {
+        previous_page: null,
+        next_page: '2',
+        total: 150,
+      },
     }
 
     const page2Posts: DocbasePostsResponse = {
@@ -137,6 +154,11 @@ describe('DocbaseAdapter', () => {
         created_at: '2023-01-01T00:00:00Z',
         url: `https://test.docbase.io/posts/${i + 101}`,
       })),
+      meta: {
+        previous_page: '1',
+        next_page: null,
+        total: 150,
+      },
     }
 
     const mockHttpClient = createMockHttpClient([
