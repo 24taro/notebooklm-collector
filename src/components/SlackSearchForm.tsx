@@ -39,7 +39,6 @@ type SlackSearchFormProps = {
   progressStatus: ProgressStatus
   hasSearched: boolean
   error: string | null
-  hasSearched: boolean
   
   // 結果
   slackThreads: SlackThread[]
@@ -72,7 +71,6 @@ export function SlackSearchForm({
   progressStatus,
   hasSearched,
   error,
-  hasSearched,
   slackThreads,
   userMaps,
   permalinkMaps,
