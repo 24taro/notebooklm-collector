@@ -4,6 +4,7 @@
  * エラーログの保存、取得、管理機能のテスト
  */
 
+import { describe, test, expect, beforeEach, afterAll, vi } from 'vitest'
 import {
   logError,
   getErrorLogs,
@@ -17,10 +18,10 @@ import {
 
 // LocalStorageのモック
 const localStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
 }
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
@@ -39,10 +40,10 @@ Object.defineProperty(window, 'innerHeight', {
 })
 
 // console.errorのモック
-const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
-const consoleGroupSpy = jest.spyOn(console, 'group').mockImplementation(() => {})
-const consoleLogSpy = jest.spyOn(console, 'log').mockImplementation(() => {})
-const consoleGroupEndSpy = jest.spyOn(console, 'groupEnd').mockImplementation(() => {})
+const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+const consoleGroupSpy = vi.spyOn(console, 'group').mockImplementation(() => {})
+const consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+const consoleGroupEndSpy = vi.spyOn(console, 'groupEnd').mockImplementation(() => {})
 
 describe('errorStorage', () => {
   beforeEach(() => {

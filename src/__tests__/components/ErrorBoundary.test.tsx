@@ -6,14 +6,15 @@
 
 import type React from 'react'
 import { render, screen } from '@testing-library/react'
+import { describe, test, expect, beforeEach, afterAll, vi } from 'vitest'
 import { ErrorBoundary } from '../../components/ErrorBoundary'
 
 // LocalStorageのモック
 const localStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
 }
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
@@ -28,17 +29,21 @@ const ThrowError: React.FC<{ shouldThrow: boolean }> = ({ shouldThrow }) => {
 }
 
 // console.errorをモック
-const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
+const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+// console.groupをモック
+const consoleGroupSpy = vi.spyOn(console, 'group').mockImplementation(() => {})
 
 describe('ErrorBoundary', () => {
   beforeEach(() => {
     localStorageMock.getItem.mockClear()
     localStorageMock.setItem.mockClear()
     consoleSpy.mockClear()
+    consoleGroupSpy.mockClear()
   })
 
   afterAll(() => {
     consoleSpy.mockRestore()
+    consoleGroupSpy.mockRestore()
   })
 
   test('正常な子コンポーネントをレンダリングする', () => {
@@ -77,7 +82,7 @@ describe('ErrorBoundary', () => {
   })
 
   test('onErrorコールバックが呼ばれる', () => {
-    const onErrorMock = jest.fn()
+    const onErrorMock = vi.fn()
 
     render(
       <ErrorBoundary onError={onErrorMock}>
@@ -118,7 +123,7 @@ describe('ErrorBoundary', () => {
       </ErrorBoundary>
     )
 
-    expect(consoleSpy).toHaveBeenCalled()
+    expect(consoleGroupSpy).toHaveBeenCalled()
 
     process.env.NODE_ENV = originalEnv
   })

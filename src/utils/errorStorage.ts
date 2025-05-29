@@ -60,10 +60,10 @@ export function logError(
       error: {
         name: error.name,
         message: error.message,
-        stack: error.stack,
+        stack: error.stack || '',
       },
       errorInfo: {
-        componentStack: errorInfo.componentStack,
+        componentStack: errorInfo.componentStack || '',
       },
       context: {
         url: additionalContext.url,
@@ -104,10 +104,10 @@ export function logError(
       error: {
         name: error.name,
         message: error.message,
-        stack: error.stack,
+        stack: error.stack || '',
       },
       errorInfo: {
-        componentStack: errorInfo.componentStack,
+        componentStack: errorInfo.componentStack || '',
       },
       context: {
         url: additionalContext.url,

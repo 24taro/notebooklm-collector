@@ -5,14 +5,15 @@
  */
 
 import { renderHook, act } from '@testing-library/react'
+import { describe, test, expect, beforeEach, afterEach, afterAll, vi } from 'vitest'
 import { useErrorRecovery } from '../../hooks/useErrorRecovery'
 
 // LocalStorageのモック
 const localStorageMock = {
-  getItem: jest.fn(),
-  setItem: jest.fn(),
-  removeItem: jest.fn(),
-  clear: jest.fn(),
+  getItem: vi.fn(),
+  setItem: vi.fn(),
+  removeItem: vi.fn(),
+  clear: vi.fn(),
 }
 Object.defineProperty(window, 'localStorage', {
   value: localStorageMock,
@@ -20,7 +21,7 @@ Object.defineProperty(window, 'localStorage', {
 
 // sessionStorageのモック
 const sessionStorageMock = {
-  clear: jest.fn(),
+  clear: vi.fn(),
 }
 Object.defineProperty(window, 'sessionStorage', {
   value: sessionStorageMock,
@@ -29,13 +30,13 @@ Object.defineProperty(window, 'sessionStorage', {
 // window.location.reloadのモック
 Object.defineProperty(window, 'location', {
   value: {
-    reload: jest.fn(),
+    reload: vi.fn(),
   },
 })
 
 // console.errorのモック
-const consoleSpy = jest.spyOn(console, 'error').mockImplementation(() => {})
-const consoleWarnSpy = jest.spyOn(console, 'warn').mockImplementation(() => {})
+const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {})
+const consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
 
 describe('useErrorRecovery', () => {
   beforeEach(() => {
@@ -44,16 +45,16 @@ describe('useErrorRecovery', () => {
     localStorageMock.removeItem.mockClear()
     localStorageMock.clear.mockClear()
     sessionStorageMock.clear.mockClear()
-    ;(window.location.reload as jest.Mock).mockClear()
+    ;(window.location.reload as vi.Mock).mockClear()
     consoleSpy.mockClear()
     consoleWarnSpy.mockClear()
-    jest.clearAllTimers()
-    jest.useFakeTimers()
+    vi.clearAllTimers()
+    vi.useFakeTimers()
   })
 
   afterEach(() => {
-    jest.runOnlyPendingTimers()
-    jest.useRealTimers()
+    vi.runOnlyPendingTimers()
+    vi.useRealTimers()
   })
 
   afterAll(() => {
@@ -102,7 +103,7 @@ describe('useErrorRecovery', () => {
     })
 
     test('カスタム復旧処理を実行する', async () => {
-      const customRecovery = jest.fn().mockResolvedValue(undefined)
+      const customRecovery = vi.fn().mockResolvedValue(undefined)
       localStorageMock.getItem.mockReturnValue(null)
 
       const { result } = renderHook(() => useErrorRecovery({ customRecovery }))
@@ -209,7 +210,7 @@ describe('useErrorRecovery', () => {
 
   describe('recoverWithCustom', () => {
     test('カスタム復旧処理のみを実行する', async () => {
-      const customRecovery = jest.fn().mockResolvedValue(undefined)
+      const customRecovery = vi.fn().mockResolvedValue(undefined)
       localStorageMock.getItem.mockReturnValue(null)
 
       const { result } = renderHook(() => useErrorRecovery({ customRecovery }))
@@ -279,7 +280,7 @@ describe('useErrorRecovery', () => {
 
       // 5秒進める
       act(() => {
-        jest.advanceTimersByTime(5000)
+        vi.advanceTimersByTime(5000)
       })
 
       expect(window.location.reload).toHaveBeenCalled()
@@ -294,7 +295,7 @@ describe('useErrorRecovery', () => {
       renderHook(() => useErrorRecovery({ autoReload: true }))
 
       act(() => {
-        jest.advanceTimersByTime(5000)
+        vi.advanceTimersByTime(5000)
       })
 
       expect(window.location.reload).not.toHaveBeenCalled()
