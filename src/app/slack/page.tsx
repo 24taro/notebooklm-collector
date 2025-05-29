@@ -23,8 +23,8 @@ export default function SlackPage() {
   const { isDownloading, handleDownload } = useDownload()
   // TODO: Issue #39で統一エラーハンドリングフックに移行
   const [isLoading, setIsLoading] = useState(false)
-  const [error, setError] = useState<any>(null)
-  const [slackThreads, setSlackThreads] = useState<any[]>([])
+  const [error, setError] = useState<Error | null>(null)
+  const [slackThreads, setSlackThreads] = useState<unknown[]>([])
   const [userMaps, setUserMaps] = useState<Record<string, string>>({})
   const [permalinkMaps, setPermalinkMaps] = useState<Record<string, string>>({})
   const [threadMarkdowns, setThreadMarkdowns] = useState<string[]>([])

@@ -33,7 +33,7 @@ export const generateMarkdown = (posts: DocbasePostListItem[], searchKeyword?: s
     ? minDate.toLocaleDateString('ja-JP')
     : `${minDate.toLocaleDateString('ja-JP')} - ${maxDate.toLocaleDateString('ja-JP')}`
   
-  markdown += `# Docbase Articles Collection\n\n`
+  markdown += '# Docbase Articles Collection\n\n'
   
   markdown += '## Collection Overview\n'
   markdown += `- **Total Articles**: ${posts.length}\n`
@@ -41,7 +41,7 @@ export const generateMarkdown = (posts: DocbasePostListItem[], searchKeyword?: s
     markdown += `- **Search Keyword**: "${searchKeyword}"\n`
   }
   markdown += `- **Date Range**: ${dateRange}\n`
-  markdown += `- **Source**: Docbase Knowledge Base\n\n`
+  markdown += '- **Source**: Docbase Knowledge Base\n\n'
 
   // 目次
   markdown += '## Articles Index\n\n'

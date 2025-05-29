@@ -90,7 +90,7 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
   /**
    * 検索クエリを構築
    */
-  const buildSearchQuery = (params: SlackSearchParams): string => {
+  const buildSearchQuery = useCallback((params: SlackSearchParams): string => {
     let query = params.searchQuery.trim()
 
     if (params.channel?.trim()) {
@@ -110,12 +110,12 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
     }
 
     return query.trim()
-  }
+  }, [])
 
   /**
    * メッセージをスレッド単位でユニーク化
    */
-  const groupMessagesByThread = (messages: SlackMessage[]): SlackMessage[] => {
+  const groupMessagesByThread = useCallback((messages: SlackMessage[]): SlackMessage[] => {
     const threadMap = new Map<string, SlackMessage>()
     
     for (const message of messages) {
@@ -126,12 +126,12 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
     }
     
     return Array.from(threadMap.values())
-  }
+  }, [])
 
   /**
    * スレッド詳細情報を取得
    */
-  const fetchThreadDetails = async (
+  const fetchThreadDetails = useCallback(async (
     uniqueMessages: SlackMessage[],
     token: string
   ): Promise<{
@@ -161,7 +161,9 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
 
         // ユーザーIDを収集
         userIdSet.add(thread.parent.user)
-        thread.replies.forEach(reply => userIdSet.add(reply.user))
+        for (const reply of thread.replies) {
+          userIdSet.add(reply.user)
+        }
 
         // パーマリンク取得（親メッセージ）
         const parentPermalinkResult = await adapter.getPermalink({
@@ -197,7 +199,7 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
     }
 
     return { threads, userMaps, permalinkMaps }
-  }
+  }, [adapter])
 
   /**
    * 検索実行
@@ -315,7 +317,7 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
       // リトライ可能性判定
       setCanRetry(apiError.type === 'network' || apiError.type === 'rate_limit')
     }
-  }, [adapter])
+  }, [adapter, buildSearchQuery, groupMessagesByThread, fetchThreadDetails])
 
   /**
    * 再試行
@@ -378,7 +380,7 @@ function generateSingleThreadMarkdown(
 ): string {
   const parentUser = userMaps[thread.parent.user] || thread.parent.user
   const parentPermalink = permalinkMaps[thread.parent.ts] || '#'
-  const parentDate = new Date(parseFloat(thread.parent.ts) * 1000).toLocaleString('ja-JP')
+  const parentDate = new Date(Number.parseFloat(thread.parent.ts) * 1000).toLocaleString('ja-JP')
 
   let markdown = `## 🧵 スレッド: ${thread.parent.text.slice(0, 50)}...
 
@@ -393,7 +395,7 @@ function generateSingleThreadMarkdown(
     thread.replies.forEach((reply, index) => {
       const replyUser = userMaps[reply.user] || reply.user
       const replyPermalink = permalinkMaps[reply.ts] || '#'
-      const replyDate = new Date(parseFloat(reply.ts) * 1000).toLocaleString('ja-JP')
+      const replyDate = new Date(Number.parseFloat(reply.ts) * 1000).toLocaleString('ja-JP')
 
       markdown += `
 #### 💬 返信 ${index + 1}: ${replyUser} - ${replyDate}
