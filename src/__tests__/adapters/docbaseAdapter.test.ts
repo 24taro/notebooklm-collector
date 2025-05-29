@@ -1,7 +1,7 @@
 // Docbaseアダプターのテスト
 // モックHTTPクライアントを使用してアダプターの動作を検証
 
-import { describe, expect, it } from '@jest/globals'
+import { describe, expect, it } from 'vitest'
 import { createDocbaseAdapter } from '../../adapters/docbaseAdapter'
 import { createMockHttpClient, createSuccessResponse, createErrorResponse } from '../../adapters/mockHttpClient'
 import type { DocbasePostsResponse } from '../../types/docbase'
