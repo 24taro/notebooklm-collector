@@ -28,6 +28,7 @@ export default function SlackPage() {
   const {
     isLoading,
     progressStatus,
+    hasSearched,
     error,
     slackThreads,
     userMaps,
@@ -114,6 +115,7 @@ export default function SlackPage() {
                 isLoading={isLoading}
                 isDownloading={isDownloading}
                 progressStatus={progressStatus}
+                hasSearched={hasSearched}
                 error={error?.message || null}
                 slackThreads={slackThreads}
                 userMaps={userMaps}
