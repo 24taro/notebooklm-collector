@@ -52,7 +52,7 @@ export const generateSlackThreadsMarkdown = (
     ? minDate.toLocaleDateString('ja-JP')
     : `${minDate.toLocaleDateString('ja-JP')} - ${maxDate.toLocaleDateString('ja-JP')}`
 
-  markdown += `# Slack Threads Collection\n\n`
+  markdown += '# Slack Threads Collection\n\n'
   
   markdown += '## Collection Overview\n'
   markdown += `- **Total Threads**: ${threads.length}\n`
@@ -63,7 +63,7 @@ export const generateSlackThreadsMarkdown = (
   markdown += `- **Channels**: ${channels.join(', ')}\n`
   markdown += `- **Date Range**: ${dateRange}\n`
   markdown += `- **Participants**: ${allParticipants.length} unique users\n`
-  markdown += `- **Source**: Slack Workspace\n\n`
+  markdown += '- **Source**: Slack Workspace\n\n'
 
   // スレッド目次
   markdown += '## Threads Index\n\n'
