@@ -53,6 +53,7 @@ interface UseSlackSearchState {
   progressStatus: ProgressStatus
   hasSearched: boolean
   error: ApiError | null
+  hasSearched: boolean
 }
 
 /**
@@ -99,6 +100,7 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
     },
     hasSearched: false,
     error: null,
+    hasSearched: false,
   })
 
   const [lastSearchParams, setLastSearchParams] = useState<SlackSearchParams | null>(null)
@@ -274,6 +276,7 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
       isLoading: true, 
       hasSearched: true,
       error: null,
+      hasSearched: true,
       progressStatus: {
         phase: 'searching',
         message: '🔍 メッセージを検索中...',

@@ -30,6 +30,7 @@ export default function SlackPage() {
     progressStatus,
     hasSearched,
     error,
+    hasSearched,
     slackThreads,
     userMaps,
     permalinkMaps,
@@ -117,6 +118,7 @@ export default function SlackPage() {
                 progressStatus={progressStatus}
                 hasSearched={hasSearched}
                 error={error?.message || null}
+                hasSearched={hasSearched}
                 slackThreads={slackThreads}
                 userMaps={userMaps}
                 permalinkMaps={permalinkMaps}
