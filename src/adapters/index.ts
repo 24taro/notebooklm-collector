@@ -21,14 +21,10 @@ export {
 } from './slackAdapter'
 
 // デフォルトインスタンス作成用のヘルパー関数
-import { createFetchHttpClient as fetchClient } from './fetchHttpClient'
-import { createDocbaseAdapter as docbaseAdapter } from './docbaseAdapter'
-import { createSlackAdapter as slackAdapter } from './slackAdapter'
-
 export function createDefaultDocbaseAdapter() {
-  return docbaseAdapter(fetchClient())
+  return createDocbaseAdapter(createFetchHttpClient())
 }
 
 export function createDefaultSlackAdapter() {
-  return slackAdapter(fetchClient())
+  return createSlackAdapter(createFetchHttpClient())
 }
