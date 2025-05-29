@@ -8,11 +8,12 @@ import Header from '../../components/Header'
 import { SlackHeroSection } from '../../components/SlackHeroSection'
 import { SlackSearchForm } from '../../components/SlackSearchForm'
 import { useDownload } from '../../hooks/useDownload'
+import useLocalStorage from '../../hooks/useLocalStorage'
 // import { useSlackSearch } from '../../hooks/useSlackSearch' // TODO: Issue #39で統一フックに移行
 import { generateSlackThreadsMarkdown } from '../../utils/slackMarkdownGenerator'
 
 export default function SlackPage() {
-  const [token, setToken] = useState<string>('')
+  const [token, setToken] = useLocalStorage<string>('slackApiToken', '')
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [startDate, setStartDate] = useState<string>('')
   const [endDate, setEndDate] = useState<string>('')
@@ -34,20 +35,6 @@ export default function SlackPage() {
     // TODO: Issue #39で実装
     console.log('Search function will be implemented in Issue #39')
   }
-
-  // ローカルストレージからトークンを読み込み・保存するuseEffect
-  useEffect(() => {
-    const storedToken = localStorage.getItem('slackApiToken')
-    if (storedToken) {
-      setToken(storedToken)
-    }
-  }, [])
-
-  useEffect(() => {
-    if (token) {
-      localStorage.setItem('slackApiToken', token)
-    }
-  }, [token])
 
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
