@@ -14,6 +14,16 @@ export default defineConfig({
     // テストセットアップファイル
     setupFiles: './src/__tests__/setup.ts',
     
+    // テスト対象から除外
+    exclude: [
+      '**/node_modules/**',
+      '**/dist/**',
+      '**/cypress/**',
+      '**/.{idea,git,cache,output,temp}/**',
+      '**/{karma,rollup,webpack,vite,vitest,jest,ava,babel,nyc,cypress,tsup,build}.config.*',
+      '**/tests/**',  // Playwrightテストディレクトリを除外
+    ],
+    
     // カバレッジ設定
     coverage: {
       reporter: ['text', 'json', 'html'],
