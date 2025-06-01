@@ -9,12 +9,12 @@ import { SlackHeroSection } from '../../components/SlackHeroSection'
 import { SlackSearchForm } from '../../components/SlackSearchForm'
 import { useDownload } from '../../hooks/useDownload'
 import { useSlackSearchUnified } from '../../hooks/useSlackSearchUnified'
-import useLocalStorage from '../../hooks/useLocalStorage'
+import { useEncryptedApiToken } from '../../hooks/useEncryptedLocalStorage'
 import { generateSlackThreadsMarkdown } from '../../utils/slackMarkdownGenerator'
 import type { SlackThread } from '@/types/slack'
 
 export default function SlackPage() {
-  const [token, setToken] = useLocalStorage<string>('slackApiToken', '')
+  const { token, setToken, error: tokenError } = useEncryptedApiToken('slackApiToken')
   const [searchQuery, setSearchQuery] = useState<string>('')
   const [startDate, setStartDate] = useState<string>('')
   const [endDate, setEndDate] = useState<string>('')
@@ -41,7 +41,7 @@ export default function SlackPage() {
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault()
     searchSlack({
-      token,
+      token: token || '',
       searchQuery,
       channel,
       author,
@@ -100,8 +100,14 @@ export default function SlackPage() {
               <SlackSearchForm
                   searchQuery={searchQuery}
                   onSearchQueryChange={setSearchQuery}
-                  token={token}
-                  onTokenChange={setToken}
+                  token={token || ''}
+                  onTokenChange={async (value) => {
+                    try {
+                      await setToken(value)
+                    } catch (err) {
+                      // エラーはtokenErrorで表示される
+                    }
+                  }}
                   showAdvanced={showAdvanced}
                   onToggleAdvanced={() => setShowAdvanced(!showAdvanced)}
                   channel={channel}
@@ -116,7 +122,7 @@ export default function SlackPage() {
                   isDownloading={isDownloading}
                   progressStatus={progressStatus}
                   hasSearched={hasSearched}
-                  error={error?.message || null}
+                  error={error?.message || tokenError || null}
                   slackThreads={slackThreads}
                   userMaps={userMaps}
                   permalinkMaps={permalinkMaps}
