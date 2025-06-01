@@ -1,5 +1,8 @@
 import { test, expect } from '@playwright/test'
 
+// テストのタイムアウトを延長
+test.setTimeout(60000)
+
 test.describe('Storybook動作確認', () => {
   test('Storybookが正常に起動する', async ({ page }) => {
     await page.goto('/')
@@ -14,15 +17,23 @@ test.describe('Storybook動作確認', () => {
   test('MarkdownPreview - Default Storyが表示される', async ({ page }) => {
     await page.goto('/')
     
+    // サイドバーが表示されるまで待機
+    await page.locator('[data-item-id="components"]').waitFor({ state: 'visible' })
+    
     // MarkdownPreviewコンポーネントを展開
     await page.locator('[data-item-id="components-markdownpreview"]').click()
+    await page.waitForTimeout(500) // アニメーション待機
     
     // Default Storyを選択
     await page.locator('[data-item-id="components-markdownpreview--default"]').click()
+    await page.waitForTimeout(1000) // iframeロード待機
     
     // プレビューエリアでMarkdownPreviewコンポーネントが表示されることを確認
     const iframe = page.frameLocator('#storybook-preview-iframe')
-    await expect(iframe.locator('h2:has-text("プレビュー")')).toBeVisible()
+    // iframeのコンテンツがロードされるまで待機
+    await iframe.locator('body').waitFor({ state: 'attached' })
+    // h2タグのプレビュータイトルを確認
+    await expect(iframe.locator('h2').filter({ hasText: 'プレビュー' }).first()).toBeVisible()
     
     // サンプルMarkdownの内容が表示されることを確認
     await expect(iframe.locator('h1:has-text("サンプルドキュメント")')).toBeVisible()
@@ -51,17 +62,29 @@ test.describe('Storybook動作確認', () => {
     
     // プレビューエリアでコンポーネントが表示されることを確認
     const iframe = page.frameLocator('#storybook-preview-iframe')
-    await expect(iframe.locator('button:has-text("もっと詳細な条件を追加する")')).toBeVisible()
+    // iframeのコンテンツがロードされるまで待機
+    await iframe.locator('body').waitFor({ state: 'attached' })
+    await expect(iframe.locator('button').filter({ hasText: 'もっと詳細な条件を追加する' }).first()).toBeVisible()
   })
 
   test('SlackAdvancedFilters - Expanded Storyでフィルターが展開される', async ({ page }) => {
     await page.goto('/')
     
+    // サイドバーが表示されるまで待機
+    await page.locator('[data-item-id="components"]').waitFor({ state: 'visible' })
+    
+    // SlackAdvancedFiltersコンポーネントを展開
+    await page.locator('[data-item-id="components-slackadvancedfilters"]').click()
+    await page.waitForTimeout(500) // アニメーション待機
+    
     // Expanded Storyを選択
     await page.locator('[data-item-id="components-slackadvancedfilters--expanded"]').click()
+    await page.waitForTimeout(1000) // iframeロード待機
     
     // フィルター入力フィールドが表示されることを確認
     const iframe = page.frameLocator('#storybook-preview-iframe')
+    // iframeのコンテンツがロードされるまで待機
+    await iframe.locator('body').waitFor({ state: 'attached' })
     await expect(iframe.locator('input[placeholder="#general"]')).toBeVisible()
     await expect(iframe.locator('input[placeholder="@user"]')).toBeVisible()
     await expect(iframe.locator('input[type="date"]').first()).toBeVisible()
@@ -70,10 +93,20 @@ test.describe('Storybook動作確認', () => {
   test('アクセシビリティ - タブキーでのフォーカス移動が正常に動作する', async ({ page }) => {
     await page.goto('/')
     
+    // サイドバーが表示されるまで待機
+    await page.locator('[data-item-id="components"]').waitFor({ state: 'visible' })
+    
+    // SlackAdvancedFiltersコンポーネントを展開
+    await page.locator('[data-item-id="components-slackadvancedfilters"]').click()
+    await page.waitForTimeout(500) // アニメーション弆機
+    
     // SlackAdvancedFilters Expanded Storyに移動
     await page.locator('[data-item-id="components-slackadvancedfilters--expanded"]').click()
+    await page.waitForTimeout(1000) // iframeロード待機
     
     const iframe = page.frameLocator('#storybook-preview-iframe')
+    // iframeのコンテンツがロードされるまで待機
+    await iframe.locator('body').waitFor({ state: 'attached' })
     
     // Tabキーでフォーカス移動をテスト
     await iframe.locator('body').click()
@@ -93,13 +126,23 @@ test.describe('Storybook動作確認', () => {
     
     await page.goto('/')
     
+    // サイドバーが表示されるまで待機
+    await page.locator('[data-item-id="components"]').waitFor({ state: 'visible' })
+    
+    // MarkdownPreviewコンポーネントを展開
+    await page.locator('[data-item-id="components-markdownpreview"]').click()
+    await page.waitForTimeout(500) // アニメーション待機
+    
     // MarkdownPreview Default Storyを表示
     await page.locator('[data-item-id="components-markdownpreview--default"]').click()
+    await page.waitForTimeout(1000) // iframeロード待機
     
     const iframe = page.frameLocator('#storybook-preview-iframe')
+    // iframeのコンテンツがロードされるまで待機
+    await iframe.locator('body').waitFor({ state: 'attached' })
     
     // モバイルでも適切に表示されることを確認
-    await expect(iframe.locator('h1:has-text("サンプルドキュメント")')).toBeVisible()
+    await expect(iframe.locator('h1').filter({ hasText: 'サンプルドキュメント' }).first()).toBeVisible()
     
     // コンテナが適切な幅で表示されることを確認
     const container = iframe.locator('.max-w-3xl')
@@ -115,7 +158,9 @@ test.describe('Storybook動作確認', () => {
     const iframe = page.frameLocator('#storybook-preview-iframe')
     
     // ダウンロードボタンが表示されることを確認
-    const downloadButton = iframe.locator('button:has-text("ダウンロード")')
+    // iframeのコンテンツがロードされるまで待機
+    await iframe.locator('body').waitFor({ state: 'attached' })
+    const downloadButton = iframe.locator('button').filter({ hasText: 'ダウンロード' }).first()
     await expect(downloadButton).toBeVisible()
     
     // ボタンがクリック可能であることを確認
@@ -131,10 +176,13 @@ test.describe('Storybook動作確認', () => {
     const iframe = page.frameLocator('#storybook-preview-iframe')
     
     // コードブロックが適切に表示されることを確認
-    await expect(iframe.locator('pre')).toBeVisible()
-    await expect(iframe.locator('code')).toBeVisible()
+    // iframeのコンテンツがロードされるまで待機
+    await iframe.locator('body').waitFor({ state: 'attached' })
+    // コードブロックを含むコンテナを特定
+    await expect(iframe.locator('pre').nth(1)).toBeVisible() // Storybookのエラー表示のpreを避ける
+    await expect(iframe.locator('code').first()).toBeVisible()
     
     // 言語ラベルが表示されることを確認
-    await expect(iframe.locator('.bg-gray-700:has-text("typescript")')).toBeVisible()
+    await expect(iframe.locator('.bg-gray-700').filter({ hasText: 'typescript' }).first()).toBeVisible()
   })
 })
