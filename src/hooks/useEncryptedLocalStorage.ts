@@ -1,36 +1,36 @@
 /**
  * 暗号化LocalStorageフック
- * APIトークンなどの機密情報を暗号化してlocalStorageに保存
  * 
- * 仕様:
- * - Web Crypto APIを使用した暗号化
- * - セッション管理機能
- * - 自動的な暗号化・復号化
- * - 既存の平文トークンからの自動マイグレーション
+ * ブラウザのLocalStorageにデータを暗号化して安全に保存するためのカスタムフック。
+ * Web Crypto APIを使用してブラウザネイティブの暗号化を行い、
+ * セッション管理機能により一定時間後の自動削除にも対応。
+ * 
+ * 主な機能:
+ * - AES-GCM暗号化によるデータ保護
+ * - セッション管理（期限切れ自動削除）
+ * - 暗号化非対応ブラウザでのフォールバック
+ * - 既存平文データの自動マイグレーション
  */
 
-import { useCallback, useEffect, useState } from 'react';
-import { encrypt, decrypt, generateUserPassword, isCryptoSupported } from '@/utils/crypto';
-import { sessionManager, getTokenWithSession, saveTokenWithSession } from '@/utils/sessionManager';
+import { useState, useEffect, useCallback } from 'react';
+import { encrypt, decrypt, generateUserPassword, isCryptoSupported } from '../utils/crypto';
+import { saveTokenWithSession, getTokenWithSession, sessionManager } from '../utils/sessionManager';
 
-// 暗号化プレフィックス（暗号化されたデータを識別するため）
 const ENCRYPTED_PREFIX = 'encrypted_v1:';
-
-// セッションキーのサフィックス
 const SESSION_SUFFIX = '_session';
 
-export interface UseEncryptedLocalStorageOptions {
-  sessionDuration?: number; // セッションの有効期間（ミリ秒）
-  onSessionExpire?: () => void; // セッション期限切れ時のコールバック
-  fallbackToPlainText?: boolean; // 暗号化がサポートされていない場合に平文で保存するか
+interface UseEncryptedLocalStorageOptions {
+  sessionDuration?: number;
+  onSessionExpire?: () => void;
+  fallbackToPlainText?: boolean;
 }
 
 /**
  * 暗号化LocalStorageフック
- * @param key localStorageのキー
- * @param initialValue 初期値
- * @param options オプション設定
- * @returns [value, setValue, remove, error]
+ * @param key - LocalStorageのキー
+ * @param initialValue - 初期値
+ * @param options - オプション設定
+ * @returns [値, 値の設定関数, 値の削除関数, エラー]
  */
 export function useEncryptedLocalStorage<T>(
   key: string,
@@ -48,6 +48,42 @@ export function useEncryptedLocalStorage<T>(
 
   // 暗号化パスワードを生成（ブラウザフィンガープリントベース）
   const password = generateUserPassword(key);
+
+  // セッション期限切れコールバックの設定
+  useEffect(() => {
+    if (onSessionExpire) {
+      sessionManager.onSessionExpire(onSessionExpire);
+    }
+  }, [onSessionExpire]);
+
+  // 暗号化して値を保存
+  const saveEncryptedValue = useCallback(async (value: T) => {
+    try {
+      const jsonValue = JSON.stringify(value);
+
+      if (isCryptoSupported()) {
+        // 暗号化して保存
+        const encryptResult = await encrypt(jsonValue, password);
+        if (encryptResult.isErr()) {
+          throw new Error(encryptResult.error.message);
+        }
+
+        const encryptedData = ENCRYPTED_PREFIX + encryptResult.value;
+        saveTokenWithSession(key, encryptedData, sessionDuration);
+      } else if (fallbackToPlainText) {
+        // 暗号化がサポートされていない場合、平文で保存
+        saveTokenWithSession(key, jsonValue, sessionDuration);
+      } else {
+        throw new Error('暗号化がサポートされていません');
+      }
+
+      setError(null);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : '保存に失敗しました';
+      setError(errorMessage);
+      throw new Error(errorMessage);
+    }
+  }, [key, password, sessionDuration, fallbackToPlainText]);
 
   // 初期化時にLocalStorageから値を読み込む
   useEffect(() => {
@@ -111,43 +147,7 @@ export function useEncryptedLocalStorage<T>(
     };
 
     loadValue();
-  }, [key]);
-
-  // セッション期限切れコールバックの設定
-  useEffect(() => {
-    if (onSessionExpire) {
-      sessionManager.onSessionExpire(onSessionExpire);
-    }
-  }, [onSessionExpire]);
-
-  // 暗号化して値を保存
-  const saveEncryptedValue = async (value: T) => {
-    try {
-      const jsonValue = JSON.stringify(value);
-
-      if (isCryptoSupported()) {
-        // 暗号化して保存
-        const encryptResult = await encrypt(jsonValue, password);
-        if (encryptResult.isErr()) {
-          throw new Error(encryptResult.error.message);
-        }
-
-        const encryptedData = ENCRYPTED_PREFIX + encryptResult.value;
-        saveTokenWithSession(key, encryptedData, sessionDuration);
-      } else if (fallbackToPlainText) {
-        // 暗号化がサポートされていない場合、平文で保存
-        saveTokenWithSession(key, jsonValue, sessionDuration);
-      } else {
-        throw new Error('暗号化がサポートされていません');
-      }
-
-      setError(null);
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : '保存に失敗しました';
-      setError(errorMessage);
-      throw new Error(errorMessage);
-    }
-  };
+  }, [key, fallbackToPlainText, password, saveEncryptedValue]);
 
   // 値を設定
   const setValue = useCallback(async (value: T) => {
@@ -158,7 +158,7 @@ export function useEncryptedLocalStorage<T>(
       // エラーは既にsetErrorで設定されている
       console.error('Failed to save encrypted value:', err);
     }
-  }, [key, password, sessionDuration]);
+  }, [saveEncryptedValue]);
 
   // 値を削除
   const removeValue = useCallback(() => {
@@ -217,14 +217,10 @@ export function useEncryptedApiToken(
       try {
         const valid = await validateToken(token);
         setIsValid(valid);
-        if (!valid) {
-          setValidationError('無効なトークンです');
-        } else {
-          setValidationError(null);
-        }
+        setValidationError(valid ? null : '無効なトークンです');
       } catch (err) {
         setIsValid(false);
-        setValidationError(err instanceof Error ? err.message : 'トークンの検証に失敗しました');
+        setValidationError(err instanceof Error ? err.message : '検証エラー');
       } finally {
         setIsLoading(false);
       }
@@ -233,30 +229,34 @@ export function useEncryptedApiToken(
     validate();
   }, [token, validateToken]);
 
-  // トークンを設定（検証付き）
-  const setToken = useCallback(async (newToken: string) => {
-    if (validateToken) {
-      setIsLoading(true);
-      try {
+  // トークンの設定（検証付き）
+  const setToken = async (newToken: string) => {
+    setIsLoading(true);
+    setValidationError(null);
+
+    try {
+      // 検証が必要な場合
+      if (validateToken) {
         const valid = await validateToken(newToken);
         if (!valid) {
+          setValidationError('無効なトークンです');
+          setIsValid(false);
+          setIsLoading(false);
           throw new Error('無効なトークンです');
         }
-        await setTokenInternal(newToken);
-        setIsValid(true);
-        setValidationError(null);
-      } catch (err) {
-        setValidationError(err instanceof Error ? err.message : 'トークンの設定に失敗しました');
-        throw err;
-      } finally {
-        setIsLoading(false);
       }
-    } else {
-      await setTokenInternal(newToken);
-    }
-  }, [setTokenInternal, validateToken]);
 
-  const error = storageError || validationError;
+      await setTokenInternal(newToken);
+      setIsValid(true);
+    } catch (err) {
+      if (err instanceof Error && err.message !== '無効なトークンです') {
+        setValidationError(err.message);
+      }
+      throw err;
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return {
     token,
@@ -264,6 +264,6 @@ export function useEncryptedApiToken(
     removeToken,
     isValid,
     isLoading,
-    error
+    error: storageError || validationError
   };
 }

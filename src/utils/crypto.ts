@@ -10,7 +10,7 @@
  * - 認証タグ: 128ビット
  */
 
-import { err, ok, Result } from 'neverthrow';
+import { err, ok, type Result } from 'neverthrow';
 
 export type CryptoError =
   | { type: 'unsupported'; message: string }
@@ -242,14 +242,21 @@ export async function decrypt(
  * ブラウザのフィンガープリントとユーザー提供のソルトを組み合わせる
  */
 export function generateUserPassword(userSalt?: string): string {
+  // サーバーサイドレンダリング時のチェック
+  if (typeof window === 'undefined') {
+    // SSR時は固定のパスワードを返す
+    return btoa(`ssr-fallback-${userSalt || 'default-salt'}`);
+  }
+
   // ブラウザフィンガープリント要素を収集
   const fingerprint = [
     navigator.userAgent,
     navigator.language,
     new Date().getTimezoneOffset().toString(),
-    screen.width.toString(),
-    screen.height.toString(),
-    screen.colorDepth.toString(),
+    // screenオブジェクトが存在する場合のみ使用
+    typeof screen !== 'undefined' ? screen.width.toString() : 'unknown',
+    typeof screen !== 'undefined' ? screen.height.toString() : 'unknown',
+    typeof screen !== 'undefined' ? screen.colorDepth.toString() : 'unknown',
     // オプションのユーザーソルト
     userSalt || 'default-salt'
   ].join('|');

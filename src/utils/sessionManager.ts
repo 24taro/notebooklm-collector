@@ -9,7 +9,7 @@
  * - 自動ログアウト機能
  */
 
-import { err, ok, Result } from 'neverthrow';
+import { err, ok, type Result } from 'neverthrow';
 
 export type SessionError =
   | { type: 'expired'; message: string }
@@ -178,7 +178,9 @@ class SessionManager {
   private checkSession(sessionKey: string): void {
     if (!this.isSessionValid(sessionKey)) {
       // セッションが期限切れの場合、コールバックを実行
-      this.onExpireCallbacks.forEach(callback => callback());
+      for (const callback of this.onExpireCallbacks) {
+        callback();
+      }
       
       // セッションを終了
       this.endSession(sessionKey);
@@ -193,12 +195,14 @@ class SessionManager {
     const keysToRemove: string[] = [];
     for (let i = 0; i < localStorage.length; i++) {
       const key = localStorage.key(i);
-      if (key && key.startsWith('session_')) {
+      if (key?.startsWith('session_')) {
         keysToRemove.push(key);
       }
     }
     
-    keysToRemove.forEach(key => localStorage.removeItem(key));
+    for (const key of keysToRemove) {
+      localStorage.removeItem(key);
+    }
     
     // チェックインターバルをクリア
     if (this.checkInterval) {

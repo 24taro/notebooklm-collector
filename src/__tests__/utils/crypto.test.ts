@@ -40,7 +40,7 @@ if (typeof TextEncoder === 'undefined') {
       }
       return arr;
     }
-  } as any;
+  } as typeof TextEncoder;
 }
 
 if (typeof TextDecoder === 'undefined') {
@@ -48,7 +48,7 @@ if (typeof TextDecoder === 'undefined') {
     decode(arr: Uint8Array): string {
       return Buffer.from(arr).toString('utf8');
     }
-  } as any;
+  } as typeof TextDecoder;
 }
 
 describe('crypto utilities', () => {

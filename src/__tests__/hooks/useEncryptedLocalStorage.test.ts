@@ -34,7 +34,7 @@ describe('useEncryptedLocalStorage', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
-    (crypto.isCryptoSupported as any).mockReturnValue(true);
+    vi.mocked(crypto.isCryptoSupported).mockReturnValue(true);
   });
 
   describe('基本機能', () => {
@@ -50,7 +50,7 @@ describe('useEncryptedLocalStorage', () => {
 
     it('暗号化して値を保存する', async () => {
       const encryptedData = 'encrypted_data';
-      (crypto.encrypt as any).mockResolvedValue(ok(encryptedData));
+      vi.mocked(crypto.encrypt).mockResolvedValue(ok(encryptedData));
 
       const { result } = renderHook(() => 
         useEncryptedLocalStorage('testKey', 'initial')
@@ -77,8 +77,8 @@ describe('useEncryptedLocalStorage', () => {
       const encryptedData = 'encrypted_v1:encrypted_data';
       localStorage.setItem('testKey', encryptedData);
       
-      (crypto.decrypt as any).mockResolvedValue(ok('"decrypted value"'));
-      (sessionManager.getTokenWithSession as any).mockReturnValue(ok('decrypted value'));
+      vi.mocked(crypto.decrypt).mockResolvedValue(ok('"decrypted value"'));
+      vi.mocked(sessionManager.getTokenWithSession).mockReturnValue(ok('decrypted value'));
 
       const { result } = renderHook(() => 
         useEncryptedLocalStorage('testKey', 'initial')
@@ -107,7 +107,7 @@ describe('useEncryptedLocalStorage', () => {
 
   describe('エラーハンドリング', () => {
     it('暗号化がサポートされていない場合はエラーを設定する', async () => {
-      (crypto.isCryptoSupported as any).mockReturnValue(false);
+      vi.mocked(crypto.isCryptoSupported).mockReturnValue(false);
 
       const { result } = renderHook(() => 
         useEncryptedLocalStorage('testKey', 'initial')
@@ -119,7 +119,7 @@ describe('useEncryptedLocalStorage', () => {
     });
 
     it('暗号化に失敗した場合はエラーを設定する', async () => {
-      (crypto.encrypt as any).mockResolvedValue(err({ 
+      vi.mocked(crypto.encrypt).mockResolvedValue(err({ 
         type: 'encryptionFailed' as const, 
         message: '暗号化に失敗しました' 
       }));
@@ -143,7 +143,7 @@ describe('useEncryptedLocalStorage', () => {
       const encryptedData = 'encrypted_v1:invalid_data';
       localStorage.setItem('testKey', encryptedData);
       
-      (crypto.decrypt as any).mockResolvedValue(err({ 
+      vi.mocked(crypto.decrypt).mockResolvedValue(err({ 
         type: 'decryptionFailed' as const, 
         message: '復号化に失敗しました' 
       }));
@@ -164,7 +164,7 @@ describe('useEncryptedLocalStorage', () => {
       const plainData = JSON.stringify('plain text value');
       localStorage.setItem('testKey', plainData);
       
-      (crypto.encrypt as any).mockResolvedValue(ok('encrypted_data'));
+      vi.mocked(crypto.encrypt).mockResolvedValue(ok('encrypted_data'));
 
       const { result } = renderHook(() => 
         useEncryptedLocalStorage('testKey', 'initial')
@@ -180,7 +180,7 @@ describe('useEncryptedLocalStorage', () => {
     });
 
     it('fallbackToPlainTextが有効な場合は平文で保存する', async () => {
-      (crypto.isCryptoSupported as any).mockReturnValue(false);
+      vi.mocked(crypto.isCryptoSupported).mockReturnValue(false);
 
       const { result } = renderHook(() => 
         useEncryptedLocalStorage('testKey', 'initial', { fallbackToPlainText: true })
@@ -201,7 +201,7 @@ describe('useEncryptedLocalStorage', () => {
   describe('セッション管理', () => {
     it('カスタムセッション期間を設定できる', async () => {
       const sessionDuration = 3600000; // 1時間
-      (crypto.encrypt as any).mockResolvedValue(ok('encrypted_data'));
+      vi.mocked(crypto.encrypt).mockResolvedValue(ok('encrypted_data'));
 
       const { result } = renderHook(() => 
         useEncryptedLocalStorage('testKey', 'initial', { sessionDuration })
@@ -234,12 +234,12 @@ describe('useEncryptedApiToken', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     localStorage.clear();
-    (crypto.isCryptoSupported as any).mockReturnValue(true);
+    vi.mocked(crypto.isCryptoSupported).mockReturnValue(true);
   });
 
   it('トークンの検証機能が動作する', async () => {
     const validateToken = vi.fn().mockResolvedValue(true);
-    (crypto.encrypt as any).mockResolvedValue(ok('encrypted_token'));
+    vi.mocked(crypto.encrypt).mockResolvedValue(ok('encrypted_token'));
 
     const { result } = renderHook(() => 
       useEncryptedApiToken('apiToken', validateToken)
@@ -284,7 +284,7 @@ describe('useEncryptedApiToken', () => {
     const validateToken = vi.fn().mockImplementation(() => 
       new Promise(resolve => setTimeout(() => resolve(true), 100))
     );
-    (crypto.encrypt as any).mockResolvedValue(ok('encrypted_token'));
+    vi.mocked(crypto.encrypt).mockResolvedValue(ok('encrypted_token'));
 
     const { result } = renderHook(() => 
       useEncryptedApiToken('apiToken', validateToken)
