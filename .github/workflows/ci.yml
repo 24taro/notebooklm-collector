@@ -35,11 +35,52 @@ jobs:
       - name: Run unit tests
         run: npm test
 
+      - name: Get Playwright version
+        id: playwright-version
+        run: |
+          PLAYWRIGHT_VERSION=$(npm ls @playwright/test | grep @playwright/test | sed 's/.*@//' | head -1)
+          echo "version=$PLAYWRIGHT_VERSION" >> $GITHUB_OUTPUT
+
+      - name: Cache Playwright browsers
+        uses: actions/cache@v4
+        id: playwright-cache
+        with:
+          path: |
+            ~/.cache/ms-playwright
+            ~/Library/Caches/ms-playwright
+            %USERPROFILE%\AppData\Local\ms-playwright
+          key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.version }}-${{ hashFiles('**/package-lock.json') }}
+          restore-keys: |
+            ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.version }}-
+            ${{ runner.os }}-playwright-
+
       - name: Install Playwright browsers
         run: npx playwright install --with-deps chromium
 
+      - name: Cache Storybook build
+        uses: actions/cache@v4
+        with:
+          path: |
+            .storybook/cache
+            node_modules/.cache/storybook
+          key: ${{ runner.os }}-storybook-${{ hashFiles('**/package-lock.json', '**/*.stories.tsx') }}
+          restore-keys: |
+            ${{ runner.os }}-storybook-
+
       - name: Run Storybook tests
         run: npm run test:e2e
+        env:
+          CI: true
+          DEBUG: pw:api
+        timeout-minutes: 10
+
+      - name: Upload Playwright report
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: playwright-report-${{ matrix.node-version }}
+          path: playwright-report/
+          retention-days: 7
 
       - name: Run build
         run: npm run build

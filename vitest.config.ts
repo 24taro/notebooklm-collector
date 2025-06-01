@@ -14,6 +14,15 @@ export default defineConfig({
     // テストセットアップファイル
     setupFiles: './src/__tests__/setup.ts',
     
+    // パフォーマンス最適化: スレッドプールの設定
+    pool: 'threads',
+    poolOptions: {
+      threads: {
+        minThreads: 2,
+        maxThreads: 4
+      }
+    },
+    
     // テスト対象から除外
     exclude: [
       '**/node_modules/**',

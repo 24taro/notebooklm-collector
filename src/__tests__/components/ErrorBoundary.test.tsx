@@ -5,7 +5,8 @@
  */
 
 import type React from 'react'
-import { render, screen } from '@testing-library/react'
+import { screen } from '@testing-library/react'
+import { render } from '../test-utils'
 import { describe, test, expect, beforeEach, afterAll, vi } from 'vitest'
 import { ErrorBoundary } from '../../components/ErrorBoundary'
 
@@ -46,8 +47,8 @@ describe('ErrorBoundary', () => {
     consoleGroupSpy.mockRestore()
   })
 
-  test('正常な子コンポーネントをレンダリングする', () => {
-    render(
+  test('正常な子コンポーネントをレンダリングする', async () => {
+    await render(
       <ErrorBoundary>
         <ThrowError shouldThrow={false} />
       </ErrorBoundary>
@@ -56,8 +57,8 @@ describe('ErrorBoundary', () => {
     expect(screen.getByText('No error')).toBeInTheDocument()
   })
 
-  test('エラーが発生した場合にErrorFallbackを表示する', () => {
-    render(
+  test('エラーが発生した場合にErrorFallbackを表示する', async () => {
+    await render(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} />
       </ErrorBoundary>
@@ -67,12 +68,12 @@ describe('ErrorBoundary', () => {
     expect(screen.getByText('予期しないエラーが発生しました。以下の方法で解決を試してください。')).toBeInTheDocument()
   })
 
-  test('カスタムフォールバックコンポーネントを使用する', () => {
+  test('カスタムフォールバックコンポーネントを使用する', async () => {
     const CustomFallback: React.FC<{ error: Error | null; resetError: () => void }> = () => (
       <div>Custom error fallback</div>
     )
 
-    render(
+    await render(
       <ErrorBoundary fallback={CustomFallback}>
         <ThrowError shouldThrow={true} />
       </ErrorBoundary>
@@ -81,10 +82,10 @@ describe('ErrorBoundary', () => {
     expect(screen.getByText('Custom error fallback')).toBeInTheDocument()
   })
 
-  test('onErrorコールバックが呼ばれる', () => {
+  test('onErrorコールバックが呼ばれる', async () => {
     const onErrorMock = vi.fn()
 
-    render(
+    await render(
       <ErrorBoundary onError={onErrorMock}>
         <ThrowError shouldThrow={true} />
       </ErrorBoundary>
@@ -98,10 +99,10 @@ describe('ErrorBoundary', () => {
     )
   })
 
-  test('エラーログがLocalStorageに保存される', () => {
+  test('エラーログがLocalStorageに保存される', async () => {
     localStorageMock.getItem.mockReturnValue(null)
 
-    render(
+    await render(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} />
       </ErrorBoundary>
@@ -113,11 +114,11 @@ describe('ErrorBoundary', () => {
     )
   })
 
-  test('開発環境でコンソールにエラー情報が出力される', () => {
+  test('開発環境でコンソールにエラー情報が出力される', async () => {
     const originalEnv = process.env.NODE_ENV
     process.env.NODE_ENV = 'development'
 
-    render(
+    await render(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} />
       </ErrorBoundary>
