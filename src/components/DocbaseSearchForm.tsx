@@ -3,6 +3,7 @@
 import React, { useState, type FormEvent, useEffect, useRef } from 'react'
 import { useDownload } from '../hooks/useDownload'
 import useLocalStorage from '../hooks/useLocalStorage'
+import { useEncryptedApiToken } from '../hooks/useEncryptedLocalStorage'
 import { useSearch } from '../hooks/useSearch'
 import type { ApiError } from '../types/error'
 import { generateMarkdown } from '../utils/markdownGenerator'
@@ -19,7 +20,7 @@ const LOCAL_STORAGE_TOKEN_KEY = 'docbaseToken'
 const SearchForm = () => {
   const [keyword, setKeyword] = useState('')
   const [domain, setDomain] = useLocalStorage<string>(LOCAL_STORAGE_DOMAIN_KEY, '')
-  const [token, setToken] = useLocalStorage<string>(LOCAL_STORAGE_TOKEN_KEY, '')
+  const { token, setToken, error: tokenError } = useEncryptedApiToken(LOCAL_STORAGE_TOKEN_KEY)
   const [markdownContent, setMarkdownContent] = useState('')
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false)
   const [tags, setTags] = useState('')
@@ -45,7 +46,7 @@ const SearchForm = () => {
       endDate,
       group,
     }
-    await searchPosts(domain, token, keyword, advancedFilters)
+    await searchPosts(domain, token || '', keyword, advancedFilters)
   }
 
   useEffect(() => {
@@ -108,7 +109,18 @@ const SearchForm = () => {
             />
           </div>
           <DocbaseDomainInput domain={domain} onDomainChange={setDomain} disabled={isLoading || isDownloading} />
-          <DocbaseTokenInput token={token} onTokenChange={setToken} disabled={isLoading || isDownloading} />
+          <DocbaseTokenInput 
+            token={token || ''} 
+            onTokenChange={async (value) => {
+              try {
+                await setToken(value)
+              } catch (err) {
+                // エラーはtokenErrorで表示される
+              }
+            }} 
+            error={tokenError || undefined}
+            disabled={isLoading || isDownloading} 
+          />
         </div>
 
         {/* 詳細検索の開閉ボタンと入力フィールドを追加 */}
