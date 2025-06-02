@@ -2,7 +2,15 @@
   "$schema": "https://biomejs.dev/schemas/1.5.3/schema.json",
   "organizeImports": {
     "enabled": true,
-    "ignore": [".next/**", "node_modules/**", "public/**", ".github/**", "out/**", "coverage/**"]
+    "ignore": [
+      ".next/**",
+      "node_modules/**",
+      "public/**",
+      ".github/**",
+      "out/**",
+      "coverage/**",
+      ".claude/**"
+    ]
   },
   "linter": {
     "enabled": true,
@@ -16,7 +24,9 @@
       ".github/**",
       "out/**",
       "coverage/**",
+      ".claude/**",
       "next.config.ts",
+      "next.config.js",
       "postcss.config.mjs",
       "tailwind.config.ts",
       "tsconfig.json"
@@ -35,6 +45,7 @@
       ".github/**",
       "out/**",
       "coverage/**",
+      ".claude/**",
       "postcss.config.mjs",
       "tailwind.config.ts",
       "tsconfig.json"
