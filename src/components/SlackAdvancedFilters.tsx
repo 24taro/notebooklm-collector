@@ -32,7 +32,7 @@ export function SlackAdvancedFilters({
   onStartDateChange,
   endDate,
   onEndDateChange,
-  disabled = false
+  disabled = false,
 }: SlackAdvancedFiltersProps) {
   return (
     <div className="space-y-4 pt-2">

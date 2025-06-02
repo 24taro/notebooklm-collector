@@ -8,11 +8,11 @@
 
 'use client'
 
-import { SlackTokenInput } from '@/components/SlackTokenInput'
 import { SlackAdvancedFilters } from '@/components/SlackAdvancedFilters'
 import { SlackMarkdownPreview } from '@/components/SlackMarkdownPreview'
-import type { SlackThread } from '@/types/slack'
+import { SlackTokenInput } from '@/components/SlackTokenInput'
 import type { ProgressStatus } from '@/hooks/useSlackSearchUnified'
+import type { SlackThread } from '@/types/slack'
 
 type SlackSearchFormProps = {
   // 検索条件
@@ -20,7 +20,7 @@ type SlackSearchFormProps = {
   onSearchQueryChange: (query: string) => void
   token: string
   onTokenChange: (token: string) => void
-  
+
   // 詳細フィルター
   showAdvanced: boolean
   onToggleAdvanced: () => void
@@ -32,19 +32,19 @@ type SlackSearchFormProps = {
   onStartDateChange: (date: string) => void
   endDate: string
   onEndDateChange: (date: string) => void
-  
+
   // 状態
   isLoading: boolean
   isDownloading: boolean
   progressStatus: ProgressStatus
   hasSearched: boolean
   error: string | null
-  
+
   // 結果
   slackThreads: SlackThread[]
   userMaps: Record<string, string>
   permalinkMaps: Record<string, string>
-  
+
   // イベントハンドラー
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
   onDownload: (markdownContent: string, searchQuery: string, hasContent: boolean) => void
@@ -76,11 +76,11 @@ export function SlackSearchForm({
   permalinkMaps,
   onSubmit,
   onDownload,
-  onFullDownload
+  onFullDownload,
 }: SlackSearchFormProps) {
   const hasResults = slackThreads.length > 0
   const hasValidForm = !isLoading && !isDownloading && token && searchQuery
-  
+
   return (
     <div className="max-w-3xl mx-auto">
       <form onSubmit={onSubmit} className="space-y-6">
@@ -100,14 +100,10 @@ export function SlackSearchForm({
               required
             />
           </div>
-          
-          <SlackTokenInput
-            token={token}
-            onTokenChange={onTokenChange}
-            disabled={isLoading || isDownloading}
-          />
+
+          <SlackTokenInput token={token} onTokenChange={onTokenChange} disabled={isLoading || isDownloading} />
         </div>
-        
+
         <SlackAdvancedFilters
           showAdvanced={showAdvanced}
           onToggleAdvanced={onToggleAdvanced}
@@ -121,7 +117,7 @@ export function SlackSearchForm({
           onEndDateChange={onEndDateChange}
           disabled={isLoading || isDownloading}
         />
-        
+
         <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 pt-2">
           <button
             type="submit"
@@ -137,14 +133,7 @@ export function SlackSearchForm({
                   viewBox="0 0 24 24"
                 >
                   <title>検索処理ローディング</title>
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path
                     className="opacity-75"
                     fill="currentColor"
@@ -179,14 +168,7 @@ export function SlackSearchForm({
                   viewBox="0 0 24 24"
                 >
                   <title>ダウンロード処理ローディング</title>
-                  <circle
-                    className="opacity-25"
-                    cx="12"
-                    cy="12"
-                    r="10"
-                    stroke="currentColor"
-                    strokeWidth="4"
-                  />
+                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
                   <path
                     className="opacity-75"
                     fill="currentColor"
@@ -200,7 +182,7 @@ export function SlackSearchForm({
             )}
           </button>
         </div>
-        
+
         {/* エラー表示 */}
         {error && (
           <div className="mt-5 p-3.5 text-sm text-gray-800 bg-red-50 border border-red-300 rounded-sm shadow-sm">
@@ -225,14 +207,12 @@ export function SlackSearchForm({
             <p className="ml-7 mt-0.5 text-red-600">{error}</p>
           </div>
         )}
-        
+
         {/* プレビュー */}
         {hasResults && !isLoading && !error && (
           <div className="mt-6 pt-5 border-t border-gray-200">
             <div className="flex justify-between items-center mb-3">
-              <h3 className="text-lg font-semibold text-gray-800">
-                スレッド単位のプレビュー（親＋返信まとめて）
-              </h3>
+              <h3 className="text-lg font-semibold text-gray-800">スレッド単位のプレビュー（親＋返信まとめて）</h3>
               <p className="text-sm text-gray-500">取得スレッド数: {slackThreads.length}件</p>
             </div>
             <SlackMarkdownPreview
@@ -251,7 +231,7 @@ export function SlackSearchForm({
             </button>
           </div>
         )}
-        
+
         {/* スレッドが0件のときの案内 */}
         {slackThreads.length === 0 && !isLoading && !error && hasSearched && (
           <div className="mt-6 pt-5 border-t border-gray-200 text-gray-500 text-center">

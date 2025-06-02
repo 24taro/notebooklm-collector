@@ -1,4 +1,4 @@
-import { describe, expect, it, beforeEach, vi, afterEach, type Mock } from 'vitest'
+import { type Mock, afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import { downloadMarkdownFile } from '../../utils/fileDownloader'
 
 // DOM操作のモック
@@ -18,7 +18,7 @@ describe('fileDownloader', () => {
       download: '',
       click: mockClick,
     }
-    
+
     global.document = {
       createElement: vi.fn().mockReturnValue(mockAnchorElement),
       body: {
@@ -49,21 +49,13 @@ describe('fileDownloader', () => {
 
   describe('正常ケース', () => {
     it('Docbaseソースでファイルダウンロードが成功する', () => {
-      const result = downloadMarkdownFile(
-        '# テストMarkdown',
-        'test-keyword',
-        true,
-        'docbase'
-      )
+      const result = downloadMarkdownFile('# テストMarkdown', 'test-keyword', true, 'docbase')
 
       expect(result.success).toBe(true)
       expect(result.message).toBeUndefined()
 
       // Blob作成の確認
-      expect(global.Blob).toHaveBeenCalledWith(
-        ['# テストMarkdown'],
-        { type: 'text/markdown;charset=utf-8' }
-      )
+      expect(global.Blob).toHaveBeenCalledWith(['# テストMarkdown'], { type: 'text/markdown;charset=utf-8' })
 
       // URL作成・削除の確認
       expect(mockCreateObjectURL).toHaveBeenCalled()
@@ -77,12 +69,7 @@ describe('fileDownloader', () => {
     })
 
     it('Slackソースでファイルダウンロードが成功する', () => {
-      const result = downloadMarkdownFile(
-        '# Slack Threads',
-        'slack-search',
-        true,
-        'slack'
-      )
+      const result = downloadMarkdownFile('# Slack Threads', 'slack-search', true, 'slack')
 
       expect(result.success).toBe(true)
 
@@ -95,7 +82,7 @@ describe('fileDownloader', () => {
       const result = downloadMarkdownFile(
         '# Default Content',
         'default-keyword',
-        true
+        true,
         // sourceType省略
       )
 
@@ -155,7 +142,7 @@ describe('fileDownloader', () => {
         '# Test Content',
         'keyword',
         false, // postsExist = false
-        'docbase'
+        'docbase',
       )
 
       expect(result.success).toBe(false)
@@ -171,7 +158,7 @@ describe('fileDownloader', () => {
         '', // 空のコンテンツ
         'keyword',
         true,
-        'docbase'
+        'docbase',
       )
 
       expect(result.success).toBe(false)
@@ -186,7 +173,7 @@ describe('fileDownloader', () => {
         '   \n\t  ', // 空白のみのコンテンツ
         'keyword',
         true,
-        'docbase'
+        'docbase',
       )
 
       expect(result.success).toBe(false)
@@ -199,19 +186,11 @@ describe('fileDownloader', () => {
         throw new Error('Blob creation failed')
       }) as unknown as typeof Blob
 
-      const result = downloadMarkdownFile(
-        '# Test Content',
-        'keyword',
-        true,
-        'docbase'
-      )
+      const result = downloadMarkdownFile('# Test Content', 'keyword', true, 'docbase')
 
       expect(result.success).toBe(false)
       expect(result.message).toBe('ファイルのダウンロード中にエラーが発生しました。')
-      expect(console.error).toHaveBeenCalledWith(
-        'Markdown file download error:',
-        expect.any(Error)
-      )
+      expect(console.error).toHaveBeenCalledWith('Markdown file download error:', expect.any(Error))
     })
 
     it('DOM操作でエラーが発生した場合を処理する', () => {
@@ -220,12 +199,7 @@ describe('fileDownloader', () => {
         throw new Error('DOM manipulation failed')
       })
 
-      const result = downloadMarkdownFile(
-        '# Test Content',
-        'keyword',
-        true,
-        'docbase'
-      )
+      const result = downloadMarkdownFile('# Test Content', 'keyword', true, 'docbase')
 
       expect(result.success).toBe(false)
       expect(result.message).toBe('ファイルのダウンロード中にエラーが発生しました。')
@@ -278,10 +252,7 @@ describe('fileDownloader', () => {
     it('Blobが正しいMIMEタイプで作成される', () => {
       downloadMarkdownFile('# Test', 'keyword', true, 'docbase')
 
-      expect(global.Blob).toHaveBeenCalledWith(
-        ['# Test'],
-        { type: 'text/markdown;charset=utf-8' }
-      )
+      expect(global.Blob).toHaveBeenCalledWith(['# Test'], { type: 'text/markdown;charset=utf-8' })
     })
   })
 

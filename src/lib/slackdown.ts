@@ -55,7 +55,7 @@ export function convertToSlackThreadMarkdown(
   const parent = thread.parent
   const parentUser = getUserName(parent.user)
   const parentPermalink = getPermalink(parent.ts)
-  
+
   // 日付フォーマット（ISO形式）
   const parentDate = new Date(Number.parseFloat(parent.ts) * 1000)
   const parentISODate = parentDate.toISOString()
@@ -68,20 +68,21 @@ export function convertToSlackThreadMarkdown(
 
   // 参加者リスト作成
   const allMessages = [parent, ...thread.replies]
-  const participants = [...new Set(allMessages.map(msg => getUserName(msg.user)))]
-  
+  const participants = [...new Set(allMessages.map((msg) => getUserName(msg.user)))]
+
   // 時系列情報
   const firstMessageTime = parentDate
-  const lastMessageTime = thread.replies.length > 0 
-    ? new Date(Number.parseFloat(thread.replies[thread.replies.length - 1].ts) * 1000)
-    : parentDate
+  const lastMessageTime =
+    thread.replies.length > 0
+      ? new Date(Number.parseFloat(thread.replies[thread.replies.length - 1].ts) * 1000)
+      : parentDate
 
   // YAML Front Matter形式でメタデータを構造化
   let md = '---\n'
   md += `thread_id: "${parent.ts}"\n`
   md += `channel: "${thread.channel}"\n`
   md += `permalink: "${parentPermalink}"\n`
-  md += `participants: [${participants.map(p => `"${p}"`).join(', ')}]\n`
+  md += `participants: [${participants.map((p) => `"${p}"`).join(', ')}]\n`
   md += `reply_count: ${thread.replies.length}\n`
   md += `date: "${parentDisplayDate}"\n`
   md += `created_at: "${parentISODate}"\n`
@@ -89,7 +90,7 @@ export function convertToSlackThreadMarkdown(
 
   // LLM理解しやすい階層構造
   md += `# Slack Thread: ${parentDisplayDate}\n\n`
-  
+
   md += '## Thread Context\n'
   md += `- **Channel**: ${thread.channel}\n`
   md += `- **Started by**: ${parentUser}\n`
@@ -116,7 +117,7 @@ export function convertToSlackThreadMarkdown(
       const replyUser = getUserName(reply.user)
       const replyDate = new Date(Number.parseFloat(reply.ts) * 1000)
       const replyPermalink = getPermalink(reply.ts)
-      
+
       md += `### Message ${index + 2} (Reply)\n`
       md += `**Author**: ${replyUser}\n`
       md += `**Time**: ${replyDate.toLocaleString('ja-JP', { timeZone: 'Asia/Tokyo' })}\n`

@@ -1,7 +1,7 @@
 // Docbase APIアダプター実装
 // HTTPクライアントアダプターを使用してDocbase APIにアクセスし、Result型で結果を返す
 
-import { err, ok, type Result } from 'neverthrow'
+import { type Result, err, ok } from 'neverthrow'
 import type { DocbasePostListItem, DocbasePostsResponse } from '../types/docbase'
 import type { ApiError } from '../types/error'
 import type { HttpClient } from './types'
@@ -67,7 +67,7 @@ export function createDocbaseAdapter(httpClient: HttpClient): DocbaseAdapter {
         })
 
         const url = `${API_BASE_URL}/${domain}/posts?${searchParams.toString()}`
-        
+
         const result = await httpClient.fetch<DocbasePostsResponse>(url, {
           headers: {
             'X-DocBaseToken': token,
@@ -83,7 +83,7 @@ export function createDocbaseAdapter(httpClient: HttpClient): DocbaseAdapter {
         const data = result.value
         if (data.posts && data.posts.length > 0) {
           allPosts.push(...data.posts)
-          
+
           // 取得した件数がper_page未満なら最終ページ
           if (data.posts.length < POSTS_PER_PAGE) {
             break
@@ -104,10 +104,7 @@ export function createDocbaseAdapter(httpClient: HttpClient): DocbaseAdapter {
 /**
  * 検索クエリを構築する内部ヘルパー関数
  */
-function buildSearchQuery(
-  keyword: string,
-  advancedFilters?: DocbaseSearchParams['advancedFilters']
-): string {
+function buildSearchQuery(keyword: string, advancedFilters?: DocbaseSearchParams['advancedFilters']): string {
   // キーワードと詳細検索条件の両方が空の場合は空文字を返す
   if (
     !keyword.trim() &&

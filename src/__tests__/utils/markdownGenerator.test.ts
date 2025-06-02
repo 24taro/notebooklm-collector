@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import { generateMarkdown } from '../../utils/markdownGenerator'
 import type { DocbasePostListItem } from '../../types/docbase'
+import { generateMarkdown } from '../../utils/markdownGenerator'
 
 describe('markdownGenerator', () => {
   const mockPosts: DocbasePostListItem[] = [

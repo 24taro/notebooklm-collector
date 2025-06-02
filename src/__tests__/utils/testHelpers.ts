@@ -1,14 +1,14 @@
 // テスト用ユーティリティ関数群
 // 型安全なモックデータ生成とヘルパー関数を提供
 
-import { vi, type MockedFunction } from 'vitest'
-import { renderHook, type RenderHookResult } from '@testing-library/react'
+import { type RenderHookResult, renderHook } from '@testing-library/react'
 import { act } from '@testing-library/react'
 import type { ReactNode } from 'react'
-import type { ApiError } from '../../types/error'
-import type { SlackThread, SlackMessage, SlackUser } from '../../types/slack'
-import type { DocbasePostListItem } from '../../types/docbase'
+import { type MockedFunction, vi } from 'vitest'
 import type { HttpClient } from '../../adapters/types'
+import type { DocbasePostListItem } from '../../types/docbase'
+import type { ApiError } from '../../types/error'
+import type { SlackMessage, SlackThread, SlackUser } from '../../types/slack'
 
 /**
  * テスト用型定義
@@ -44,7 +44,7 @@ export function createMockHttpClient(): {
  */
 export function createMockLocalStorage(): MockedLocalStorage {
   const storage: Record<string, string> = {}
-  
+
   return {
     getItem: vi.fn((key: string) => storage[key] || null),
     setItem: vi.fn((key: string, value: string) => {
@@ -54,7 +54,9 @@ export function createMockLocalStorage(): MockedLocalStorage {
       delete storage[key]
     }),
     clear: vi.fn(() => {
-      Object.keys(storage).forEach(key => delete storage[key])
+      for (const key of Object.keys(storage)) {
+        delete storage[key]
+      }
     }),
   }
 }
@@ -70,7 +72,7 @@ export function createMockSlackMessage(overrides: Partial<SlackMessage> = {}): S
     channel: { id: 'C1234567890', name: 'general' },
     permalink: 'https://test.slack.com/archives/C1234567890/p1234567890123456',
   }
-  
+
   return { ...defaults, ...overrides }
 }
 
@@ -82,19 +84,19 @@ export function createMockSlackThread(overrides: Partial<SlackThread> = {}): Sla
     channel: 'C1234567890',
     parent: createMockSlackMessage({ ts: '1234567890.123456' }),
     replies: [
-      createMockSlackMessage({ 
-        ts: '1234567890.123457', 
+      createMockSlackMessage({
+        ts: '1234567890.123457',
         thread_ts: '1234567890.123456',
-        text: 'リプライメッセージ1' 
+        text: 'リプライメッセージ1',
       }),
-      createMockSlackMessage({ 
-        ts: '1234567890.123458', 
+      createMockSlackMessage({
+        ts: '1234567890.123458',
         thread_ts: '1234567890.123456',
-        text: 'リプライメッセージ2' 
+        text: 'リプライメッセージ2',
       }),
     ],
   }
-  
+
   return { ...defaults, ...overrides }
 }
 
@@ -107,7 +109,7 @@ export function createMockSlackUser(overrides: Partial<SlackUser> = {}): SlackUs
     name: 'testuser',
     real_name: 'テストユーザー',
   }
-  
+
   return { ...defaults, ...overrides }
 }
 
@@ -122,7 +124,7 @@ export function createMockDocbasePost(overrides: Partial<DocbasePostListItem> = 
     created_at: '2023-01-01T00:00:00Z',
     url: 'https://test.docbase.io/posts/12345',
   }
-  
+
   return { ...defaults, ...overrides }
 }
 
@@ -134,7 +136,7 @@ export function createMockApiError(overrides: Partial<ApiError> = {}): ApiError 
     type: 'network',
     message: 'テスト用エラーメッセージ',
   }
-  
+
   return { ...defaults, ...overrides }
 }
 
@@ -147,10 +149,10 @@ export function createMockResponse<T>(
     status?: number
     statusText?: string
     headers?: Record<string, string>
-  } = {}
+  } = {},
 ): Response {
   const { status = 200, statusText = 'OK', headers = {} } = options
-  
+
   return new Response(JSON.stringify(data), {
     status,
     statusText,
@@ -164,17 +166,14 @@ export function createMockResponse<T>(
 /**
  * エラーレスポンスモック作成ヘルパー
  */
-export function createMockErrorResponse(
-  status: number,
-  statusText: string = 'Error'
-): Response {
+export function createMockErrorResponse(status: number, statusText = 'Error'): Response {
   return new Response(null, { status, statusText })
 }
 
 /**
  * ネットワークエラーモック作成ヘルパー
  */
-export function createMockNetworkError(message: string = 'Network Error'): Error {
+export function createMockNetworkError(message = 'Network Error'): Error {
   return new Error(message)
 }
 
@@ -186,7 +185,7 @@ export function renderHookWithAct<T, P>(
   options?: {
     initialProps?: P
     wrapper?: ({ children }: { children: ReactNode }) => ReactNode
-  }
+  },
 ): RenderHookResult<T, P> {
   return renderHook(hook, options)
 }
@@ -204,7 +203,7 @@ export async function actAsync(fn: () => Promise<void>): Promise<void> {
  * 遅延実行ヘルパー
  */
 export function delay(ms: number): Promise<void> {
-  return new Promise(resolve => setTimeout(resolve, ms))
+  return new Promise((resolve) => setTimeout(resolve, ms))
 }
 
 /**
@@ -213,15 +212,13 @@ export function delay(ms: number): Promise<void> {
 export async function waitForCalls(
   mockFn: MockedFunction<(...args: unknown[]) => unknown>,
   expectedCallCount: number,
-  timeout: number = 5000
+  timeout = 5000,
 ): Promise<void> {
   const startTime = Date.now()
-  
+
   while (mockFn.mock.calls.length < expectedCallCount) {
     if (Date.now() - startTime > timeout) {
-      throw new Error(
-        `Timeout: Expected ${expectedCallCount} calls, but got ${mockFn.mock.calls.length}`
-      )
+      throw new Error(`Timeout: Expected ${expectedCallCount} calls, but got ${mockFn.mock.calls.length}`)
     }
     await delay(10)
   }
@@ -239,23 +236,23 @@ export function captureConsole(): {
   const originalLog = console.log
   const originalError = console.error
   const originalWarn = console.warn
-  
+
   const logs: string[] = []
   const errors: string[] = []
   const warns: string[] = []
-  
+
   console.log = (...args: unknown[]) => {
-    logs.push(args.map(arg => String(arg)).join(' '))
+    logs.push(args.map((arg) => String(arg)).join(' '))
   }
-  
+
   console.error = (...args: unknown[]) => {
-    errors.push(args.map(arg => String(arg)).join(' '))
+    errors.push(args.map((arg) => String(arg)).join(' '))
   }
-  
+
   console.warn = (...args: unknown[]) => {
-    warns.push(args.map(arg => String(arg)).join(' '))
+    warns.push(args.map((arg) => String(arg)).join(' '))
   }
-  
+
   return {
     log: logs,
     error: errors,

@@ -1,12 +1,12 @@
 /**
  * ErrorBoundaryコンポーネントのテスト
- * 
+ *
  * Error Boundaryの動作確認とエラーハンドリング機能のテスト
  */
 
-import type React from 'react'
 import { render, screen } from '@testing-library/react'
-import { describe, test, expect, beforeEach, afterAll, vi } from 'vitest'
+import type React from 'react'
+import { afterAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import { ErrorBoundary } from '../../components/ErrorBoundary'
 
 // LocalStorageのモック
@@ -50,7 +50,7 @@ describe('ErrorBoundary', () => {
     render(
       <ErrorBoundary>
         <ThrowError shouldThrow={false} />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     )
 
     expect(screen.getByText('No error')).toBeInTheDocument()
@@ -60,7 +60,7 @@ describe('ErrorBoundary', () => {
     render(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     )
 
     expect(screen.getByText('申し訳ございません')).toBeInTheDocument()
@@ -75,7 +75,7 @@ describe('ErrorBoundary', () => {
     render(
       <ErrorBoundary fallback={CustomFallback}>
         <ThrowError shouldThrow={true} />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     )
 
     expect(screen.getByText('Custom error fallback')).toBeInTheDocument()
@@ -87,14 +87,14 @@ describe('ErrorBoundary', () => {
     render(
       <ErrorBoundary onError={onErrorMock}>
         <ThrowError shouldThrow={true} />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     )
 
     expect(onErrorMock).toHaveBeenCalledWith(
       expect.any(Error),
       expect.objectContaining({
         componentStack: expect.any(String),
-      })
+      }),
     )
   })
 
@@ -104,13 +104,10 @@ describe('ErrorBoundary', () => {
     render(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     )
 
-    expect(localStorageMock.setItem).toHaveBeenCalledWith(
-      'notebooklm_error_logs',
-      expect.any(String)
-    )
+    expect(localStorageMock.setItem).toHaveBeenCalledWith('notebooklm_error_logs', expect.any(String))
   })
 
   test('開発環境でコンソールにエラー情報が出力される', () => {
@@ -120,7 +117,7 @@ describe('ErrorBoundary', () => {
     render(
       <ErrorBoundary>
         <ThrowError shouldThrow={true} />
-      </ErrorBoundary>
+      </ErrorBoundary>,
     )
 
     expect(consoleGroupSpy).toHaveBeenCalled()

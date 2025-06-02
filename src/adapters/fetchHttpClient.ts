@@ -1,7 +1,7 @@
 // fetchベースのHTTPクライアントアダプター実装
 // 実際のAPIリクエストを処理し、Result型でレスポンスを返す
 
-import { err, ok, type Result } from 'neverthrow'
+import { type Result, err, ok } from 'neverthrow'
 import type { ApiError } from '../types/error'
 import type { HttpClient, RetryConfig } from './types'
 
@@ -17,21 +17,18 @@ const DEFAULT_RETRY_CONFIG: RetryConfig = {
 /**
  * 指定ミリ秒待機するユーティリティ関数
  */
-const sleep = (ms: number): Promise<void> =>
-  new Promise((resolve) => setTimeout(resolve, ms))
+const sleep = (ms: number): Promise<void> => new Promise((resolve) => setTimeout(resolve, ms))
 
 /**
  * fetchベースのHTTPクライアントアダプターを作成
  * @param retryConfig リトライ設定（オプション）
  * @returns HttpClient インターフェースの実装
  */
-export function createFetchHttpClient(
-  retryConfig: RetryConfig = DEFAULT_RETRY_CONFIG
-): HttpClient {
+export function createFetchHttpClient(retryConfig: RetryConfig = DEFAULT_RETRY_CONFIG): HttpClient {
   return {
     async fetch<T>(url: string, options?: RequestInit): Promise<Result<T, ApiError>> {
       let lastError: ApiError | null = null
-      
+
       for (let attempt = 0; attempt <= retryConfig.maxRetries; attempt++) {
         try {
           // 指数バックオフによる待機（初回は待機なし）
@@ -45,23 +42,19 @@ export function createFetchHttpClient(
           // HTTPエラーレスポンスの処理
           if (!response.ok) {
             const apiError = mapHttpStatusToApiError(response.status, response.statusText)
-            
+
             // リトライ対象のエラーかチェック
-            if (
-              attempt < retryConfig.maxRetries &&
-              retryConfig.retryableErrors.includes(apiError.type)
-            ) {
+            if (attempt < retryConfig.maxRetries && retryConfig.retryableErrors.includes(apiError.type)) {
               lastError = apiError
               continue
             }
-            
+
             return err(apiError)
           }
 
           // 成功レスポンスの処理
           const data = (await response.json()) as T
           return ok(data)
-
         } catch (error) {
           const networkError: ApiError = {
             type: 'network',
@@ -70,10 +63,7 @@ export function createFetchHttpClient(
           }
 
           // ネットワークエラーのリトライ
-          if (
-            attempt < retryConfig.maxRetries &&
-            retryConfig.retryableErrors.includes('network')
-          ) {
+          if (attempt < retryConfig.maxRetries && retryConfig.retryableErrors.includes('network')) {
             lastError = networkError
             continue
           }
@@ -83,10 +73,12 @@ export function createFetchHttpClient(
       }
 
       // すべてのリトライが失敗した場合、最後のエラーを返す
-      return err(lastError || {
-        type: 'unknown',
-        message: 'Maximum retry attempts exceeded',
-      })
+      return err(
+        lastError || {
+          type: 'unknown',
+          message: 'Maximum retry attempts exceeded',
+        },
+      )
     },
   }
 }

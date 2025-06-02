@@ -38,7 +38,8 @@ export default function HomePage() {
           <div className="px-6 py-8 rounded-xl border border-gray-200 bg-gray-50">
             <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">🔒 セキュリティについて</h2>
             <p className="text-gray-600 text-center leading-relaxed">
-              入力されたAPIトークンや取得されたデータは、お使いのブラウザ内でのみ処理されます。<br />
+              入力されたAPIトークンや取得されたデータは、お使いのブラウザ内でのみ処理されます。
+              <br />
               外部サーバーへの送信や保存は一切行われませんので、安心してご利用いただけます。
             </p>
           </div>

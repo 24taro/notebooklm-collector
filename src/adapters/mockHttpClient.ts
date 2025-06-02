@@ -1,7 +1,7 @@
 // テスト用のモックHTTPクライアントアダプター実装
 // 実際のAPIリクエストを行わず、事前に設定されたレスポンスを返す
 
-import { err, ok, type Result } from 'neverthrow'
+import { type Result, err, ok } from 'neverthrow'
 import type { ApiError } from '../types/error'
 import type { HttpClient, MockResponse } from './types'
 
@@ -20,9 +20,7 @@ export function createMockHttpClient(responses: MockResponse[]): HttpClient {
       // URLとメソッドでマッチするレスポンスを検索
       const method = options?.method?.toUpperCase() || 'GET'
       const matchingResponse = responses.find(
-        (response) =>
-          response.url === url &&
-          (response.method?.toUpperCase() || 'GET') === method
+        (response) => response.url === url && (response.method?.toUpperCase() || 'GET') === method,
       )
 
       // マッチするレスポンスが見つからない場合
@@ -72,11 +70,7 @@ function mapStatusToApiError(status: number): ApiError {
 /**
  * テスト用のヘルパー関数: 成功レスポンスを簡単に作成
  */
-export function createSuccessResponse(
-  url: string,
-  data: unknown,
-  method = 'GET'
-): MockResponse {
+export function createSuccessResponse(url: string, data: unknown, method = 'GET'): MockResponse {
   return {
     url,
     method,
@@ -88,11 +82,7 @@ export function createSuccessResponse(
 /**
  * テスト用のヘルパー関数: エラーレスポンスを簡単に作成
  */
-export function createErrorResponse(
-  url: string,
-  error: ApiError,
-  method = 'GET'
-): MockResponse {
+export function createErrorResponse(url: string, error: ApiError, method = 'GET'): MockResponse {
   return {
     url,
     method,

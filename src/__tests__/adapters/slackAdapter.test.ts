@@ -1,7 +1,7 @@
+import { err, ok } from 'neverthrow'
 import { describe, expect, it, vi } from 'vitest'
-import { ok, err } from 'neverthrow'
-import { createSlackAdapter, type SlackAdapter } from '../../adapters/slackAdapter'
 import { createMockHttpClient } from '../../adapters/mockHttpClient'
+import { type SlackAdapter, createSlackAdapter } from '../../adapters/slackAdapter'
 import type { ApiError } from '../../types/error'
 import type { SlackMessage, SlackThread, SlackUser } from '../../types/slack'
 
@@ -48,7 +48,7 @@ describe('SlackAdapter', () => {
           method: 'POST',
           status: 200,
           data: mockResponse,
-        }
+        },
       ])
 
       // アダプターの作成とテスト実行
@@ -86,7 +86,7 @@ describe('SlackAdapter', () => {
           method: 'POST',
           status: 200,
           data: mockResponse,
-        }
+        },
       ])
 
       const adapter = createSlackAdapter(mockHttpClient)
@@ -142,7 +142,7 @@ describe('SlackAdapter', () => {
           method: 'POST',
           status: 200,
           data: mockResponse,
-        }
+        },
       ])
 
       const adapter = createSlackAdapter(mockHttpClient)
@@ -185,7 +185,7 @@ describe('SlackAdapter', () => {
           method: 'POST',
           status: 200,
           data: mockResponse,
-        }
+        },
       ])
 
       const adapter = createSlackAdapter(mockHttpClient)
@@ -216,7 +216,7 @@ describe('SlackAdapter', () => {
           method: 'POST',
           status: 200,
           data: mockResponse,
-        }
+        },
       ])
 
       const adapter = createSlackAdapter(mockHttpClient)
@@ -244,7 +244,7 @@ describe('SlackAdapter', () => {
           method: 'POST',
           status: 200,
           data: mockResponse,
-        }
+        },
       ])
 
       const adapter = createSlackAdapter(mockHttpClient)
@@ -276,7 +276,7 @@ describe('SlackAdapter', () => {
           method: 'GET',
           status: 200,
           data: mockResponse,
-        }
+        },
       ])
 
       const adapter = createSlackAdapter(mockHttpClient)
@@ -304,7 +304,7 @@ describe('SlackAdapter', () => {
           method: 'GET',
           status: 200,
           data: mockResponse,
-        }
+        },
       ])
 
       const adapter = createSlackAdapter(mockHttpClient)
@@ -344,7 +344,7 @@ describe('SlackAdapter', () => {
           method: 'POST',
           status: 200,
           data: mockResponse,
-        }
+        },
       ])
 
       const adapter = createSlackAdapter(mockHttpClient)
@@ -371,7 +371,7 @@ describe('SlackAdapter', () => {
           method: 'POST',
           status: 200,
           data: mockResponse,
-        }
+        },
       ])
 
       const adapter = createSlackAdapter(mockHttpClient)
@@ -402,7 +402,7 @@ describe('SlackAdapter', () => {
           method: 'POST',
           status: 200,
           data: mockResponse,
-        }
+        },
       ])
 
       const adapter = createSlackAdapter(mockHttpClient)
@@ -442,7 +442,7 @@ describe('SlackAdapter', () => {
             method: 'POST',
             status: 200,
             data: mockResponse,
-          }
+          },
         ])
 
         const adapter = createSlackAdapter(mockHttpClient)
@@ -472,7 +472,7 @@ describe('SlackAdapter', () => {
           method: 'POST',
           status: 500,
           error: networkError,
-        }
+        },
       ])
 
       const adapter = createSlackAdapter(mockHttpClient)

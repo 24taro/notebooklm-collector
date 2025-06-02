@@ -1,16 +1,16 @@
 import { describe, expect, it, vi } from 'vitest'
-import { generateSlackThreadsMarkdown } from '../../utils/slackMarkdownGenerator'
 import type { SlackThread } from '../../types/slack'
+import { generateSlackThreadsMarkdown } from '../../utils/slackMarkdownGenerator'
 
 // slackdownモジュールのモック
 vi.mock('../../lib/slackdown', () => ({
   convertToSlackThreadMarkdown: vi.fn((thread, userMap, permalinkMap) => {
     const parentUser = userMap[thread.parent.user] || thread.parent.user
     const parentDate = new Date(Number.parseFloat(thread.parent.ts) * 1000).toLocaleString('ja-JP')
-    
+
     let markdown = `#### 👤 ${parentUser} - ${parentDate}\n`
     markdown += `> ${thread.parent.text}\n\n`
-    
+
     if (thread.replies && thread.replies.length > 0) {
       thread.replies.forEach((reply: SlackMessage, index: number) => {
         const replyUser = userMap[reply.user] || reply.user
@@ -19,9 +19,9 @@ vi.mock('../../lib/slackdown', () => ({
         markdown += `${reply.text}\n\n`
       })
     }
-    
+
     return markdown
-  })
+  }),
 }))
 
 describe('slackMarkdownGenerator', () => {
@@ -72,9 +72,9 @@ describe('slackMarkdownGenerator', () => {
   ]
 
   const mockUserMap: Record<string, string> = {
-    'U123456': '田中太郎',
-    'U789012': '佐藤花子',
-    'U345678': '山田次郎',
+    U123456: '田中太郎',
+    U789012: '佐藤花子',
+    U345678: '山田次郎',
   }
 
   const mockPermalinkMap: Record<string, string> = {
@@ -97,12 +97,7 @@ describe('slackMarkdownGenerator', () => {
     })
 
     it('スレッドリストから正しいMarkdownを生成する', () => {
-      const result = generateSlackThreadsMarkdown(
-        mockThreads,
-        mockUserMap,
-        mockPermalinkMap,
-        'テストキーワード'
-      )
+      const result = generateSlackThreadsMarkdown(mockThreads, mockUserMap, mockPermalinkMap, 'テストキーワード')
 
       // YAML Front Matterの確認
       expect(result).toContain('---')
@@ -138,11 +133,7 @@ describe('slackMarkdownGenerator', () => {
     })
 
     it('検索キーワードなしでもMarkdownを生成する', () => {
-      const result = generateSlackThreadsMarkdown(
-        mockThreads,
-        mockUserMap,
-        mockPermalinkMap
-      )
+      const result = generateSlackThreadsMarkdown(mockThreads, mockUserMap, mockPermalinkMap)
 
       // 検索キーワードが含まれないことを確認
       expect(result).not.toContain('search_keyword:')
@@ -161,22 +152,14 @@ describe('slackMarkdownGenerator', () => {
         { ...mockThreads[1], channel: 'C789012' },
       ]
 
-      const result = generateSlackThreadsMarkdown(
-        multiChannelThreads,
-        mockUserMap,
-        mockPermalinkMap
-      )
+      const result = generateSlackThreadsMarkdown(multiChannelThreads, mockUserMap, mockPermalinkMap)
 
       expect(result).toContain('channels: ["C123456", "C789012"]')
       expect(result).toContain('- **Channels**: C123456, C789012')
     })
 
     it('参加者が10人以下の場合は全員リストアップする', () => {
-      const result = generateSlackThreadsMarkdown(
-        mockThreads,
-        mockUserMap,
-        mockPermalinkMap
-      )
+      const result = generateSlackThreadsMarkdown(mockThreads, mockUserMap, mockPermalinkMap)
 
       expect(result).toContain('participants: ["田中太郎", "佐藤花子", "山田次郎"]')
       expect(result).not.toContain('total_participants:')
@@ -211,11 +194,7 @@ describe('slackMarkdownGenerator', () => {
 
       threadsWithManyUsers.push(thread)
 
-      const result = generateSlackThreadsMarkdown(
-        threadsWithManyUsers,
-        largeUserMap,
-        mockPermalinkMap
-      )
+      const result = generateSlackThreadsMarkdown(threadsWithManyUsers, largeUserMap, mockPermalinkMap)
 
       expect(result).toContain('total_participants: 15')
       // 最初の10人のみがリストアップされることを確認
@@ -227,11 +206,7 @@ describe('slackMarkdownGenerator', () => {
     })
 
     it('日付範囲を正しく計算する', () => {
-      const result = generateSlackThreadsMarkdown(
-        mockThreads,
-        mockUserMap,
-        mockPermalinkMap
-      )
+      const result = generateSlackThreadsMarkdown(mockThreads, mockUserMap, mockPermalinkMap)
 
       expect(result).toContain('date_range: "2023-01-01 - 2023-01-02"')
       expect(result).toMatch(/- \*\*Date Range\*\*: 2023\/1\/1 - 2023\/1\/2/)
@@ -240,11 +215,7 @@ describe('slackMarkdownGenerator', () => {
     it('同じ日付のスレッドのみの場合、日付範囲が単一日付になる', () => {
       const sameDayThreads = [mockThreads[0]] // 2023-01-01のスレッドのみ
 
-      const result = generateSlackThreadsMarkdown(
-        sameDayThreads,
-        mockUserMap,
-        mockPermalinkMap
-      )
+      const result = generateSlackThreadsMarkdown(sameDayThreads, mockUserMap, mockPermalinkMap)
 
       expect(result).toContain('date_range: "2023-01-01 - 2023-01-01"')
       expect(result).toMatch(/- \*\*Date Range\*\*: 2023\/1\/1/)
@@ -253,11 +224,7 @@ describe('slackMarkdownGenerator', () => {
 
   describe('目次生成', () => {
     it('スレッド目次が正しく生成される', () => {
-      const result = generateSlackThreadsMarkdown(
-        mockThreads,
-        mockUserMap,
-        mockPermalinkMap
-      )
+      const result = generateSlackThreadsMarkdown(mockThreads, mockUserMap, mockPermalinkMap)
 
       expect(result).toContain('## Threads Index')
       expect(result).toContain('1. [Thread 1](#thread-1) - 田中太郎 in C123456 (2023/1/1)')
@@ -278,13 +245,11 @@ describe('slackMarkdownGenerator', () => {
         replies: [],
       }
 
-      const result = generateSlackThreadsMarkdown(
-        [longTextThread],
-        mockUserMap,
-        mockPermalinkMap
-      )
+      const result = generateSlackThreadsMarkdown([longTextThread], mockUserMap, mockPermalinkMap)
 
-      expect(result).toContain('"これは非常に長いテキストメッセージです。50文字を超える場合は省略されるはずです。確認用の追加テキス..."')
+      expect(result).toContain(
+        '"これは非常に長いテキストメッセージです。50文字を超える場合は省略されるはずです。確認用の追加テキス..."',
+      )
     })
 
     it('50文字以下のテキストは省略されない', () => {
@@ -299,11 +264,7 @@ describe('slackMarkdownGenerator', () => {
         replies: [],
       }
 
-      const result = generateSlackThreadsMarkdown(
-        [shortTextThread],
-        mockUserMap,
-        mockPermalinkMap
-      )
+      const result = generateSlackThreadsMarkdown([shortTextThread], mockUserMap, mockPermalinkMap)
 
       expect(result).toContain('"短いメッセージ"')
       expect(result).not.toContain('...')
@@ -312,11 +273,7 @@ describe('slackMarkdownGenerator', () => {
 
   describe('スレッド内容生成', () => {
     it('スレッド内容が正しく生成される', () => {
-      const result = generateSlackThreadsMarkdown(
-        mockThreads,
-        mockUserMap,
-        mockPermalinkMap
-      )
+      const result = generateSlackThreadsMarkdown(mockThreads, mockUserMap, mockPermalinkMap)
 
       // 両方のスレッドの内容が含まれることを確認
       expect(result).toContain('田中太郎 - 2023/1/1')
@@ -326,11 +283,7 @@ describe('slackMarkdownGenerator', () => {
     })
 
     it('各スレッドに適切なヘッダーとIDが付けられる', () => {
-      const result = generateSlackThreadsMarkdown(
-        mockThreads,
-        mockUserMap,
-        mockPermalinkMap
-      )
+      const result = generateSlackThreadsMarkdown(mockThreads, mockUserMap, mockPermalinkMap)
 
       expect(result).toContain('### Thread 1 {#thread-1}')
       expect(result).toContain('### Thread 2 {#thread-2}')
@@ -340,26 +293,18 @@ describe('slackMarkdownGenerator', () => {
   describe('ユーザーマップ処理', () => {
     it('ユーザーマップにないユーザーIDをそのまま使用する', () => {
       const incompleteUserMap = {
-        'U123456': '田中太郎',
+        U123456: '田中太郎',
         // U789012とU345678は含まない
       }
 
-      const result = generateSlackThreadsMarkdown(
-        mockThreads,
-        incompleteUserMap,
-        mockPermalinkMap
-      )
+      const result = generateSlackThreadsMarkdown(mockThreads, incompleteUserMap, mockPermalinkMap)
 
       // 参加者リストにユーザーIDが含まれることを確認
       expect(result).toContain('participants: ["田中太郎", "U789012", "U345678"]')
     })
 
     it('空のユーザーマップでも処理できる', () => {
-      const result = generateSlackThreadsMarkdown(
-        mockThreads,
-        {},
-        mockPermalinkMap
-      )
+      const result = generateSlackThreadsMarkdown(mockThreads, {}, mockPermalinkMap)
 
       expect(result).toContain('participants: ["U123456", "U789012", "U345678"]')
       expect(result).toBeTruthy()
@@ -368,12 +313,7 @@ describe('slackMarkdownGenerator', () => {
 
   describe('YAML Front Matter', () => {
     it('すべての必要なメタデータが含まれる', () => {
-      const result = generateSlackThreadsMarkdown(
-        mockThreads,
-        mockUserMap,
-        mockPermalinkMap,
-        'AI開発'
-      )
+      const result = generateSlackThreadsMarkdown(mockThreads, mockUserMap, mockPermalinkMap, 'AI開発')
 
       // YAML形式の確認
       expect(result).toMatch(/^---\n/)
@@ -402,11 +342,7 @@ describe('slackMarkdownGenerator', () => {
         replies: [],
       }
 
-      const result = generateSlackThreadsMarkdown(
-        [threadWithoutReplies],
-        mockUserMap,
-        mockPermalinkMap
-      )
+      const result = generateSlackThreadsMarkdown([threadWithoutReplies], mockUserMap, mockPermalinkMap)
 
       expect(result).toContain('total_threads: 1')
       expect(result).toContain('total_messages: 1')
@@ -414,11 +350,7 @@ describe('slackMarkdownGenerator', () => {
     })
 
     it('単一スレッドでも正しく処理する', () => {
-      const result = generateSlackThreadsMarkdown(
-        [mockThreads[0]],
-        mockUserMap,
-        mockPermalinkMap
-      )
+      const result = generateSlackThreadsMarkdown([mockThreads[0]], mockUserMap, mockPermalinkMap)
 
       expect(result).toContain('total_threads: 1')
       expect(result).toContain('total_messages: 3') // 親1 + 返信2

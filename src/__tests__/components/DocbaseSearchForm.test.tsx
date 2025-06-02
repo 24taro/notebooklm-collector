@@ -1,11 +1,11 @@
 // DocbaseSearchForm コンポーネントの包括的テスト
 // フォーム操作、検索、ダウンロード機能のテストカバレッジ
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
-import { render, screen, fireEvent, waitFor } from '@testing-library/react'
+import { fireEvent, render, screen, waitFor } from '@testing-library/react'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import DocbaseSearchForm from '../../components/DocbaseSearchForm'
-import { createMockDocbasePost } from '../utils/testHelpers'
 import type { DocbasePostListItem } from '../../types/docbase'
+import { createMockDocbasePost } from '../utils/testHelpers'
 
 // フックのモック
 const mockSearchPosts = vi.fn()
@@ -49,14 +49,15 @@ vi.mock('../../hooks/useLocalStorage', () => ({
       docbaseDomain: vi.fn(),
       docbaseToken: vi.fn(),
     }
-    
+
     return [mockValues[key] || defaultValue, mockSetters[key] || vi.fn()]
   },
 }))
 
 vi.mock('../../utils/markdownGenerator', () => ({
-  generateMarkdown: vi.fn((posts: DocbasePostListItem[], keyword: string) => 
-    `# 検索結果: ${keyword}\n\n${posts.map(post => `## ${post.title}\n${post.body}`).join('\n\n')}`
+  generateMarkdown: vi.fn(
+    (posts: DocbasePostListItem[], keyword: string) =>
+      `# 検索結果: ${keyword}\n\n${posts.map((post) => `## ${post.title}\n${post.body}`).join('\n\n')}`,
   ),
 }))
 
@@ -178,19 +179,14 @@ describe('DocbaseSearchForm', () => {
       fireEvent.click(submitButton)
 
       await waitFor(() => {
-        expect(mockSearchPosts).toHaveBeenCalledWith(
-          'test-domain',
-          'test-token',
-          'テストキーワード',
-          {
-            tags: '',
-            author: '',
-            titleFilter: '',
-            startDate: '',
-            endDate: '',
-            group: '',
-          }
-        )
+        expect(mockSearchPosts).toHaveBeenCalledWith('test-domain', 'test-token', 'テストキーワード', {
+          tags: '',
+          author: '',
+          titleFilter: '',
+          startDate: '',
+          endDate: '',
+          group: '',
+        })
       })
     })
 
@@ -214,19 +210,14 @@ describe('DocbaseSearchForm', () => {
       fireEvent.click(submitButton)
 
       await waitFor(() => {
-        expect(mockSearchPosts).toHaveBeenCalledWith(
-          'test-domain',
-          'test-token',
-          '詳細検索テスト',
-          {
-            tags: 'API',
-            author: 'testuser',
-            titleFilter: '',
-            startDate: '',
-            endDate: '',
-            group: '',
-          }
-        )
+        expect(mockSearchPosts).toHaveBeenCalledWith('test-domain', 'test-token', '詳細検索テスト', {
+          tags: 'API',
+          author: 'testuser',
+          titleFilter: '',
+          startDate: '',
+          endDate: '',
+          group: '',
+        })
       })
     })
 
@@ -241,7 +232,7 @@ describe('DocbaseSearchForm', () => {
       render(<DocbaseSearchForm />)
 
       const submitButton = screen.getByText('検索実行')
-      
+
       // キーワードが空の場合
       expect(submitButton).toBeDisabled()
     })
@@ -263,15 +254,19 @@ describe('DocbaseSearchForm', () => {
     })
 
     it('検索結果が10件を超える場合は注意メッセージが表示される', () => {
-      const mockPosts = Array.from({ length: 15 }, (_, i) => 
-        createMockDocbasePost({ id: i + 1, title: `テスト記事${i + 1}` })
+      const mockPosts = Array.from({ length: 15 }, (_, i) =>
+        createMockDocbasePost({ id: i + 1, title: `テスト記事${i + 1}` }),
       )
 
       updateMockSearchState({ posts: mockPosts })
 
       render(<DocbaseSearchForm />)
 
-      expect(screen.getByText('プレビューには最初の10件のMarkdownが生成されます。すべての内容を確認するには、ファイルをダウンロードしてください。')).toBeInTheDocument()
+      expect(
+        screen.getByText(
+          'プレビューには最初の10件のMarkdownが生成されます。すべての内容を確認するには、ファイルをダウンロードしてください。',
+        ),
+      ).toBeInTheDocument()
       expect(screen.getByText('取得件数: 15件')).toBeInTheDocument()
     })
   })
@@ -343,7 +338,7 @@ describe('DocbaseSearchForm', () => {
       render(<DocbaseSearchForm />)
 
       expect(screen.getByText('検索中...')).toBeInTheDocument()
-      
+
       // フォーム要素が無効になる
       expect(screen.getByLabelText('検索キーワード')).toBeDisabled()
       expect(screen.getByRole('button', { name: /検索中/ })).toBeDisabled()
@@ -355,7 +350,7 @@ describe('DocbaseSearchForm', () => {
       render(<DocbaseSearchForm />)
 
       expect(screen.getByText('生成中...')).toBeInTheDocument()
-      
+
       // フォーム要素が無効になる
       expect(screen.getByLabelText('検索キーワード')).toBeDisabled()
     })
@@ -387,7 +382,7 @@ describe('DocbaseSearchForm', () => {
         expect.any(String), // markdown content
         '', // keyword (初期値)
         true, // postsExist
-        'docbase'
+        'docbase',
       )
     })
   })

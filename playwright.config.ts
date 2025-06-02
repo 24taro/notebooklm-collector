@@ -30,27 +30,29 @@ export default defineConfig({
   projects: [
     {
       name: 'chromium',
-      use: { 
+      use: {
         ...devices['Desktop Chrome'],
         launchOptions: {
           args: ['--no-sandbox', '--disable-setuid-sandbox', '--disable-dev-shm-usage'],
-          slowMo: process.env.CI ? 100 : 0 // CI環境では操作を少し遅くする
+          slowMo: process.env.CI ? 100 : 0, // CI環境では操作を少し遅くする
         },
         contextOptions: {
           // iframeのセキュリティ制限を緩和
           bypassCSP: true,
-        }
+        },
       },
     },
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: process.env.SKIP_WEBSERVER ? undefined : {
-    command: 'npm run storybook -- --no-open --quiet',
-    url: 'http://localhost:6006',
-    reuseExistingServer: !process.env.CI,
-    timeout: 180 * 1000,
-    stdout: 'pipe',
-    stderr: 'pipe',
-  },
+  webServer: process.env.SKIP_WEBSERVER
+    ? undefined
+    : {
+        command: 'npm run storybook -- --no-open --quiet',
+        url: 'http://localhost:6006',
+        reuseExistingServer: !process.env.CI,
+        timeout: 180 * 1000,
+        stdout: 'pipe',
+        stderr: 'pipe',
+      },
 })

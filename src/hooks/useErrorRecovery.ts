@@ -1,6 +1,6 @@
 /**
  * エラー復旧機能フック
- * 
+ *
  * Error Boundaryと連携してエラーからの復旧を支援する。
  * LocalStorageのクリア、コンポーネント状態リセット、
  * アプリケーション全体の再初期化などの機能を提供する。
@@ -9,7 +9,7 @@
 'use client'
 
 import { useCallback, useEffect, useState } from 'react'
-import { clearErrorLogs, cleanupOldErrorLogs, getErrorLogStats } from '../utils/errorStorage'
+import { cleanupOldErrorLogs, clearErrorLogs, getErrorLogStats } from '../utils/errorStorage'
 
 interface ErrorRecoveryOptions {
   /**
@@ -17,19 +17,19 @@ interface ErrorRecoveryOptions {
    * @default true
    */
   autoCleanup?: boolean
-  
+
   /**
    * エラー発生時に自動的にページリロードするかどうか
    * @default false
    */
   autoReload?: boolean
-  
+
   /**
    * 復旧試行回数の上限
    * @default 3
    */
   maxRetries?: number
-  
+
   /**
    * カスタム復旧処理
    */
@@ -53,32 +53,32 @@ interface UseErrorRecoveryResult extends ErrorRecoveryState {
    * 標準的な復旧処理を実行
    */
   recover: () => Promise<boolean>
-  
+
   /**
    * LocalStorageをクリアして復旧
    */
   recoverWithStorageReset: () => Promise<boolean>
-  
+
   /**
    * ページをリロードして復旧
    */
   recoverWithReload: () => void
-  
+
   /**
    * エラーログをクリアして復旧
    */
   recoverWithLogClear: () => Promise<boolean>
-  
+
   /**
    * カスタム復旧処理を実行
    */
   recoverWithCustom: () => Promise<boolean>
-  
+
   /**
    * 復旧回数をリセット
    */
   resetRetryCount: () => void
-  
+
   /**
    * エラー統計を更新
    */
@@ -93,19 +93,14 @@ const RECOVERY_COOLDOWN_MS = 5000 // 5秒
  * エラー復旧機能のカスタムフック
  */
 export function useErrorRecovery(options: ErrorRecoveryOptions = {}): UseErrorRecoveryResult {
-  const {
-    autoCleanup = true,
-    autoReload = false,
-    maxRetries = MAX_RETRY_COUNT,
-    customRecovery,
-  } = options
+  const { autoCleanup = true, autoReload = false, maxRetries = MAX_RETRY_COUNT, customRecovery } = options
 
   const [state, setState] = useState<ErrorRecoveryState>(() => {
     // 初期状態を復元
     try {
       const stored = localStorage.getItem(RECOVERY_STORAGE_KEY)
       const recoveryData = stored ? JSON.parse(stored) : {}
-      
+
       return {
         isRecovering: false,
         retryCount: recoveryData.retryCount || 0,
@@ -127,27 +122,30 @@ export function useErrorRecovery(options: ErrorRecoveryOptions = {}): UseErrorRe
   /**
    * 復旧状態をLocalStorageに保存
    */
-  const saveRecoveryState = useCallback((newState: Partial<ErrorRecoveryState>) => {
-    try {
-      const dataToSave = {
-        retryCount: newState.retryCount ?? state.retryCount,
-        lastRecoveryTime: newState.lastRecoveryTime ?? state.lastRecoveryTime,
+  const saveRecoveryState = useCallback(
+    (newState: Partial<ErrorRecoveryState>) => {
+      try {
+        const dataToSave = {
+          retryCount: newState.retryCount ?? state.retryCount,
+          lastRecoveryTime: newState.lastRecoveryTime ?? state.lastRecoveryTime,
+        }
+        localStorage.setItem(RECOVERY_STORAGE_KEY, JSON.stringify(dataToSave))
+      } catch (error) {
+        console.warn('Failed to save recovery state:', error)
       }
-      localStorage.setItem(RECOVERY_STORAGE_KEY, JSON.stringify(dataToSave))
-    } catch (error) {
-      console.warn('Failed to save recovery state:', error)
-    }
-  }, [state.retryCount, state.lastRecoveryTime])
+    },
+    [state.retryCount, state.lastRecoveryTime],
+  )
 
   /**
    * 復旧処理のクールダウンチェック
    */
   const isInCooldown = useCallback((): boolean => {
     if (!state.lastRecoveryTime) return false
-    
+
     const now = Date.now()
     const lastRecovery = state.lastRecoveryTime.getTime()
-    return (now - lastRecovery) < RECOVERY_COOLDOWN_MS
+    return now - lastRecovery < RECOVERY_COOLDOWN_MS
   }, [state.lastRecoveryTime])
 
   /**
@@ -175,23 +173,26 @@ export function useErrorRecovery(options: ErrorRecoveryOptions = {}): UseErrorRe
   /**
    * 復旧後の共通処理
    */
-  const afterRecover = useCallback((success: boolean) => {
-    const now = new Date()
-    const newRetryCount = success ? 0 : state.retryCount + 1
-    
-    const newState: Partial<ErrorRecoveryState> = {
-      isRecovering: false,
-      retryCount: newRetryCount,
-      lastRecoveryTime: now,
-      canRetry: newRetryCount < maxRetries,
-      errorStats: getErrorLogStats(),
-    }
-    
-    setState(prev => ({ ...prev, ...newState }))
-    saveRecoveryState(newState)
-    
-    return success
-  }, [state.retryCount, maxRetries, saveRecoveryState])
+  const afterRecover = useCallback(
+    (success: boolean) => {
+      const now = new Date()
+      const newRetryCount = success ? 0 : state.retryCount + 1
+
+      const newState: Partial<ErrorRecoveryState> = {
+        isRecovering: false,
+        retryCount: newRetryCount,
+        lastRecoveryTime: now,
+        canRetry: newRetryCount < maxRetries,
+        errorStats: getErrorLogStats(),
+      }
+
+      setState((prev) => ({ ...prev, ...newState }))
+      saveRecoveryState(newState)
+
+      return success
+    },
+    [state.retryCount, maxRetries, saveRecoveryState],
+  )
 
   /**
    * 標準的な復旧処理
@@ -199,7 +200,7 @@ export function useErrorRecovery(options: ErrorRecoveryOptions = {}): UseErrorRe
   const recover = useCallback(async (): Promise<boolean> => {
     if (!beforeRecover()) return false
 
-    setState(prev => ({ ...prev, isRecovering: true }))
+    setState((prev) => ({ ...prev, isRecovering: true }))
 
     try {
       if (autoCleanup) {
@@ -225,7 +226,7 @@ export function useErrorRecovery(options: ErrorRecoveryOptions = {}): UseErrorRe
   const recoverWithStorageReset = useCallback(async (): Promise<boolean> => {
     if (!beforeRecover()) return false
 
-    setState(prev => ({ ...prev, isRecovering: true }))
+    setState((prev) => ({ ...prev, isRecovering: true }))
 
     try {
       // LocalStorageの関連データをクリア
@@ -236,7 +237,7 @@ export function useErrorRecovery(options: ErrorRecoveryOptions = {}): UseErrorRe
         'notebooklm_error_logs',
         'notebooklm_error_metadata',
       ]
-      
+
       for (const key of keysToRemove) {
         try {
           localStorage.removeItem(key)
@@ -277,7 +278,7 @@ export function useErrorRecovery(options: ErrorRecoveryOptions = {}): UseErrorRe
         lastRecoveryTime: new Date(),
       }
       saveRecoveryState(newState)
-      
+
       // ページリロード
       window.location.reload()
     } catch (error) {
@@ -291,12 +292,12 @@ export function useErrorRecovery(options: ErrorRecoveryOptions = {}): UseErrorRe
   const recoverWithLogClear = useCallback(async (): Promise<boolean> => {
     if (!beforeRecover()) return false
 
-    setState(prev => ({ ...prev, isRecovering: true }))
+    setState((prev) => ({ ...prev, isRecovering: true }))
 
     try {
       // エラーログをクリア
       const cleared = clearErrorLogs()
-      
+
       if (!cleared) {
         throw new Error('Failed to clear error logs')
       }
@@ -324,7 +325,7 @@ export function useErrorRecovery(options: ErrorRecoveryOptions = {}): UseErrorRe
 
     if (!beforeRecover()) return false
 
-    setState(prev => ({ ...prev, isRecovering: true }))
+    setState((prev) => ({ ...prev, isRecovering: true }))
 
     try {
       await customRecovery()
@@ -343,7 +344,7 @@ export function useErrorRecovery(options: ErrorRecoveryOptions = {}): UseErrorRe
       retryCount: 0,
       canRetry: true,
     }
-    setState(prev => ({ ...prev, ...newState }))
+    setState((prev) => ({ ...prev, ...newState }))
     saveRecoveryState(newState)
   }, [saveRecoveryState])
 
@@ -351,7 +352,7 @@ export function useErrorRecovery(options: ErrorRecoveryOptions = {}): UseErrorRe
    * エラー統計を更新
    */
   const refreshErrorStats = useCallback(() => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       errorStats: getErrorLogStats(),
     }))

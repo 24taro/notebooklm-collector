@@ -1,5 +1,5 @@
-import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest'
-import { renderHook, act, waitFor } from '@testing-library/react'
+import { act, renderHook, waitFor } from '@testing-library/react'
+import { type Mock, beforeEach, describe, expect, it, vi } from 'vitest'
 import { useDownload } from '../../hooks/useDownload'
 import type { downloadMarkdownFile as downloadMarkdownFileType } from '../../utils/fileDownloader'
 
@@ -42,20 +42,10 @@ describe('useDownload', () => {
       const { result } = renderHook(() => useDownload())
 
       await act(async () => {
-        await result.current.handleDownload(
-          '# テストMarkdown',
-          'test-keyword',
-          true,
-          'docbase'
-        )
+        await result.current.handleDownload('# テストMarkdown', 'test-keyword', true, 'docbase')
       })
 
-      expect(downloadMarkdownFile).toHaveBeenCalledWith(
-        '# テストMarkdown',
-        'test-keyword',
-        true,
-        'docbase'
-      )
+      expect(downloadMarkdownFile).toHaveBeenCalledWith('# テストMarkdown', 'test-keyword', true, 'docbase')
       expect(result.current.isDownloading).toBe(false)
     })
 
@@ -69,20 +59,10 @@ describe('useDownload', () => {
       const { result } = renderHook(() => useDownload())
 
       await act(async () => {
-        await result.current.handleDownload(
-          '# Slack Markdown',
-          'slack-search',
-          true,
-          'slack'
-        )
+        await result.current.handleDownload('# Slack Markdown', 'slack-search', true, 'slack')
       })
 
-      expect(downloadMarkdownFile).toHaveBeenCalledWith(
-        '# Slack Markdown',
-        'slack-search',
-        true,
-        'slack'
-      )
+      expect(downloadMarkdownFile).toHaveBeenCalledWith('# Slack Markdown', 'slack-search', true, 'slack')
     })
 
     it('ソースタイプが指定されない場合はデフォルトでdocbaseを使用する', async () => {
@@ -95,19 +75,10 @@ describe('useDownload', () => {
       const { result } = renderHook(() => useDownload())
 
       await act(async () => {
-        await result.current.handleDownload(
-          '# デフォルトMarkdown',
-          'default-keyword',
-          true
-        )
+        await result.current.handleDownload('# デフォルトMarkdown', 'default-keyword', true)
       })
 
-      expect(downloadMarkdownFile).toHaveBeenCalledWith(
-        '# デフォルトMarkdown',
-        'default-keyword',
-        true,
-        'docbase'
-      )
+      expect(downloadMarkdownFile).toHaveBeenCalledWith('# デフォルトMarkdown', 'default-keyword', true, 'docbase')
     })
   })
 
@@ -122,20 +93,10 @@ describe('useDownload', () => {
       const { result } = renderHook(() => useDownload())
 
       await act(async () => {
-        await result.current.handleDownload(
-          '',
-          'empty-keyword',
-          false,
-          'docbase'
-        )
+        await result.current.handleDownload('', 'empty-keyword', false, 'docbase')
       })
 
-      expect(downloadMarkdownFile).toHaveBeenCalledWith(
-        '',
-        'empty-keyword',
-        false,
-        'docbase'
-      )
+      expect(downloadMarkdownFile).toHaveBeenCalledWith('', 'empty-keyword', false, 'docbase')
       expect(result.current.isDownloading).toBe(false)
     })
 
@@ -149,12 +110,7 @@ describe('useDownload', () => {
       const { result } = renderHook(() => useDownload())
 
       await act(async () => {
-        await result.current.handleDownload(
-          '   ',
-          'whitespace-keyword',
-          true,
-          'docbase'
-        )
+        await result.current.handleDownload('   ', 'whitespace-keyword', true, 'docbase')
       })
 
       expect(result.current.isDownloading).toBe(false)
@@ -170,12 +126,7 @@ describe('useDownload', () => {
       const { result } = renderHook(() => useDownload())
 
       await act(async () => {
-        await result.current.handleDownload(
-          '# テストコンテンツ',
-          'test-keyword',
-          true,
-          'docbase'
-        )
+        await result.current.handleDownload('# テストコンテンツ', 'test-keyword', true, 'docbase')
       })
 
       expect(result.current.isDownloading).toBe(false)
@@ -194,12 +145,7 @@ describe('useDownload', () => {
 
       // ダウンロードを開始
       const downloadPromise = act(async () => {
-        await result.current.handleDownload(
-          '# テストMarkdown',
-          'test-keyword',
-          true,
-          'docbase'
-        )
+        await result.current.handleDownload('# テストMarkdown', 'test-keyword', true, 'docbase')
       })
 
       // ダウンロード完了を待つ
@@ -219,12 +165,7 @@ describe('useDownload', () => {
       const { result } = renderHook(() => useDownload())
 
       await act(async () => {
-        await result.current.handleDownload(
-          '',
-          'no-posts',
-          false,
-          'docbase'
-        )
+        await result.current.handleDownload('', 'no-posts', false, 'docbase')
       })
 
       expect(result.current.isDownloading).toBe(false)
@@ -243,12 +184,7 @@ describe('useDownload', () => {
       const { result } = renderHook(() => useDownload())
 
       await act(async () => {
-        await result.current.handleDownload(
-          '# テストMarkdown',
-          'error-keyword',
-          true,
-          'docbase'
-        )
+        await result.current.handleDownload('# テストMarkdown', 'error-keyword', true, 'docbase')
       })
 
       expect(consoleSpy).toHaveBeenCalled()
@@ -271,12 +207,7 @@ describe('useDownload', () => {
       const startTime = Date.now()
 
       await act(async () => {
-        await result.current.handleDownload(
-          '# テストMarkdown',
-          'delay-test',
-          true,
-          'docbase'
-        )
+        await result.current.handleDownload('# テストMarkdown', 'delay-test', true, 'docbase')
       })
 
       const endTime = Date.now()

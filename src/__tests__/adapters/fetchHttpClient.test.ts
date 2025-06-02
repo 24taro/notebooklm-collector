@@ -1,15 +1,10 @@
 // fetchHttpClient の包括的テスト
 // 全機能のテストカバレッジとエラーケースを網羅
 
-import { describe, it, expect, vi, beforeEach } from 'vitest'
+import { beforeEach, describe, expect, it, vi } from 'vitest'
 import { createFetchHttpClient } from '../../adapters/fetchHttpClient'
 import type { RetryConfig } from '../../adapters/types'
-import {
-  createMockResponse,
-  createMockErrorResponse,
-  createMockNetworkError,
-  delay,
-} from '../utils/testHelpers'
+import { createMockErrorResponse, createMockNetworkError, createMockResponse, delay } from '../utils/testHelpers'
 
 // グローバル fetch のモック
 const mockFetch = vi.fn()
@@ -287,7 +282,7 @@ describe('fetchHttpClient', () => {
       const duration = endTime - startTime
 
       // 1回目のリトライ: 50ms待機
-      // 2回目のリトライ: 100ms待機  
+      // 2回目のリトライ: 100ms待機
       // 合計最低150ms待機するはず
       expect(duration).toBeGreaterThan(100) // バックオフによる遅延を確認
     })
@@ -402,9 +397,7 @@ describe('fetchHttpClient', () => {
       const networkError = createMockNetworkError('Network error')
       const timeoutError = createMockNetworkError('Timeout error')
 
-      mockFetch
-        .mockRejectedValueOnce(networkError)
-        .mockRejectedValueOnce(timeoutError)
+      mockFetch.mockRejectedValueOnce(networkError).mockRejectedValueOnce(timeoutError)
 
       const retryConfig: RetryConfig = {
         maxRetries: 1,

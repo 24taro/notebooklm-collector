@@ -23,7 +23,7 @@ export function SlackHeroSection() {
           </p>
         </div>
       </section>
-      
+
       {/* 使い方説明セクション */}
       <section className="w-full mt-12">
         <div className="max-w-screen-lg mx-auto px-6 sm:px-10 lg:px-24 py-16 rounded-xl border border-gray-200 bg-background-light">
@@ -64,7 +64,7 @@ export function SlackHeroSection() {
           </div>
         </div>
       </section>
-      
+
       {/* セキュリティ説明セクション */}
       <section className="w-full mt-12">
         <div className="max-w-screen-lg mx-auto px-6 sm:px-10 lg:px-24 py-16 rounded-xl border border-gray-200 bg-background-light">

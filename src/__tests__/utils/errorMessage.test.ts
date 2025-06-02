@@ -1,10 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import {
-  getUserFriendlyErrorMessage,
-  getErrorActionSuggestion,
-  getErrorSeverity,
-} from '../../utils/errorMessage'
 import type { ApiError } from '../../types/error'
+import { getErrorActionSuggestion, getErrorSeverity, getUserFriendlyErrorMessage } from '../../utils/errorMessage'
 
 describe('errorMessage', () => {
   describe('getUserFriendlyErrorMessage', () => {

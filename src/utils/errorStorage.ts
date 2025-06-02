@@ -1,6 +1,6 @@
 /**
  * エラー情報保存・管理ユーティリティ
- * 
+ *
  * Error Boundaryでキャッチされたエラー情報を
  * LocalStorageに保存し、デバッグやサポートに活用する。
  */
@@ -51,7 +51,7 @@ export function logError(
     userAgent: string
     timestamp: string
     userId?: string
-  }
+  },
 ): ErrorLog {
   try {
     const errorLog: ErrorLog = {
@@ -78,25 +78,25 @@ export function logError(
 
     // 既存のログを取得
     const existingLogs = getErrorLogs()
-    
+
     // 新しいログを先頭に追加
     const updatedLogs = [errorLog, ...existingLogs]
-    
+
     // 最大件数を超えた場合は古いログを削除
     const trimmedLogs = updatedLogs.slice(0, MAX_ERROR_LOGS)
-    
+
     // LocalStorageに保存
     localStorage.setItem(ERROR_STORAGE_KEY, JSON.stringify(trimmedLogs))
-    
+
     // メタデータを更新
     updateMetadata()
-    
+
     return errorLog
   } catch (storageError) {
     // LocalStorageの保存に失敗した場合はコンソールにログ出力
     console.error('Failed to save error log to localStorage:', storageError)
     console.error('Original error:', error)
-    
+
     // 最低限のログオブジェクトを返す
     return {
       id: generateErrorId(),
@@ -128,7 +128,7 @@ export function getErrorLogs(): ErrorLog[] {
   try {
     const stored = localStorage.getItem(ERROR_STORAGE_KEY)
     if (!stored) return []
-    
+
     const logs = JSON.parse(stored)
     return Array.isArray(logs) ? logs : []
   } catch (error) {
@@ -142,7 +142,7 @@ export function getErrorLogs(): ErrorLog[] {
  */
 export function getErrorLog(id: string): ErrorLog | null {
   const logs = getErrorLogs()
-  return logs.find(log => log.id === id) || null
+  return logs.find((log) => log.id === id) || null
 }
 
 /**
@@ -165,20 +165,20 @@ export function clearErrorLogs(): boolean {
 export function cleanupOldErrorLogs(): number {
   try {
     const logs = getErrorLogs()
-    const sevenDaysAgo = Date.now() - (7 * 24 * 60 * 60 * 1000)
-    
-    const recentLogs = logs.filter(log => {
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
+
+    const recentLogs = logs.filter((log) => {
       const logTime = new Date(log.timestamp).getTime()
       return logTime > sevenDaysAgo
     })
-    
+
     const removedCount = logs.length - recentLogs.length
-    
+
     if (removedCount > 0) {
       localStorage.setItem(ERROR_STORAGE_KEY, JSON.stringify(recentLogs))
       updateMetadata()
     }
-    
+
     return removedCount
   } catch (error) {
     console.error('Failed to cleanup error logs:', error)
@@ -199,15 +199,15 @@ export function getErrorLogStats(): {
   }
 } {
   const logs = getErrorLogs()
-  
+
   const errorTypes: Record<string, number> = {}
   let oldest: string | null = null
   let newest: string | null = null
-  
+
   for (const log of logs) {
     // エラータイプをカウント
     errorTypes[log.error.name] = (errorTypes[log.error.name] || 0) + 1
-    
+
     // 時間範囲を更新
     if (!oldest || log.timestamp < oldest) {
       oldest = log.timestamp
@@ -216,7 +216,7 @@ export function getErrorLogStats(): {
       newest = log.timestamp
     }
   }
-  
+
   return {
     totalLogs: logs.length,
     lastError: logs.length > 0 ? logs[0].timestamp : null,
@@ -233,7 +233,7 @@ export function getErrorLogStats(): {
  */
 export function exportErrorLogsAsCSV(): string {
   const logs = getErrorLogs()
-  
+
   const headers = [
     'ID',
     'Timestamp',
@@ -244,8 +244,8 @@ export function exportErrorLogsAsCSV(): string {
     'Viewport Width',
     'Viewport Height',
   ]
-  
-  const rows = logs.map(log => [
+
+  const rows = logs.map((log) => [
     log.id,
     log.timestamp,
     log.error.name,
@@ -255,12 +255,9 @@ export function exportErrorLogsAsCSV(): string {
     log.context.viewport.width.toString(),
     log.context.viewport.height.toString(),
   ])
-  
-  const csvContent = [
-    headers.join(','),
-    ...rows.map(row => row.map(cell => `"${cell}"`).join(',')),
-  ].join('\n')
-  
+
+  const csvContent = [headers.join(','), ...rows.map((row) => row.map((cell) => `"${cell}"`).join(','))].join('\n')
+
   return csvContent
 }
 
@@ -276,7 +273,7 @@ function generateErrorId(): string {
  */
 function getOrCreateUserId(): string {
   const USER_ID_KEY = 'notebooklm_user_id'
-  
+
   try {
     let userId = localStorage.getItem(USER_ID_KEY)
     if (!userId) {
@@ -300,7 +297,7 @@ function updateMetadata(): void {
       maxLogs: MAX_ERROR_LOGS,
       lastCleanup: new Date().toISOString(),
     }
-    
+
     localStorage.setItem(ERROR_METADATA_KEY, JSON.stringify(metadata))
   } catch (error) {
     console.error('Failed to update error storage metadata:', error)
@@ -312,10 +309,10 @@ function updateMetadata(): void {
  */
 export function debugErrorLogs(): void {
   if (process.env.NODE_ENV !== 'development') return
-  
+
   const logs = getErrorLogs()
   const stats = getErrorLogStats()
-  
+
   console.group('🐛 Error Logs Debug Info')
   console.log('Stats:', stats)
   console.log('All Logs:', logs)

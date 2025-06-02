@@ -1,8 +1,8 @@
 // SlackAdvancedFilters コンポーネントの包括的テスト
 // 表示切り替え、フォーム操作、プロパティ連携のテストカバレッジ
 
-import { describe, it, expect, vi } from 'vitest'
-import { render, screen, fireEvent } from '@testing-library/react'
+import { fireEvent, render, screen } from '@testing-library/react'
+import { describe, expect, it, vi } from 'vitest'
 import { SlackAdvancedFilters } from '../../components/SlackAdvancedFilters'
 
 describe('SlackAdvancedFilters', () => {
@@ -45,7 +45,7 @@ describe('SlackAdvancedFilters', () => {
   describe('トグル機能', () => {
     it('トグルボタンクリックでonToggleAdvancedが呼ばれる', () => {
       const onToggleAdvanced = vi.fn()
-      
+
       render(<SlackAdvancedFilters {...defaultProps} onToggleAdvanced={onToggleAdvanced} />)
 
       const toggleButton = screen.getByText('もっと詳細な条件を追加する ▼')
@@ -56,14 +56,8 @@ describe('SlackAdvancedFilters', () => {
 
     it('展開状態でトグルボタンクリックするとコールバックが呼ばれる', () => {
       const onToggleAdvanced = vi.fn()
-      
-      render(
-        <SlackAdvancedFilters 
-          {...defaultProps} 
-          showAdvanced={true}
-          onToggleAdvanced={onToggleAdvanced} 
-        />
-      )
+
+      render(<SlackAdvancedFilters {...defaultProps} showAdvanced={true} onToggleAdvanced={onToggleAdvanced} />)
 
       const toggleButton = screen.getByText('詳細な条件を閉じる ▲')
       fireEvent.click(toggleButton)
@@ -75,14 +69,8 @@ describe('SlackAdvancedFilters', () => {
   describe('フォーム入力', () => {
     it('チャンネル入力でonChannelChangeが呼ばれる', () => {
       const onChannelChange = vi.fn()
-      
-      render(
-        <SlackAdvancedFilters 
-          {...defaultProps} 
-          showAdvanced={true}
-          onChannelChange={onChannelChange} 
-        />
-      )
+
+      render(<SlackAdvancedFilters {...defaultProps} showAdvanced={true} onChannelChange={onChannelChange} />)
 
       const channelInput = screen.getByLabelText('チャンネル (例: #general)')
       fireEvent.change(channelInput, { target: { value: '#general' } })
@@ -92,14 +80,8 @@ describe('SlackAdvancedFilters', () => {
 
     it('投稿者入力でonAuthorChangeが呼ばれる', () => {
       const onAuthorChange = vi.fn()
-      
-      render(
-        <SlackAdvancedFilters 
-          {...defaultProps} 
-          showAdvanced={true}
-          onAuthorChange={onAuthorChange} 
-        />
-      )
+
+      render(<SlackAdvancedFilters {...defaultProps} showAdvanced={true} onAuthorChange={onAuthorChange} />)
 
       const authorInput = screen.getByLabelText('投稿者 (例: @user)')
       fireEvent.change(authorInput, { target: { value: '@testuser' } })
@@ -109,14 +91,8 @@ describe('SlackAdvancedFilters', () => {
 
     it('開始日入力でonStartDateChangeが呼ばれる', () => {
       const onStartDateChange = vi.fn()
-      
-      render(
-        <SlackAdvancedFilters 
-          {...defaultProps} 
-          showAdvanced={true}
-          onStartDateChange={onStartDateChange} 
-        />
-      )
+
+      render(<SlackAdvancedFilters {...defaultProps} showAdvanced={true} onStartDateChange={onStartDateChange} />)
 
       const startDateInput = screen.getByLabelText('投稿期間 (開始日)')
       fireEvent.change(startDateInput, { target: { value: '2023-01-01' } })
@@ -126,14 +102,8 @@ describe('SlackAdvancedFilters', () => {
 
     it('終了日入力でonEndDateChangeが呼ばれる', () => {
       const onEndDateChange = vi.fn()
-      
-      render(
-        <SlackAdvancedFilters 
-          {...defaultProps} 
-          showAdvanced={true}
-          onEndDateChange={onEndDateChange} 
-        />
-      )
+
+      render(<SlackAdvancedFilters {...defaultProps} showAdvanced={true} onEndDateChange={onEndDateChange} />)
 
       const endDateInput = screen.getByLabelText('投稿期間 (終了日)')
       fireEvent.change(endDateInput, { target: { value: '2023-12-31' } })
@@ -152,7 +122,7 @@ describe('SlackAdvancedFilters', () => {
         startDate: '2023-01-01',
         endDate: '2023-12-31',
       }
-      
+
       render(<SlackAdvancedFilters {...propsWithValues} />)
 
       expect(screen.getByDisplayValue('#test-channel')).toBeInTheDocument()
@@ -173,13 +143,7 @@ describe('SlackAdvancedFilters', () => {
 
   describe('無効化状態', () => {
     it('disabled=trueの場合、すべての入力フィールドが無効化される', () => {
-      render(
-        <SlackAdvancedFilters 
-          {...defaultProps} 
-          showAdvanced={true} 
-          disabled={true} 
-        />
-      )
+      render(<SlackAdvancedFilters {...defaultProps} showAdvanced={true} disabled={true} />)
 
       expect(screen.getByLabelText('チャンネル (例: #general)')).toBeDisabled()
       expect(screen.getByLabelText('投稿者 (例: @user)')).toBeDisabled()
@@ -188,13 +152,7 @@ describe('SlackAdvancedFilters', () => {
     })
 
     it('disabled=falseの場合、すべての入力フィールドが有効である', () => {
-      render(
-        <SlackAdvancedFilters 
-          {...defaultProps} 
-          showAdvanced={true} 
-          disabled={false} 
-        />
-      )
+      render(<SlackAdvancedFilters {...defaultProps} showAdvanced={true} disabled={false} />)
 
       expect(screen.getByLabelText('チャンネル (例: #general)')).not.toBeDisabled()
       expect(screen.getByLabelText('投稿者 (例: @user)')).not.toBeDisabled()
@@ -211,9 +169,7 @@ describe('SlackAdvancedFilters', () => {
 
   describe('レスポンシブデザイン', () => {
     it('日付フィールドがグリッドレイアウトで配置される', () => {
-      const { container } = render(
-        <SlackAdvancedFilters {...defaultProps} showAdvanced={true} />
-      )
+      const { container } = render(<SlackAdvancedFilters {...defaultProps} showAdvanced={true} />)
 
       const dateGrid = container.querySelector('.grid-cols-1.sm\\:grid-cols-2')
       expect(dateGrid).toBeInTheDocument()
@@ -297,21 +253,11 @@ describe('SlackAdvancedFilters', () => {
       render(<SlackAdvancedFilters {...defaultProps} showAdvanced={true} />)
 
       const channelInput = screen.getByLabelText('チャンネル (例: #general)')
-      expect(channelInput).toHaveClass(
-        'block',
-        'w-full',
-        'px-3',
-        'py-2',
-        'border',
-        'border-gray-400',
-        'rounded-md'
-      )
+      expect(channelInput).toHaveClass('block', 'w-full', 'px-3', 'py-2', 'border', 'border-gray-400', 'rounded-md')
     })
 
     it('展開されたフィルター領域に背景色が適用されている', () => {
-      const { container } = render(
-        <SlackAdvancedFilters {...defaultProps} showAdvanced={true} />
-      )
+      const { container } = render(<SlackAdvancedFilters {...defaultProps} showAdvanced={true} />)
 
       const filterContainer = container.querySelector('.bg-gray-50')
       expect(filterContainer).toBeInTheDocument()
@@ -326,14 +272,14 @@ describe('SlackAdvancedFilters', () => {
       const onEndDateChange = vi.fn()
 
       render(
-        <SlackAdvancedFilters 
-          {...defaultProps} 
+        <SlackAdvancedFilters
+          {...defaultProps}
           showAdvanced={true}
           onChannelChange={onChannelChange}
           onAuthorChange={onAuthorChange}
           onStartDateChange={onStartDateChange}
           onEndDateChange={onEndDateChange}
-        />
+        />,
       )
 
       const channelInput = screen.getByLabelText('チャンネル (例: #general)')
@@ -356,14 +302,14 @@ describe('SlackAdvancedFilters', () => {
   describe('エッジケース', () => {
     it('空文字を入力した場合もコールバックが呼ばれる', () => {
       const onChannelChange = vi.fn()
-      
+
       render(
-        <SlackAdvancedFilters 
-          {...defaultProps} 
+        <SlackAdvancedFilters
+          {...defaultProps}
           showAdvanced={true}
           channel="#test"
-          onChannelChange={onChannelChange} 
-        />
+          onChannelChange={onChannelChange}
+        />,
       )
 
       const channelInput = screen.getByLabelText('チャンネル (例: #general)')
@@ -374,14 +320,8 @@ describe('SlackAdvancedFilters', () => {
 
     it('特殊文字を含む入力でもコールバックが呼ばれる', () => {
       const onChannelChange = vi.fn()
-      
-      render(
-        <SlackAdvancedFilters 
-          {...defaultProps} 
-          showAdvanced={true}
-          onChannelChange={onChannelChange} 
-        />
-      )
+
+      render(<SlackAdvancedFilters {...defaultProps} showAdvanced={true} onChannelChange={onChannelChange} />)
 
       const channelInput = screen.getByLabelText('チャンネル (例: #general)')
       fireEvent.change(channelInput, { target: { value: '#test-123_channel' } })

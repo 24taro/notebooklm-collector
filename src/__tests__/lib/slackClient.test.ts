@@ -1,8 +1,8 @@
-import { describe, expect, it, vi, beforeEach, afterEach, type Mock } from 'vitest'
+import { type Mock, afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   fetchSlackMessages,
-  fetchSlackThreadMessages,
   fetchSlackPermalink,
+  fetchSlackThreadMessages,
   fetchSlackUserName,
 } from '../../lib/slackClient'
 import type { SlackMessage } from '../../types/slack'
@@ -65,7 +65,7 @@ describe('slackClient', () => {
             'Content-Type': 'application/x-www-form-urlencoded',
           },
           body: expect.stringContaining('token=xoxp-test-token'),
-        })
+        }),
       )
     })
 
@@ -109,7 +109,6 @@ describe('slackClient', () => {
           pagination: { page: 1, page_count: 1, total_count: 0, per_page: 20 },
         },
       }
-
       ;(global.fetch as Mock)
         .mockResolvedValueOnce({
           ok: false,
@@ -138,7 +137,6 @@ describe('slackClient', () => {
         ok: false,
         error: 'missing_scope',
       }
-
       ;(global.fetch as Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
@@ -162,12 +160,10 @@ describe('slackClient', () => {
       }
 
       // 最初はネットワークエラー、2回目で成功
-      ;(global.fetch as Mock)
-        .mockRejectedValueOnce(new TypeError('Failed to fetch'))
-        .mockResolvedValueOnce({
-          ok: true,
-          json: async () => mockResponse,
-        })
+      ;(global.fetch as Mock).mockRejectedValueOnce(new TypeError('Failed to fetch')).mockResolvedValueOnce({
+        ok: true,
+        json: async () => mockResponse,
+      })
 
       const result = await fetchSlackMessages('xoxp-test-token', 'test query', 20, 1, 3, 10)
 
@@ -194,7 +190,6 @@ describe('slackClient', () => {
           },
         ],
       }
-
       ;(global.fetch as Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
@@ -216,7 +211,6 @@ describe('slackClient', () => {
         ok: false,
         error: 'thread_not_found',
       }
-
       ;(global.fetch as Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
@@ -249,7 +243,6 @@ describe('slackClient', () => {
         ok: true,
         permalink: mockPermalink,
       }
-
       ;(global.fetch as Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
@@ -269,7 +262,7 @@ describe('slackClient', () => {
           headers: expect.objectContaining({
             Authorization: 'Bearer xoxp-test-token',
           }),
-        })
+        }),
       )
     })
 
@@ -278,7 +271,6 @@ describe('slackClient', () => {
         ok: false,
         error: 'message_not_found',
       }
-
       ;(global.fetch as Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
@@ -303,7 +295,6 @@ describe('slackClient', () => {
           real_name: 'Test User',
         },
       }
-
       ;(global.fetch as Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
@@ -324,7 +315,6 @@ describe('slackClient', () => {
         ok: false,
         error: 'user_not_found',
       }
-
       ;(global.fetch as Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,
@@ -343,7 +333,6 @@ describe('slackClient', () => {
         ok: false,
         error: 'token_revoked',
       }
-
       ;(global.fetch as Mock).mockResolvedValueOnce({
         ok: true,
         json: async () => mockResponse,

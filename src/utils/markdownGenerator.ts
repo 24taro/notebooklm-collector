@@ -13,10 +13,10 @@ export const generateMarkdown = (posts: DocbasePostListItem[], searchKeyword?: s
   }
 
   // 全体のメタデータ作成
-  const dates = posts.map(post => new Date(post.created_at))
-  const minDate = new Date(Math.min(...dates.map(d => d.getTime())))
-  const maxDate = new Date(Math.max(...dates.map(d => d.getTime())))
-  
+  const dates = posts.map((post) => new Date(post.created_at))
+  const minDate = new Date(Math.min(...dates.map((d) => d.getTime())))
+  const maxDate = new Date(Math.max(...dates.map((d) => d.getTime())))
+
   // YAML Front Matter形式で全体メタデータ
   let markdown = '---\n'
   markdown += `source: "docbase"\n`
@@ -29,12 +29,13 @@ export const generateMarkdown = (posts: DocbasePostListItem[], searchKeyword?: s
   markdown += '---\n\n'
 
   // LLM理解しやすいタイトル
-  const dateRange = minDate.toLocaleDateString('ja-JP') === maxDate.toLocaleDateString('ja-JP')
-    ? minDate.toLocaleDateString('ja-JP')
-    : `${minDate.toLocaleDateString('ja-JP')} - ${maxDate.toLocaleDateString('ja-JP')}`
-  
+  const dateRange =
+    minDate.toLocaleDateString('ja-JP') === maxDate.toLocaleDateString('ja-JP')
+      ? minDate.toLocaleDateString('ja-JP')
+      : `${minDate.toLocaleDateString('ja-JP')} - ${maxDate.toLocaleDateString('ja-JP')}`
+
   markdown += '# Docbase Articles Collection\n\n'
-  
+
   markdown += '## Collection Overview\n'
   markdown += `- **Total Articles**: ${posts.length}\n`
   if (searchKeyword) {
@@ -54,42 +55,45 @@ export const generateMarkdown = (posts: DocbasePostListItem[], searchKeyword?: s
 
   // 各記事の詳細
   markdown += '## Articles Content\n\n'
-  
-  return markdown + posts
-    .map((post, index) => {
-      // 日付フォーマット
-      const date = new Date(post.created_at)
-      const isoDate = date.toISOString()
-      const displayDate = date.toLocaleDateString('ja-JP', {
-        year: 'numeric',
-        month: 'long', 
-        day: 'numeric',
-        weekday: 'long'
+
+  return (
+    markdown +
+    posts
+      .map((post, index) => {
+        // 日付フォーマット
+        const date = new Date(post.created_at)
+        const isoDate = date.toISOString()
+        const displayDate = date.toLocaleDateString('ja-JP', {
+          year: 'numeric',
+          month: 'long',
+          day: 'numeric',
+          weekday: 'long',
+        })
+
+        // 記事のYAML Front Matter
+        let articleMd = `### Article ${index + 1}\n\n`
+        articleMd += '```yaml\n'
+        articleMd += `docbase_id: ${post.id}\n`
+        articleMd += `title: "${post.title}"\n`
+        articleMd += `created_at: "${isoDate}"\n`
+        articleMd += `url: "${post.url}"\n`
+        articleMd += '```\n\n'
+
+        // LLM理解しやすい構造
+        articleMd += `# ${post.title}\n\n`
+
+        articleMd += '## Document Information\n'
+        articleMd += `- **Created**: ${displayDate}\n`
+        articleMd += `- **Source**: [Docbase Article](${post.url})\n`
+        articleMd += `- **Document ID**: ${post.id}\n\n`
+
+        articleMd += '## Content\n\n'
+
+        // 本文をそのまま記載（二重エンコード回避）
+        articleMd += `${post.body}\n\n`
+
+        return articleMd
       })
-
-      // 記事のYAML Front Matter
-      let articleMd = `### Article ${index + 1}\n\n`
-      articleMd += '```yaml\n'
-      articleMd += `docbase_id: ${post.id}\n`
-      articleMd += `title: "${post.title}"\n`
-      articleMd += `created_at: "${isoDate}"\n`
-      articleMd += `url: "${post.url}"\n`
-      articleMd += '```\n\n'
-
-      // LLM理解しやすい構造
-      articleMd += `# ${post.title}\n\n`
-      
-      articleMd += '## Document Information\n'
-      articleMd += `- **Created**: ${displayDate}\n`
-      articleMd += `- **Source**: [Docbase Article](${post.url})\n`
-      articleMd += `- **Document ID**: ${post.id}\n\n`
-
-      articleMd += '## Content\n\n'
-      
-      // 本文をそのまま記載（二重エンコード回避）
-      articleMd += `${post.body}\n\n`
-
-      return articleMd
-    })
-    .join('---\n\n') // 各記事の間を水平線で区切る
+      .join('---\n\n')
+  ) // 各記事の間を水平線で区切る
 }

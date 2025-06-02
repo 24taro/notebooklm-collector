@@ -1,11 +1,11 @@
 /**
  * useErrorRecoveryフックのテスト
- * 
+ *
  * エラー復旧機能の動作確認テスト
  */
 
-import { renderHook, act } from '@testing-library/react'
-import { describe, test, expect, beforeEach, afterEach, afterAll, vi } from 'vitest'
+import { act, renderHook } from '@testing-library/react'
+import { afterAll, afterEach, beforeEach, describe, expect, test, vi } from 'vitest'
 import { useErrorRecovery } from '../../hooks/useErrorRecovery'
 
 // LocalStorageのモック
@@ -220,10 +220,7 @@ describe('useErrorRecovery', () => {
       })
 
       expect(window.location.reload).toHaveBeenCalled()
-      expect(localStorageMock.setItem).toHaveBeenCalledWith(
-        'notebooklm_error_recovery',
-        expect.any(String)
-      )
+      expect(localStorageMock.setItem).toHaveBeenCalledWith('notebooklm_error_recovery', expect.any(String))
     })
   })
 

@@ -22,8 +22,8 @@ export {
 
 // 内部使用のためのインポート
 import { createDocbaseAdapter as _createDocbaseAdapter } from './docbaseAdapter'
-import { createSlackAdapter as _createSlackAdapter } from './slackAdapter'
 import { createFetchHttpClient as _createFetchHttpClient } from './fetchHttpClient'
+import { createSlackAdapter as _createSlackAdapter } from './slackAdapter'
 
 // デフォルトインスタンス作成用のヘルパー関数
 export function createDefaultDocbaseAdapter() {
