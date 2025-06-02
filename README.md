@@ -147,16 +147,33 @@ npm run build        # 本番ビルド
 npm run start        # 本番サーバー起動
 npm run lint         # Lintチェック
 npm run type-check   # TypeScript型チェック
+npm run test         # テスト実行
+npm run test:e2e     # E2Eテスト実行
+npm run storybook    # Storybook起動
+```
+
+### テスト
+
+```bash
+npm run test         # 単体テスト
+npm run test:watch   # 監視モードでテスト
+npm run test:coverage # カバレッジレポート生成
+npm run test:e2e     # E2Eテスト（Playwright）
 ```
 
 ### コントリビューション
 
-1. Issueを作成または既存のIssueを確認
-2. フィーチャーブランチを作成
-3. 変更を実装し、テストを追加
-4. プルリクエストを作成
+プロジェクトへの貢献方法については [CONTRIBUTING.md](./CONTRIBUTING.md) をご覧ください。
 
-詳細なコーディング規約は [CLAUDE.md](./CLAUDE.md) を参照してください。
+### 関連ドキュメント
+
+| ドキュメント | 内容 |
+|-------------|------|
+| [CONTRIBUTING.md](./CONTRIBUTING.md) | 貢献ガイド、開発環境セットアップ |
+| [CLAUDE.md](./CLAUDE.md) | プロジェクト開発ルール、コーディング規約 |
+| [docs/architecture.md](./docs/architecture.md) | システムアーキテクチャ、技術設計 |
+| [docs/testing-strategy.md](./docs/testing-strategy.md) | テスト戦略、テスト作成ガイド |
+| [docs/api-integration.md](./docs/api-integration.md) | API仕様、連携実装ガイド |
 
 ## 🔒 セキュリティ
 
@@ -190,11 +207,7 @@ npm run type-check   # TypeScript型チェック
 
 ### サポート
 
-問題が発生した場合は、以下のリソースを活用してください：
-
-- [GitHub Issues](https://github.com/sotaroNishioka/notebooklm-collector/issues) - バグ報告・機能要望
-- [service.md](./service.md) - 詳細な技術仕様
-- [CLAUDE.md](./CLAUDE.md) - 開発ルール・アーキテクチャ
+問題が発生した場合は、[GitHub Issues](https://github.com/sotaroNishioka/notebooklm-collector/issues) でお知らせください。
 
 ## 📄 ライセンス
 

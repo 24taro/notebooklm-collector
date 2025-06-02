@@ -1,0 +1,99 @@
+name: 🚀 機能要望
+description: 新機能やアイデアを提案してください
+title: "[Feature]: "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        新機能のご提案ありがとうございます！
+        以下の情報を記入してください。
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: 解決したい問題
+      description: この機能でどのような問題を解決しようとしていますか？
+      placeholder: |
+        例: 大量のSlackメッセージを検索する際、特定のチャンネルだけに絞り込みたいが、
+        現在はすべてのチャンネルから検索されてしまう
+    validations:
+      required: true
+
+  - type: textarea
+    id: solution
+    attributes:
+      label: 提案する解決策
+      description: どのような機能や改善を提案しますか？
+      placeholder: |
+        例: 検索フォームにチャンネル選択のドロップダウンを追加し、
+        特定のチャンネルに限定して検索できるようにする
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: 代替案
+      description: 他に検討した解決方法があれば教えてください
+      placeholder: |
+        例: 
+        - 検索クエリに「in:#channel-name」を含める方法
+        - 検索結果をチャンネルでフィルタリングする方法
+
+  - type: dropdown
+    id: priority
+    attributes:
+      label: 優先度
+      description: この機能の重要度はどの程度ですか？
+      options:
+        - 必須（この機能がないと使えない）
+        - 高（あると非常に便利）
+        - 中（あると便利）
+        - 低（あったらいいな）
+    validations:
+      required: true
+
+  - type: textarea
+    id: use-case
+    attributes:
+      label: ユースケース
+      description: この機能をどのように使用する予定ですか？
+      placeholder: |
+        例: プロジェクトごとにチャンネルを分けているので、
+        特定プロジェクトの議論だけを抽出してNotebookLMに入力したい
+
+  - type: textarea
+    id: mockup
+    attributes:
+      label: UI/UXのイメージ
+      description: UIのモックアップやスケッチがあれば添付してください
+      placeholder: ここに画像をドラッグ＆ドロップできます
+
+  - type: textarea
+    id: references
+    attributes:
+      label: 参考リンク
+      description: 参考になるサイトや類似機能があれば教えてください
+      placeholder: |
+        - https://example.com/similar-feature
+        - 他のツールでの実装例など
+
+  - type: checkboxes
+    id: contribution
+    attributes:
+      label: 貢献について
+      options:
+        - label: この機能の実装に協力できます
+        - label: この機能のテストに協力できます
+        - label: この機能のドキュメント作成に協力できます
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 確認事項
+      options:
+        - label: 既存のIssueを検索し、同様の提案がないことを確認しました
+          required: true
+        - label: この機能がプロジェクトの目的に合致することを確認しました
+          required: true

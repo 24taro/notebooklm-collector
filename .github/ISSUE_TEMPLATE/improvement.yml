@@ -1,0 +1,123 @@
+name: 💡 改善提案
+description: 既存機能の改善やリファクタリングを提案してください
+title: "[Improvement]: "
+labels: ["enhancement", "improvement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        改善提案をしていただき、ありがとうございます！
+        以下の情報を記入してください。
+
+  - type: dropdown
+    id: category
+    attributes:
+      label: 改善カテゴリ
+      description: どの種類の改善を提案しますか？
+      options:
+        - パフォーマンス
+        - ユーザビリティ
+        - コード品質
+        - セキュリティ
+        - ドキュメント
+        - テスト
+        - ビルド・CI/CD
+        - その他
+    validations:
+      required: true
+
+  - type: textarea
+    id: current
+    attributes:
+      label: 現状の問題点
+      description: 現在の実装のどこに問題がありますか？
+      placeholder: |
+        例: 検索結果が100件を超えると、レンダリングに3秒以上かかり、
+        ユーザー体験が悪化している
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposal
+    attributes:
+      label: 改善案
+      description: どのように改善することを提案しますか？
+      placeholder: |
+        例: 仮想スクロールを実装し、画面に表示される分だけをレンダリングすることで、
+        大量のデータでも高速に表示できるようにする
+    validations:
+      required: true
+
+  - type: textarea
+    id: benefits
+    attributes:
+      label: 期待される効果
+      description: この改善によってどのようなメリットがありますか？
+      placeholder: |
+        例:
+        - レンダリング時間が3秒から0.5秒に短縮
+        - メモリ使用量が50%削減
+        - スムーズなスクロール体験
+    validations:
+      required: true
+
+  - type: textarea
+    id: implementation
+    attributes:
+      label: 実装方法
+      description: 具体的な実装方法やアプローチがあれば記載してください
+      placeholder: |
+        例:
+        1. react-windowライブラリを導入
+        2. SearchResultsコンポーネントをFixedSizeListでラップ
+        3. 各アイテムの高さを固定化
+      render: markdown
+
+  - type: textarea
+    id: risks
+    attributes:
+      label: リスク・懸念事項
+      description: この改善に伴うリスクや注意点があれば記載してください
+      placeholder: |
+        例:
+        - 既存のスクロール位置保持機能との互換性
+        - アクセシビリティへの影響
+        - 追加の依存関係
+
+  - type: input
+    id: effort
+    attributes:
+      label: 想定作業量
+      description: おおよその作業時間を見積もってください
+      placeholder: 例：2-3日、1週間、2週間
+
+  - type: textarea
+    id: testing
+    attributes:
+      label: テスト方法
+      description: この改善をどのようにテストしますか？
+      placeholder: |
+        例:
+        - 1000件のダミーデータでパフォーマンステスト
+        - 各ブラウザでの動作確認
+        - E2Eテストの追加
+
+  - type: checkboxes
+    id: checklist
+    attributes:
+      label: チェックリスト
+      options:
+        - label: 既存のコードを十分に理解しています
+        - label: 後方互換性を考慮しています
+        - label: テストケースを検討しています
+        - label: ドキュメントの更新が必要か確認しました
+
+  - type: checkboxes
+    id: terms
+    attributes:
+      label: 確認事項
+      options:
+        - label: 既存のIssueを検索し、同様の提案がないことを確認しました
+          required: true
+        - label: この改善がプロジェクトの品質向上に貢献することを確認しました
+          required: true
