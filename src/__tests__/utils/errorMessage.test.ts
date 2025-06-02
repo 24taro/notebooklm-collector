@@ -171,7 +171,6 @@ describe('errorMessage', () => {
         expect(result).toContain('トークンの権限やアクセス設定を確認')
       })
     })
-
   })
 
   describe('getErrorActionSuggestion', () => {
@@ -370,5 +369,4 @@ describe('errorMessage', () => {
       })
     })
   })
-
 })

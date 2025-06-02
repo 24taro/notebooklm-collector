@@ -85,11 +85,10 @@ test.describe('Storybook動作確認', () => {
     const iframe = page.frameLocator('#storybook-preview-iframe')
     // iframeのコンテンツがロードされるまで待機
     await iframe.locator('body').waitFor({ state: 'attached' })
-    await expect(iframe.locator('input[placeholder="#general"]')).toBeVisible()
-    await expect(iframe.locator('input[placeholder="@user"]')).toBeVisible()
+    await expect(iframe.locator('input[placeholder="#general"]').first()).toBeVisible()
+    await expect(iframe.locator('input[placeholder="@user"]').first()).toBeVisible()
     await expect(iframe.locator('input[type="date"]').first()).toBeVisible()
   })
-
 
   test('ダウンロードボタンが正常に動作する', async ({ page }: { page: Page }) => {
     await page.goto('/')
@@ -108,5 +107,4 @@ test.describe('Storybook動作確認', () => {
     // ボタンがクリック可能であることを確認
     await expect(downloadButton).toBeEnabled()
   })
-
 })

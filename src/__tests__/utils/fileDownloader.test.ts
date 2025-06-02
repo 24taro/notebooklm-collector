@@ -179,9 +179,7 @@ describe('fileDownloader', () => {
       expect(result.success).toBe(false)
       expect(result.message).toBe('ダウンロードするコンテンツがありません。')
     })
-
   })
-
 
   describe('属性設定', () => {
     it('アンカー要素の属性が正しく設定される', () => {

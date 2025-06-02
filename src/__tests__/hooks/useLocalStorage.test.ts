@@ -118,6 +118,4 @@ describe('useLocalStorage', () => {
       expect(localStorage.getItem('test-key')).toBe(JSON.stringify('new-value'))
     })
   })
-
-
 })

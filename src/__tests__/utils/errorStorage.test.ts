@@ -229,7 +229,6 @@ describe('errorStorage', () => {
     })
   })
 
-
   describe('getErrorLogStats', () => {
     test('エラーログの統計情報を取得する', () => {
       const mockLogs = [
@@ -267,5 +266,4 @@ describe('errorStorage', () => {
       })
     })
   })
-
 })

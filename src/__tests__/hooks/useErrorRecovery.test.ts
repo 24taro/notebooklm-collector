@@ -81,7 +81,6 @@ describe('useErrorRecovery', () => {
     expect(result.current.lastRecoveryTime).toBeNull()
   })
 
-
   describe('recover', () => {
     test('標準的な復旧処理を実行する', async () => {
       localStorageMock.getItem.mockReturnValue(null)
@@ -109,7 +108,6 @@ describe('useErrorRecovery', () => {
 
       expect(customRecovery).toHaveBeenCalled()
     })
-
 
     test('最大リトライ回数を超えた場合は実行しない', async () => {
       const savedState = {
@@ -259,5 +257,4 @@ describe('useErrorRecovery', () => {
       expect(result.current.errorStats.totalLogs).toBe(0)
     })
   })
-
 })
