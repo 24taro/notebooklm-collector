@@ -1,14 +1,27 @@
-name: Deploy
+name: Deploy to GitHub Pages
 
 on:
   push:
     branches: [main]
   workflow_dispatch:
 
+# GitHub Pages へのデプロイ権限を設定
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 並行実行を防ぐ（GitHub Pages デプロイの競合を避ける）
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
-    environment: production
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
 
     steps:
       - name: Checkout repository
@@ -29,16 +42,22 @@ jobs:
       - name: Run type check
         run: npm run type-check
 
-      - name: Build application
+      - name: Build application for GitHub Pages
         run: npm run build
+        env:
+          NEXT_PUBLIC_BASE_PATH: /notebooklm-collector
 
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
+      - name: Setup GitHub Pages
+        uses: actions/configure-pages@v4
+
+      - name: Upload build artifacts to GitHub Pages
+        uses: actions/upload-pages-artifact@v3
         with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-args: '--prod'
-          vercel-org-id: ${{ secrets.ORG_ID }}
-          vercel-project-id: ${{ secrets.PROJECT_ID }}
+          path: out
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
 
       - name: Comment on success
         if: success() && github.event_name == 'push'
@@ -49,5 +68,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               commit_sha: context.sha,
-              body: '🚀 デプロイが完了しました！'
+              body: '🚀 GitHub Pages へのデプロイが完了しました！\n📄 サイトURL: ${{ steps.deployment.outputs.page_url }}'
             })
