@@ -1,4 +1,4 @@
-import { expect, test, type Page } from '@playwright/test'
+import { type Page, expect, test } from '@playwright/test'
 
 // テストのタイムアウトを延長
 test.setTimeout(60000)
@@ -121,8 +121,13 @@ test.describe('Storybook動作確認', () => {
     await page.keyboard.press('Tab')
 
     // フォーカスの移動を確認（どちらかにフォーカスが当たればOK）
-    const isUserInputFocused = await iframe.locator('input[placeholder="@user"]').evaluate((el: HTMLElement) => el === document.activeElement)
-    const isDateInputFocused = await iframe.locator('input[type="date"]').first().evaluate((el: HTMLElement) => el === document.activeElement)
+    const isUserInputFocused = await iframe
+      .locator('input[placeholder="@user"]')
+      .evaluate((el: HTMLElement) => el === document.activeElement)
+    const isDateInputFocused = await iframe
+      .locator('input[type="date"]')
+      .first()
+      .evaluate((el: HTMLElement) => el === document.activeElement)
 
     // いずれかの要素にフォーカスが移動していることを確認
     expect(isUserInputFocused || isDateInputFocused).toBeTruthy()
