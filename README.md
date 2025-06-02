@@ -1,5 +1,7 @@
 # NotebookLM Collector
 
+[![Deploy to GitHub Pages](https://github.com/sotaroNishioka/notebooklm-collector/actions/workflows/deploy.yml/badge.svg)](https://github.com/sotaroNishioka/notebooklm-collector/actions/workflows/deploy.yml)
+
 DocbaseとSlackから情報を収集し、NotebookLM向けに最適化されたMarkdownファイルを生成するWebアプリケーションです。
 
 ## 🎯 概要
