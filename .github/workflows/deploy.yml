@@ -32,13 +32,11 @@ jobs:
       - name: Build application
         run: npm run build
 
-      - name: Deploy to Vercel
-        uses: amondnet/vercel-action@v25
+      - name: Deploy to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v3
         with:
-          vercel-token: ${{ secrets.VERCEL_TOKEN }}
-          vercel-args: '--prod'
-          vercel-org-id: ${{ secrets.ORG_ID }}
-          vercel-project-id: ${{ secrets.PROJECT_ID }}
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./out
 
       - name: Comment on success
         if: success() && github.event_name == 'push'
@@ -49,5 +47,5 @@ jobs:
               owner: context.repo.owner,
               repo: context.repo.repo,
               commit_sha: context.sha,
-              body: '🚀 デプロイが完了しました！'
+              body: '🚀 GitHub Pagesへのデプロイが完了しました！'
             })
