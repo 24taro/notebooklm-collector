@@ -205,4 +205,4 @@ npm run type-check   # TypeScript型チェック
 ---
 
 **NotebookLM Collector v1.9**  
-🤖 Generated with [Claude Code](https://claude.ai/code)
+🤖 Generated with [Claude Code](https://claude.ai/code)<!-- Debug deploy workflow test -->
