@@ -126,51 +126,119 @@ after:2023-01-01 before:2023-12-31
 - **デプロイ**: GitHub Pages
 - **開発体験**: Turbopack (Next.js dev mode)
 
-### ディレクトリ構成
+### アーキテクチャ
+
+#### ディレクトリ構成
 
 ```
 src/
-├── app/          # Next.js App Router
-│   ├── docbase/  # Docbase連携ページ
-│   └── slack/    # Slack連携ページ
-├── components/   # UIコンポーネント
-├── hooks/        # カスタムフック
-├── lib/          # APIクライアント
-├── types/        # 型定義
-├── utils/        # ユーティリティ
-└── adapters/     # 外部依存抽象化
+├── __tests__/        # テストファイル群（Vitest）
+│   ├── adapters/     # アダプターテスト
+│   ├── components/   # コンポーネントテスト
+│   ├── hooks/        # カスタムフックテスト
+│   ├── lib/          # ライブラリテスト
+│   └── utils/        # ユーティリティテスト
+├── app/             # Next.js App Router
+│   ├── docbase/     # Docbase連携ページ
+│   ├── slack/       # Slack連携ページ
+│   ├── globals.css  # グローバルスタイル
+│   └── layout.tsx   # ルートレイアウト
+├── components/      # UIコンポーネント（18個）
+├── hooks/          # カスタムフック（5個）
+├── lib/            # APIクライアント
+├── types/          # 型定義
+├── utils/          # ユーティリティ関数
+└── adapters/       # 外部依存抽象化（アダプターパターン）
 ```
+
+#### コンポーネント設計
+
+**20個のUIコンポーネント**:
+- **認証系**: `DocbaseDomainInput`, `DocbaseTokenInput`, `SlackTokenInput`
+- **検索系**: `DocbaseSearchForm`, `SlackSearchForm`, `SearchForm`, `SearchFormWithErrorBoundary`
+- **Slack詳細検索**: `SlackAdvancedFilters`, `SlackAuthorInput`, `SlackChannelInput`
+- **プレビュー系**: `MarkdownPreview`, `SlackMarkdownPreview`
+- **エラーハンドリング**: `ErrorBoundary`, `ErrorBoundaryProvider`, `ErrorFallback`
+- **レイアウト**: `Header`, `Footer`, `SlackHeroSection`
+- **Storybook**: `MarkdownPreview.stories`, `SlackAdvancedFilters.stories`
+
+**5つのカスタムフック**:
+- `useDownload`: ファイルダウンロード機能（blob生成・自動保存）
+- `useErrorRecovery`: エラー復旧機能（リトライ・状態リセット）
+- `useLocalStorage`: localStorage操作抽象化（型安全・同期）
+- `useSearch`: Docbase記事検索機能（状態管理・エラーハンドリング）
+- `useSlackSearchUnified`: Slack統合検索（メッセージ・スレッド・ユーザー情報）
+
+**アダプターパターン実装（6ファイル）**:
+- 外部API依存を抽象化し、テスタビリティとモック性を向上
+- `docbaseAdapter`: Docbase API連携（記事検索・取得）
+- `slackAdapter`: Slack API連携（メッセージ検索・スレッド取得・ユーザー情報）
+- `fetchHttpClient`: HTTP通信（リトライ機能・エラーハンドリング）
+- `mockHttpClient`: テスト用モック（開発・テスト環境）
+- `types`: アダプター共通型定義
+- `index`: 統一エクスポート
 
 ## 👩‍💻 開発者向け
 
-### 開発コマンド
+### 開発コマンド（全22のnpmスクリプト）
 
+#### 開発・ビルド（3コマンド）
 ```bash
-# 開発・ビルド
-npm run dev              # 開発サーバー起動 (Turbopack)
-npm run build            # 本番ビルド
-npm run start            # 本番サーバー起動
-
-# コード品質
-npm run lint             # Biome lintチェック
-npm run lint:fix         # Biome lint自動修正
-npm run format           # Biome format
-npm run type-check       # TypeScript型チェック
-
-# テスト
-npm run test             # Vitestユニットテスト
-npm run test:watch       # Vitestウォッチモード
-npm run test:coverage    # カバレッジ付きテスト
-npm run test:ui          # Vitest UI
-npm run test:e2e         # Playwright E2Eテスト
-npm run test:e2e:ui      # Playwright UI
-npm run test:e2e:debug   # Playwright デバッグ
-
-# Storybook
-npm run storybook        # Storybook開発サーバー
-npm run build-storybook  # Storybookビルド
-npm run storybook:test   # Storybook E2Eテスト
+npm run dev              # Turbopack開発サーバー起動（高速HMR・ファイル監視）
+npm run build            # Next.js本番ビルド（静的サイト生成・最適化）
+npm run start            # 本番サーバー起動（ビルド済みアプリケーション実行）
 ```
+
+#### コード品質管理（4コマンド）
+```bash
+npm run lint             # Biome総合チェック（ESLint+Prettier代替・ルール検証）
+npm run lint:fix         # Biome自動修正（フォーマット+ルール適用・自動修正）
+npm run format           # Biomeフォーマッター単体実行（コードスタイル統一）
+npm run type-check       # TypeScript型チェック（noEmit・型エラー検出）
+```
+
+#### テスト戦略（7コマンド）
+
+**ユニットテスト（Vitest 3.1.4）**:
+```bash
+npm run test             # 単体テスト実行（jsdom環境・カスタムフック・ユーティリティ）
+npm run test:watch       # ウォッチモード（ファイル変更時自動実行・リアルタイムフィードバック）
+npm run test:coverage    # カバレッジ測定（閾値80%・詳細レポート生成）
+npm run test:ui          # Vitest Web UI（ブラウザでテスト結果確認・インタラクティブ実行）
+```
+
+**E2Eテスト（Playwright 1.52.0）**:
+```bash
+npm run test:e2e         # Storybook E2Eテスト（Chromium・並列実行・自動化）
+npm run test:e2e:ui      # Playwright Test UI（インタラクティブモード・ステップ確認）
+npm run test:e2e:debug   # Playwright デバッグモード（ステップ実行・スクリーンショット・詳細ログ）
+```
+
+**Storybook（8.6.14）**:
+```bash
+npm run storybook        # Storybook開発サーバー（ポート6006・アクセシビリティ・レスポンシブ確認）
+npm run build-storybook  # Storybookビルド（静的サイト生成・コンポーネントドキュメント）
+npm run storybook:test   # Storybook統合E2Eテスト実行（ビルド→テスト自動化）
+```
+
+#### テスト設定詳細
+
+**Vitest設定（vitest.config.ts）**:
+- **環境**: jsdom（React DOM環境シミュレート・Testing Library対応）
+- **グローバル設定**: globals有効（describe/it/expect直接使用可能）
+- **セットアップ**: `src/__tests__/setup.ts`（テスト環境初期化）
+- **カバレッジ**: 80%閾値（statements/branches/functions/lines）・詳細レポート
+- **除外対象**: node_modules、dist、tests（Playwright）、型定義ファイル
+- **エイリアス**: Next.jsパスエイリアスと同期（@/components、@/hooks等）
+
+**Playwright設定（playwright.config.ts）**:
+- **テストディレクトリ**: `./tests`（E2Eテスト専用）
+- **並列実行**: フル並列・CI環境では1ワーカー（安定性優先）
+- **リトライ**: CI環境で2回・ローカルでは0回（効率性重視）
+- **ベースURL**: `http://localhost:6006`（Storybook自動接続）
+- **ブラウザ**: Chromium（no-sandbox設定・安定性向上）
+- **webServer**: Storybook自動起動（3分タイムアウト・依存関係解決）
+- **レポーター**: CI環境ではHTML・GitHub・ローカルではHTML
 
 ### コントリビューション
 

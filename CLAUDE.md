@@ -353,19 +353,19 @@ git branch -d issue-42-auth-result-type
 
 ## 技術スタック
 
-| レイヤ         | 技術                     |
-| -------------- | ------------------------ |
-| フレームワーク | Next.js 15.3.2 / React 19 |
-| 言語           | TypeScript 5             |
-| スタイリング   | Tailwind CSS 4.1.7       |
-| データ取得     | fetch API                |
-| ストレージ     | localStorage             |
-| Lint / Format  | Biome 1.9.4              |
-| テスト         | Vitest 3.1.4 / Playwright 1.52.0 |
-| Storybook      | 8.6.14                   |
-| エラーハンドリング | neverthrow Result型    |
-| デプロイ       | GitHub Pages             |
-| 開発体験       | Turbopack                |
+| レイヤ         | 技術                     | 詳細 |
+| -------------- | ------------------------ | ---- |
+| フレームワーク | Next.js 15.3.2 / React 19 | App Router・静的サイト生成・Turbopack |
+| 言語           | TypeScript 5             | 厳密型チェック・Utility Types活用 |
+| スタイリング   | Tailwind CSS 4.1.7       | PostCSS統合・レスポンシブ対応 |
+| データ取得     | fetch API                | アダプターパターン・リトライ機能 |
+| ストレージ     | localStorage             | 型安全カスタムフック・同期管理 |
+| Lint / Format  | Biome 1.9.4              | ESLint+Prettier代替・高速実行 |
+| テスト         | Vitest 3.1.4 / Playwright 1.52.0 | jsdom環境・E2E自動化・80%カバレッジ |
+| Storybook      | 8.6.14                   | コンポーネント開発・アクセシビリティ |
+| エラーハンドリング | neverthrow Result型    | 型安全エラー処理・統一例外管理 |
+| デプロイ       | GitHub Pages             | 自動CI/CD・静的ホスティング |
+| 開発体験       | Turbopack                | 高速HMR・並列ビルド・モジュール解決 |
 
 ## 重要な注意事項
 
@@ -614,36 +614,65 @@ test('Storybook動作確認', async ({ page }) => {
 });
 ```
 
-### 開発コマンド拡張
+### 開発コマンド拡張（全22スクリプト）
 
+#### 開発・ビルド（3コマンド）
 ```bash
-# 開発・ビルド
-npm run dev              # 開発サーバー起動 (Turbopack)
-npm run build            # 本番ビルド
-npm run start            # 本番サーバー起動
-
-# コード品質
-npm run lint             # Biome lintチェック
-npm run lint:fix         # Biome lint自動修正
-npm run format           # Biome format
-npm run type-check       # TypeScript型チェック
-
-# テスト
-npm run test             # Vitestユニットテスト
-npm run test:watch       # Vitestウォッチモード
-npm run test:coverage    # カバレッジ付きテスト
-npm run test:ui          # Vitest UI
-npm run test:e2e         # Playwright E2Eテスト
-npm run test:e2e:ui      # Playwright UI
-npm run test:e2e:debug   # Playwright デバッグ
-
-# Storybook
-npm run storybook        # Storybook開発サーバー
-npm run build-storybook  # Storybookビルド
-npm run storybook:test   # Storybook E2Eテスト
+npm run dev              # Turbopack開発サーバー（高速HMR・ファイル監視）
+npm run build            # Next.js本番ビルド（静的サイト生成・最適化）
+npm run start            # 本番サーバー起動（ビルド済みアプリケーション実行）
 ```
+
+#### コード品質管理（4コマンド）
+```bash
+npm run lint             # Biome総合チェック（ESLint+Prettier代替・ルール検証）
+npm run lint:fix         # Biome自動修正（フォーマット+ルール適用・自動修正）
+npm run format           # Biomeフォーマッター単体実行（コードスタイル統一）
+npm run type-check       # TypeScript型チェック（noEmit・型エラー検出）
+```
+
+#### テスト戦略（7コマンド）
+```bash
+# ユニットテスト（Vitest 3.1.4）
+npm run test             # 単体テスト実行（jsdom環境・カスタムフック・ユーティリティ）
+npm run test:watch       # ウォッチモード（ファイル変更時自動実行・リアルタイムフィードバック）
+npm run test:coverage    # カバレッジ測定（閾値80%・詳細レポート生成）
+npm run test:ui          # Vitest Web UI（ブラウザでテスト結果確認・インタラクティブ実行）
+
+# E2Eテスト（Playwright 1.52.0）
+npm run test:e2e         # Storybook E2Eテスト（Chromium・並列実行・自動化）
+npm run test:e2e:ui      # Playwright Test UI（インタラクティブモード・ステップ確認）
+npm run test:e2e:debug   # Playwright デバッグモード（ステップ実行・スクリーンショット・詳細ログ）
+```
+
+#### Storybook（3コマンド）
+```bash
+npm run storybook        # Storybook開発サーバー（ポート6006・アクセシビリティ・レスポンシブ確認）
+npm run build-storybook  # Storybookビルド（静的サイト生成・コンポーネントドキュメント）
+npm run storybook:test   # Storybook統合E2Eテスト実行（ビルド→テスト自動化）
+```
+
+#### テスト設定詳細
+
+**Vitest設定（vitest.config.ts）**:
+- **環境**: jsdom（React DOM環境シミュレート・Testing Library対応）
+- **グローバル設定**: globals有効（describe/it/expect直接使用可能）
+- **セットアップ**: `src/__tests__/setup.ts`（テスト環境初期化）
+- **カバレッジ**: 80%閾値（statements/branches/functions/lines）・詳細レポート
+- **除外対象**: node_modules、dist、tests（Playwright）、型定義ファイル
+- **エイリアス**: Next.jsパスエイリアスと同期（@/components、@/hooks等）
+
+**Playwright設定（playwright.config.ts）**:
+- **テストディレクトリ**: `./tests`（E2Eテスト専用）
+- **並列実行**: フル並列・CI環境では1ワーカー（安定性優先）
+- **リトライ**: CI環境で2回・ローカルでは0回（効率性重視）
+- **ベースURL**: `http://localhost:6006`（Storybook自動接続）
+- **ブラウザ**: Chromium（no-sandbox設定・安定性向上）
+- **webServer**: Storybook自動起動（3分タイムアウト・依存関係解決）
+- **レポーター**: CI環境ではHTML・GitHub・ローカルではHTML
 
 ---
 
 **最終更新**: 2025-06-03  
 **管理者**: Claude Code Assistant
+**Issue**: #184 ドキュメント完全対応実装完了
