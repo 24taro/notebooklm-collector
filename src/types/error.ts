@@ -1,29 +1,39 @@
 /**
  * APIリクエストで発生する可能性のあるエラーの型定義
+ * - 統一された型構造によりエラーハンドリングを簡素化
+ * - アダプターパターンでHTTPステータスコードやAPI固有エラーをマッピング
+ * - 型安全なエラー処理を実現
+ */
+
+/**
+ * 基本エラー型（cause情報付き）
  */
 export type NetworkApiError = {
   type: 'network'
   message: string
   cause?: unknown
 }
+
 export type UnknownApiError = {
   type: 'unknown'
   message: string
   cause?: unknown
 }
 
-// cause を持たないエラー型
+/**
+ * シンプルエラー型（cause情報なし）
+ */
 export type UnauthorizedApiError = { type: 'unauthorized'; message: string }
 export type RateLimitApiError = { type: 'rate_limit'; message: string }
 export type NotFoundApiError = { type: 'notFound'; message: string }
-
-// 新しいエラー型定義
 export type ValidationApiError = { type: 'validation'; message: string }
 export type MissingScopeApiError = { type: 'missing_scope'; message: string }
-export type SlackSpecificApiError = { type: 'slack_api'; message: string } // Slack API固有のエラー
+export type SlackSpecificApiError = { type: 'slack_api'; message: string }
 
 /**
- * APIリクエストで発生する可能性のあるエラーの型定義
+ * 統一APIエラー型
+ * - すべてのAPIエラーパターンを包含
+ * - neverthrow結果型との組み合わせで型安全なエラー処理を実現
  */
 export type ApiError =
   | NetworkApiError
@@ -31,9 +41,9 @@ export type ApiError =
   | UnauthorizedApiError
   | RateLimitApiError
   | NotFoundApiError
-  | ValidationApiError // 追加
-  | MissingScopeApiError // 追加
-  | SlackSpecificApiError // 追加
+  | ValidationApiError
+  | MissingScopeApiError
+  | SlackSpecificApiError
 
 /**
  * エラーがApiError型であるかを判定する型ガード

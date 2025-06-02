@@ -4,6 +4,7 @@ import type { FC } from 'react'
 import { useMemo, useState } from 'react'
 import type { SlackThread } from '../types/slack'
 
+// 内部専用の型定義
 interface SlackMarkdownPreviewProps {
   threads: SlackThread[]
   searchKeyword?: string

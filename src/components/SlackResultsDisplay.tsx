@@ -6,19 +6,7 @@
  */
 
 import { SlackMarkdownPreview } from '@/components/SlackMarkdownPreview'
-import type { SlackThread } from '@/types/slack'
-
-type SlackResultsDisplayProps = {
-  slackThreads: SlackThread[]
-  userMaps: Record<string, string>
-  permalinkMaps: Record<string, string>
-  searchQuery: string
-  isLoading: boolean
-  isDownloading: boolean
-  hasSearched: boolean
-  error: string | null
-  onFullDownload: (markdownContent: string, searchQuery: string, hasContent: boolean) => void
-}
+import type { SlackResultsDisplayProps } from '@/types/forms'
 
 export function SlackResultsDisplay({
   slackThreads,

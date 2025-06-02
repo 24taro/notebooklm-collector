@@ -1,11 +1,5 @@
+import type { SlackAuthorInputProps } from '@/types/forms'
 import type { FC } from 'react'
-
-type SlackAuthorInputProps = {
-  author: string
-  onAuthorChange: (author: string) => void
-  error?: string
-  disabled?: boolean
-}
 
 export const SlackAuthorInput: FC<SlackAuthorInputProps> = ({ author, onAuthorChange, error, disabled }) => {
   return (

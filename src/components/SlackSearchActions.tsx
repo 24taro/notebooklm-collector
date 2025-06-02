@@ -5,18 +5,7 @@
  * - ローディング状態の表示
  */
 
-import type { ProgressStatus } from '@/hooks/useSlackSearchUnified'
-
-type SlackSearchActionsProps = {
-  isLoading: boolean
-  isDownloading: boolean
-  progressStatus: ProgressStatus
-  hasResults: boolean
-  token: string
-  searchQuery: string
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
-  onDownload: (markdownContent: string, searchQuery: string, hasContent: boolean) => void
-}
+import type { SlackSearchActionsProps } from '@/types/forms'
 
 export function SlackSearchActions({
   isLoading,

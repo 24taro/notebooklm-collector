@@ -1,11 +1,5 @@
+import type { SlackChannelInputProps } from '@/types/forms'
 import type { FC } from 'react'
-
-type SlackChannelInputProps = {
-  channel: string
-  onChannelChange: (channel: string) => void
-  error?: string
-  disabled?: boolean
-}
 
 export const SlackChannelInput: FC<SlackChannelInputProps> = ({ channel, onChannelChange, error, disabled }) => {
   return (

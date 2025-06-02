@@ -8,68 +8,17 @@ import toast from 'react-hot-toast'
 import { createFetchHttpClient } from '../adapters/fetchHttpClient'
 import { type SlackAdapter, createSlackAdapter } from '../adapters/slackAdapter'
 import type { ApiError } from '../types/error'
-import type { SlackMessage, SlackThread, SlackUser } from '../types/slack'
+import type {
+  ProgressStatus,
+  SlackMessage,
+  SlackSearchParams,
+  SlackThread,
+  SlackUser,
+  UseSlackSearchOptions,
+  UseSlackSearchResult,
+  UseSlackSearchState,
+} from '../types/slack'
 import { getErrorActionSuggestion, getUserFriendlyErrorMessage } from '../utils/errorMessage'
-
-/**
- * 進捗ステータスの型定義
- */
-export interface ProgressStatus {
-  phase: 'idle' | 'searching' | 'fetching_threads' | 'fetching_users' | 'generating_permalinks' | 'completed'
-  message: string
-  current?: number
-  total?: number
-}
-
-/**
- * Slack検索パラメータ
- */
-export interface SlackSearchParams {
-  token: string
-  searchQuery: string
-  channel?: string
-  author?: string
-  startDate?: string
-  endDate?: string
-}
-
-/**
- * Slack検索結果の状態
- */
-interface UseSlackSearchState {
-  messages: SlackMessage[]
-  slackThreads: SlackThread[]
-  userMaps: Record<string, string>
-  permalinkMaps: Record<string, string>
-  threadMarkdowns: string[]
-  currentPreviewMarkdown: string
-  paginationInfo: {
-    currentPage: number
-    totalPages: number
-    totalResults: number
-    perPage: number
-  }
-  isLoading: boolean
-  progressStatus: ProgressStatus
-  hasSearched: boolean
-  error: ApiError | null
-}
-
-/**
- * フック戻り値の型
- */
-interface UseSlackSearchResult extends UseSlackSearchState {
-  handleSearch: (params: SlackSearchParams) => Promise<void>
-  canRetry: boolean
-  retrySearch: () => void
-}
-
-/**
- * フックオプション（アダプター注入用）
- */
-interface UseSlackSearchOptions {
-  adapter?: SlackAdapter
-}
 
 /**
  * Slack検索機能のカスタムフック（アダプターパターン使用）

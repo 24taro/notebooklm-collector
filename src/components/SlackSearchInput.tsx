@@ -5,11 +5,7 @@
  * - 無効化状態の対応
  */
 
-type SlackSearchInputProps = {
-  searchQuery: string
-  onSearchQueryChange: (query: string) => void
-  disabled?: boolean
-}
+import type { SlackSearchInputProps } from '@/types/forms'
 
 export function SlackSearchInput({ searchQuery, onSearchQueryChange, disabled = false }: SlackSearchInputProps) {
   return (

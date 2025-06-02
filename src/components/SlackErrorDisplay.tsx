@@ -4,9 +4,7 @@
  * - エラーアイコンとメッセージのスタイリング
  */
 
-type SlackErrorDisplayProps = {
-  error: string | null
-}
+import type { SlackErrorDisplayProps } from '@/types/forms'
 
 export function SlackErrorDisplay({ error }: SlackErrorDisplayProps) {
   if (!error) return null
