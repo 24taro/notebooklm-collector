@@ -6,17 +6,15 @@ import { defineConfig, devices } from '@playwright/test'
 export default defineConfig({
   testDir: './tests',
   /* Run tests in files in parallel */
-  fullyParallel: false, // Storybookの安定性のため並列実行を無効化
+  fullyParallel: true,
   /* Fail the build on CI if you accidentally left test.only in the source code. */
   forbidOnly: !!process.env.CI,
   /* Retry on CI only */
   retries: process.env.CI ? 2 : 0,
   /* Opt out of parallel tests on CI. */
-  workers: 1, // 安定性のため常に1ワーカー
+  workers: process.env.CI ? 1 : undefined,
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
-  reporter: [['list'], ['html', { outputFolder: 'playwright-report' }]],
-  /* Test timeout */
-  timeout: 60000, // 60秒に延長
+  reporter: 'html',
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
@@ -24,52 +22,22 @@ export default defineConfig({
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: 'on-first-retry',
-    
-    /* Screenshot on failure */
-    screenshot: 'only-on-failure',
-    
-    /* Video recording */
-    video: 'retain-on-failure',
-    
-    /* Action timeout */
-    actionTimeout: 15000, // 15秒に延長
-    
-    /* Navigation timeout */
-    navigationTimeout: 45000, // 45秒に延長
   },
 
   /* Configure projects for major browsers */
   projects: [
     {
       name: 'chromium',
-      use: { 
-        ...devices['Desktop Chrome'],
-        launchOptions: {
-          args: [
-            '--disable-dev-shm-usage',
-            '--no-sandbox', 
-            '--disable-setuid-sandbox',
-            '--disable-gpu',
-            '--disable-web-security',
-            '--disable-features=IsolateOrigins',
-            '--disable-site-isolation-trials'
-          ],
-          slowMo: process.env.CI ? 100 : 0 // CI環境では操作を少し遅くする
-        },
-        contextOptions: {
-          // iframeのセキュリティ制限を緩和
-          bypassCSP: true,
-        }
-      },
+      use: { ...devices['Desktop Chrome'] },
     },
   ],
 
   /* Run your local dev server before starting the tests */
-  webServer: process.env.SKIP_WEBSERVER ? undefined : {
-    command: 'npm run storybook -- --no-open --quiet',
+  webServer: {
+    command: 'npm run storybook -- --no-open',
     url: 'http://localhost:6006',
     reuseExistingServer: !process.env.CI,
-    timeout: 180 * 1000,
+    timeout: 120 * 1000,
     stdout: 'pipe',
     stderr: 'pipe',
   },

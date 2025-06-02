@@ -4,8 +4,7 @@
  * エラー復旧機能の動作確認テスト
  */
 
-import { renderHook } from '@testing-library/react'
-import { act } from 'react'
+import { renderHook, act } from '@testing-library/react'
 import { describe, test, expect, beforeEach, afterEach, afterAll, vi } from 'vitest'
 import { useErrorRecovery } from '../../hooks/useErrorRecovery'
 

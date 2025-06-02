@@ -3,21 +3,9 @@ import '@testing-library/jest-dom';
 import { expect, afterEach } from 'vitest';
 import { cleanup } from '@testing-library/react';
 import * as matchers from '@testing-library/jest-dom/matchers';
-import { act } from 'react';
-
-// React 19のact()環境設定
-// @ts-expect-error グローバル変数の型定義
-globalThis.IS_REACT_ACT_ENVIRONMENT = true;
 
 // jest-domのマッチャーを拡張
 expect.extend(matchers);
-
-// React 19互換のact wrapper
-export const actCompat = async (callback: () => void | Promise<void>) => {
-  await act(async () => {
-    await callback();
-  });
-};
 
 // 各テスト後にReactコンポーネントをクリーンアップ
 afterEach(() => {

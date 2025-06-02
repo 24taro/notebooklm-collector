@@ -1,6 +1,5 @@
 import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest'
-import { renderHook, waitFor } from '@testing-library/react'
-import { act } from 'react'
+import { renderHook, act, waitFor } from '@testing-library/react'
 import { useDownload } from '../../hooks/useDownload'
 import type { downloadMarkdownFile as downloadMarkdownFileType } from '../../utils/fileDownloader'
 

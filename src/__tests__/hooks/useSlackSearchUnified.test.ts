@@ -1,6 +1,5 @@
 import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest'
-import { renderHook, waitFor } from '@testing-library/react'
-import { act } from 'react'
+import { renderHook, act, waitFor } from '@testing-library/react'
 import { ok, err } from 'neverthrow'
 import { useSlackSearchUnified, type SlackSearchParams } from '../../hooks/useSlackSearchUnified'
 import type { SlackAdapter } from '../../adapters/slackAdapter'
