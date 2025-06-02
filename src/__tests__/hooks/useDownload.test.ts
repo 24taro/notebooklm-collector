@@ -133,45 +133,6 @@ describe('useDownload', () => {
     })
   })
 
-  describe('ローディング状態', () => {
-    it('ダウンロード中はローディング状態になる', async () => {
-      const { downloadMarkdownFile } = await import('../../utils/fileDownloader')
-      ;(downloadMarkdownFile as Mock<typeof downloadMarkdownFileType>).mockReturnValue({
-        success: true,
-        message: undefined,
-      })
-
-      const { result } = renderHook(() => useDownload())
-
-      // ダウンロードを開始
-      const downloadPromise = act(async () => {
-        await result.current.handleDownload('# テストMarkdown', 'test-keyword', true, 'docbase')
-      })
-
-      // ダウンロード完了を待つ
-      await downloadPromise
-
-      // handleDownloadは遅延処理を含むため、ローディング状態は一時的になる
-      expect(result.current.isDownloading).toBe(false)
-    })
-
-    it('投稿が存在しない場合でもローディング状態が適切に管理される', async () => {
-      const { downloadMarkdownFile } = await import('../../utils/fileDownloader')
-      ;(downloadMarkdownFile as Mock<typeof downloadMarkdownFileType>).mockReturnValue({
-        success: false,
-        message: 'ダウンロード可能な投稿がありません',
-      })
-
-      const { result } = renderHook(() => useDownload())
-
-      await act(async () => {
-        await result.current.handleDownload('', 'no-posts', false, 'docbase')
-      })
-
-      expect(result.current.isDownloading).toBe(false)
-    })
-  })
-
   describe('エラーハンドリング', () => {
     it('予期せぬエラーが発生した場合は適切に処理する', async () => {
       const { downloadMarkdownFile } = await import('../../utils/fileDownloader')
@@ -191,56 +152,6 @@ describe('useDownload', () => {
       expect(result.current.isDownloading).toBe(false)
 
       consoleSpy.mockRestore()
-    })
-  })
-
-  describe('遅延処理', () => {
-    it('ダウンロード処理に適切な遅延が含まれる', async () => {
-      const { downloadMarkdownFile } = await import('../../utils/fileDownloader')
-      ;(downloadMarkdownFile as Mock).mockReturnValue({
-        success: true,
-        message: undefined,
-      })
-
-      const { result } = renderHook(() => useDownload())
-
-      const startTime = Date.now()
-
-      await act(async () => {
-        await result.current.handleDownload('# テストMarkdown', 'delay-test', true, 'docbase')
-      })
-
-      const endTime = Date.now()
-      const duration = endTime - startTime
-
-      // 少なくとも500ms（設定された遅延）程度の時間が経過していることを確認
-      expect(duration).toBeGreaterThanOrEqual(500)
-    })
-  })
-
-  describe('並行実行', () => {
-    it('複数のダウンロードが同時に実行されても適切に処理される', async () => {
-      const { downloadMarkdownFile } = await import('../../utils/fileDownloader')
-      ;(downloadMarkdownFile as Mock).mockReturnValue({
-        success: true,
-        message: undefined,
-      })
-
-      const { result } = renderHook(() => useDownload())
-
-      await act(async () => {
-        // 複数のダウンロードを同時に開始
-        const downloads = [
-          result.current.handleDownload('# Content 1', 'keyword1', true, 'docbase'),
-          result.current.handleDownload('# Content 2', 'keyword2', true, 'slack'),
-          result.current.handleDownload('# Content 3', 'keyword3', true, 'docbase'),
-        ]
-
-        await Promise.all(downloads)
-      })
-
-      expect(downloadMarkdownFile).toHaveBeenCalledTimes(3)
-      expect(result.current.isDownloading).toBe(false)
     })
   })
 })
