@@ -89,7 +89,6 @@ jobs:
           path: |
             ~/.cache/ms-playwright
             ~/Library/Caches/ms-playwright
-            %USERPROFILE%\AppData\Local\ms-playwright
           key: ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.version }}-${{ hashFiles('**/package-lock.json') }}
           restore-keys: |
             ${{ runner.os }}-playwright-${{ steps.playwright-version.outputs.version }}-
@@ -112,7 +111,6 @@ jobs:
         run: npm run test:e2e
         env:
           CI: true
-          DEBUG: pw:api
         timeout-minutes: 10
 
       - name: Upload Playwright report
@@ -174,4 +172,3 @@ jobs:
 
       - name: Run dependency audit
         run: npm audit --audit-level=moderate
-        continue-on-error: true

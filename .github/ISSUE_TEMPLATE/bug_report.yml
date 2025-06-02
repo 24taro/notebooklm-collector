@@ -111,3 +111,4 @@ body:
           required: true
         - label: 最新バージョンで問題が発生することを確認しました
           required: true
+

@@ -121,3 +121,4 @@ body:
           required: true
         - label: この改善がプロジェクトの品質向上に貢献することを確認しました
           required: true
+
