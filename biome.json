@@ -38,6 +38,7 @@
       "out/**",
       "coverage/**",
       ".claude/**",
+      "next.config.js",
       "postcss.config.mjs",
       "tailwind.config.ts",
       "tsconfig.json"
