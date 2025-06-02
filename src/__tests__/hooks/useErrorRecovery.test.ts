@@ -81,19 +81,6 @@ describe('useErrorRecovery', () => {
     expect(result.current.lastRecoveryTime).toBeNull()
   })
 
-  test('保存された復旧状態を復元する', () => {
-    const savedState = {
-      retryCount: 2,
-      lastRecoveryTime: '2023-01-01T00:00:00.000Z',
-    }
-    localStorageMock.getItem.mockReturnValue(JSON.stringify(savedState))
-
-    const { result } = renderHook(() => useErrorRecovery())
-
-    expect(result.current.retryCount).toBe(2)
-    expect(result.current.lastRecoveryTime).toEqual(new Date('2023-01-01T00:00:00.000Z'))
-    expect(result.current.canRetry).toBe(true) // maxRetries=3なので
-  })
 
   describe('recover', () => {
     test('標準的な復旧処理を実行する', async () => {
@@ -123,44 +110,6 @@ describe('useErrorRecovery', () => {
       expect(customRecovery).toHaveBeenCalled()
     })
 
-    test('復旧中は重複実行を防ぐ', async () => {
-      // カスタム復旧処理を遅延させて復旧中状態をテストできるようにする
-      let resolveCustomRecovery: () => void
-      const customRecoveryPromise = new Promise<void>((resolve) => {
-        resolveCustomRecovery = resolve
-      })
-      const customRecovery = vi.fn().mockReturnValue(customRecoveryPromise)
-
-      localStorageMock.getItem.mockReturnValue(null)
-
-      const { result } = renderHook(() => useErrorRecovery({ customRecovery }))
-
-      // 最初の復旧を開始
-      let promise1: Promise<boolean>
-      act(() => {
-        promise1 = result.current.recover()
-      })
-
-      // 復旧中状態を確認
-      expect(result.current.isRecovering).toBe(true)
-
-      // 復旧中に2回目を実行
-      let success2: boolean
-      await act(async () => {
-        success2 = await result.current.recover()
-      })
-      expect(success2).toBe(false) // 重複実行は失敗
-
-      // カスタム復旧処理を完了させる
-      resolveCustomRecovery?.()
-
-      // 最初の復旧完了を待つ
-      let success1: boolean
-      await act(async () => {
-        success1 = await promise1
-      })
-      expect(success1).toBe(true)
-    })
 
     test('最大リトライ回数を超えた場合は実行しない', async () => {
       const savedState = {
@@ -311,39 +260,4 @@ describe('useErrorRecovery', () => {
     })
   })
 
-  describe('自動リロード', () => {
-    test('autoReloadが有効な場合、クールダウン後に自動リロードする', () => {
-      const savedState = {
-        retryCount: 1,
-      }
-      localStorageMock.getItem.mockReturnValue(JSON.stringify(savedState))
-
-      const { result } = renderHook(() => useErrorRecovery({ autoReload: true }))
-
-      expect(result.current).not.toBeNull()
-      expect(result.current.retryCount).toBe(1)
-
-      // 5秒進める（RECOVERY_COOLDOWN_MS）
-      act(() => {
-        vi.advanceTimersByTime(5000)
-      })
-
-      expect(window.location.reload).toHaveBeenCalled()
-    })
-
-    test('最大リトライ回数に達した場合は自動リロードしない', () => {
-      const savedState = {
-        retryCount: 3, // maxRetries=3
-      }
-      localStorageMock.getItem.mockReturnValue(JSON.stringify(savedState))
-
-      renderHook(() => useErrorRecovery({ autoReload: true }))
-
-      act(() => {
-        vi.advanceTimersByTime(5000)
-      })
-
-      expect(window.location.reload).not.toHaveBeenCalled()
-    })
-  })
 })

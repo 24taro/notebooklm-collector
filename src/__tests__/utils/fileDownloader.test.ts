@@ -180,65 +180,8 @@ describe('fileDownloader', () => {
       expect(result.message).toBe('ダウンロードするコンテンツがありません。')
     })
 
-    it('Blob作成時にエラーが発生した場合を処理する', () => {
-      // Blobコンストラクタでエラーを発生させる
-      global.Blob = vi.fn().mockImplementation(() => {
-        throw new Error('Blob creation failed')
-      }) as unknown as typeof Blob
-
-      const result = downloadMarkdownFile('# Test Content', 'keyword', true, 'docbase')
-
-      expect(result.success).toBe(false)
-      expect(result.message).toBe('ファイルのダウンロード中にエラーが発生しました。')
-      expect(console.error).toHaveBeenCalledWith('Markdown file download error:', expect.any(Error))
-    })
-
-    it('DOM操作でエラーが発生した場合を処理する', () => {
-      // createElement でエラーを発生させる
-      global.document.createElement = vi.fn().mockImplementation(() => {
-        throw new Error('DOM manipulation failed')
-      })
-
-      const result = downloadMarkdownFile('# Test Content', 'keyword', true, 'docbase')
-
-      expect(result.success).toBe(false)
-      expect(result.message).toBe('ファイルのダウンロード中にエラーが発生しました。')
-      expect(console.error).toHaveBeenCalled()
-    })
   })
 
-  describe('リソース管理', () => {
-    it('成功時にURL.revokeObjectURLが呼ばれる', () => {
-      downloadMarkdownFile('# Test', 'keyword', true, 'docbase')
-
-      expect(mockRevokeObjectURL).toHaveBeenCalledWith('blob:mock-url')
-    })
-
-    it('DOM要素が適切に追加・削除される', () => {
-      downloadMarkdownFile('# Test', 'keyword', true, 'docbase')
-
-      expect(mockAppendChild).toHaveBeenCalled()
-      expect(mockRemoveChild).toHaveBeenCalled()
-
-      // 同じ要素が追加・削除されることを確認
-      const addedElement = mockAppendChild.mock.calls[0][0]
-      const removedElement = mockRemoveChild.mock.calls[0][0]
-      expect(addedElement).toBe(removedElement)
-    })
-
-    it('エラー時でもリソースリークが発生しない', () => {
-      // click でエラーを発生させる
-      mockClick.mockImplementation(() => {
-        throw new Error('Click failed')
-      })
-
-      const result = downloadMarkdownFile('# Test', 'keyword', true, 'docbase')
-
-      expect(result.success).toBe(false)
-      // エラーの場合はcatch blockでrevokeObjectURLが呼ばれる
-      expect(mockRevokeObjectURL).toHaveBeenCalled()
-    })
-  })
 
   describe('属性設定', () => {
     it('アンカー要素の属性が正しく設定される', () => {

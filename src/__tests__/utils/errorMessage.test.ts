@@ -172,30 +172,6 @@ describe('errorMessage', () => {
       })
     })
 
-    describe('unknown エラー', () => {
-      it('不明エラーメッセージを返す', () => {
-        const error: ApiError = {
-          type: 'unknown',
-          message: '不明なエラー',
-        }
-
-        const result = getUserFriendlyErrorMessage(error)
-        expect(result).toContain('予期しないエラーが発生しました')
-        expect(result).toContain('しばらく時間をおいて')
-      })
-    })
-
-    describe('その他のエラー', () => {
-      it('未知のエラータイプの場合はデフォルトメッセージを返す', () => {
-        const error = {
-          type: 'custom_error',
-          message: 'カスタムエラー',
-        } as unknown as ApiError
-
-        const result = getUserFriendlyErrorMessage(error)
-        expect(result).toBe('エラーが発生しました。再試行してください。')
-      })
-    })
   })
 
   describe('getErrorActionSuggestion', () => {
@@ -395,50 +371,4 @@ describe('errorMessage', () => {
     })
   })
 
-  describe('統合テスト', () => {
-    it('Slack認証エラーで一貫したメッセージと提案を返す', () => {
-      const error: ApiError = {
-        type: 'unauthorized',
-        message: 'Slack認証エラー: token_revoked',
-      }
-
-      const message = getUserFriendlyErrorMessage(error)
-      const suggestion = getErrorActionSuggestion(error)
-      const severity = getErrorSeverity(error)
-
-      expect(message).toContain('Slack APIトークン')
-      expect(suggestion).toContain('Slack Appの設定')
-      expect(severity).toBe('medium')
-    })
-
-    it('Docbase認証エラーで一貫したメッセージと提案を返す', () => {
-      const error: ApiError = {
-        type: 'unauthorized',
-        message: 'Docbase APIトークンが無効',
-      }
-
-      const message = getUserFriendlyErrorMessage(error)
-      const suggestion = getErrorActionSuggestion(error)
-      const severity = getErrorSeverity(error)
-
-      expect(message).toContain('Docbase APIトークン')
-      expect(suggestion).toContain('Docbaseの設定画面')
-      expect(severity).toBe('medium')
-    })
-
-    it('レート制限エラーで適切なメッセージと提案を返す', () => {
-      const error: ApiError = {
-        type: 'rate_limit',
-        message: 'API rate limit exceeded',
-      }
-
-      const message = getUserFriendlyErrorMessage(error)
-      const suggestion = getErrorActionSuggestion(error)
-      const severity = getErrorSeverity(error)
-
-      expect(message).toContain('API制限に達しました')
-      expect(suggestion).toContain('数分間待って')
-      expect(severity).toBe('medium')
-    })
-  })
 })

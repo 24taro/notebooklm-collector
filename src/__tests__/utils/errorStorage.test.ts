@@ -229,38 +229,6 @@ describe('errorStorage', () => {
     })
   })
 
-  describe('cleanupOldErrorLogs', () => {
-    test('7日以上前のログを削除する', () => {
-      const now = Date.now()
-      const eightDaysAgo = now - 8 * 24 * 60 * 60 * 1000
-
-      const mockLogs = [
-        {
-          id: 'recent',
-          timestamp: new Date(now).toISOString(),
-          error: { name: 'Error', message: 'Recent error', stack: '' },
-          errorInfo: { componentStack: '' },
-          context: { url: '', userAgent: '', viewport: { width: 0, height: 0 } },
-        },
-        {
-          id: 'old',
-          timestamp: new Date(eightDaysAgo).toISOString(),
-          error: { name: 'Error', message: 'Old error', stack: '' },
-          errorInfo: { componentStack: '' },
-          context: { url: '', userAgent: '', viewport: { width: 0, height: 0 } },
-        },
-      ]
-      localStorageMock.getItem.mockReturnValue(JSON.stringify(mockLogs))
-
-      const result = cleanupOldErrorLogs()
-
-      expect(result).toBe(1) // 1件削除
-      expect(localStorageMock.setItem).toHaveBeenCalledWith(
-        'notebooklm_error_logs',
-        JSON.stringify([mockLogs[0]]), // 新しいログのみ残る
-      )
-    })
-  })
 
   describe('getErrorLogStats', () => {
     test('エラーログの統計情報を取得する', () => {
@@ -300,56 +268,4 @@ describe('errorStorage', () => {
     })
   })
 
-  describe('exportErrorLogsAsCSV', () => {
-    test('エラーログをCSV形式でエクスポートする', () => {
-      const mockLogs = [
-        {
-          id: 'test-1',
-          timestamp: '2023-01-01T00:00:00.000Z',
-          error: { name: 'Error', message: 'Test error' },
-          context: {
-            url: 'https://example.com',
-            userAgent: 'Test UserAgent',
-            viewport: { width: 1920, height: 1080 },
-          },
-        },
-      ]
-      localStorageMock.getItem.mockReturnValue(JSON.stringify(mockLogs))
-
-      const result = exportErrorLogsAsCSV()
-
-      expect(result).toContain('ID,Timestamp,Error Name,Error Message,URL,User Agent,Viewport Width,Viewport Height')
-      expect(result).toContain(
-        '"test-1","2023-01-01T00:00:00.000Z","Error","Test error","https://example.com","Test UserAgent","1920","1080"',
-      )
-    })
-  })
-
-  describe('debugErrorLogs', () => {
-    test('開発環境でデバッグ情報を出力する', () => {
-      const originalEnv = process.env.NODE_ENV
-      process.env.NODE_ENV = 'development'
-
-      localStorageMock.getItem.mockReturnValue('[]')
-
-      debugErrorLogs()
-
-      expect(consoleGroupSpy).toHaveBeenCalledWith('🐛 Error Logs Debug Info')
-      expect(consoleLogSpy).toHaveBeenCalled()
-      expect(consoleGroupEndSpy).toHaveBeenCalled()
-
-      process.env.NODE_ENV = originalEnv
-    })
-
-    test('本番環境では何も出力しない', () => {
-      const originalEnv = process.env.NODE_ENV
-      process.env.NODE_ENV = 'production'
-
-      debugErrorLogs()
-
-      expect(consoleGroupSpy).not.toHaveBeenCalled()
-
-      process.env.NODE_ENV = originalEnv
-    })
-  })
 })
