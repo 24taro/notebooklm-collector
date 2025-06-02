@@ -93,9 +93,7 @@ export const fetchSlackMessages = async (
       if (response.status === 429) {
         // レートリミットの場合、リトライ処理を実行
         if (retries > 0) {
-          console.warn(
-            `Slack API rate limit exceeded. Retrying in ${backoff}ms... (${retries} retries left)`,
-          )
+          console.warn(`Slack API rate limit exceeded. Retrying in ${backoff}ms... (${retries} retries left)`)
           await sleep(backoff)
           return fetchSlackMessages(token, query, count, page, retries - 1, backoff * 2)
         }
@@ -180,13 +178,10 @@ export const fetchSlackMessages = async (
     if (
       retries > 0 &&
       (e instanceof TypeError ||
-        (e instanceof Error && 
-         (e.message.toLowerCase().includes('failed to fetch') || 
-          e.message.toLowerCase().includes('network error'))))
+        (e instanceof Error &&
+          (e.message.toLowerCase().includes('failed to fetch') || e.message.toLowerCase().includes('network error'))))
     ) {
-      console.warn(
-        `Network error occurred. Retrying in ${backoff}ms... (${retries} retries left)`,
-      )
+      console.warn(`Network error occurred. Retrying in ${backoff}ms... (${retries} retries left)`)
       await sleep(backoff)
       return fetchSlackMessages(token, query, count, page, retries - 1, backoff * 2)
     }

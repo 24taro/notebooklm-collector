@@ -1,5 +1,6 @@
 'use client'
 
+import type { SlackThread } from '@/types/slack'
 import { useEffect, useState } from 'react'
 import type React from 'react'
 import { Toaster } from 'react-hot-toast'
@@ -8,10 +9,9 @@ import Header from '../../components/Header'
 import { SlackHeroSection } from '../../components/SlackHeroSection'
 import { SlackSearchForm } from '../../components/SlackSearchForm'
 import { useDownload } from '../../hooks/useDownload'
-import { useSlackSearchUnified } from '../../hooks/useSlackSearchUnified'
 import useLocalStorage from '../../hooks/useLocalStorage'
+import { useSlackSearchUnified } from '../../hooks/useSlackSearchUnified'
 import { generateSlackThreadsMarkdown } from '../../utils/slackMarkdownGenerator'
-import type { SlackThread } from '@/types/slack'
 
 export default function SlackPage() {
   const [token, setToken] = useLocalStorage<string>('slackApiToken', '')
@@ -21,13 +21,14 @@ export default function SlackPage() {
   const [channel, setChannel] = useState<string>('')
   const [author, setAuthor] = useState<string>('')
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
-  
+
   const { isDownloading, handleDownload } = useDownload()
-  
+
   // 統一Slack検索フック
   const {
     isLoading,
     progressStatus,
+    hasSearched,
     error,
     slackThreads,
     userMaps,
@@ -90,7 +91,7 @@ export default function SlackPage() {
       />
       <div className="relative z-10 flex flex-col items-center w-full">
         <SlackHeroSection />
-        
+
         {/* メイン機能セクション */}
         <section id="main-tool-section" className="w-full my-12 bg-white">
           <div className="max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12 shadow-md rounded-lg border border-gray-200">
@@ -114,6 +115,7 @@ export default function SlackPage() {
                 isLoading={isLoading}
                 isDownloading={isDownloading}
                 progressStatus={progressStatus}
+                hasSearched={hasSearched}
                 error={error?.message || null}
                 slackThreads={slackThreads}
                 userMaps={userMaps}

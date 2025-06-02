@@ -11,7 +11,7 @@ export const downloadMarkdownFile = (
   markdownContent: string,
   keyword: string,
   postsExist: boolean,
-  sourceType: 'docbase' | 'slack' = 'docbase'
+  sourceType: 'docbase' | 'slack' = 'docbase',
 ): { success: boolean; message?: string } => {
   // 投稿が存在しない、またはMarkdownコンテントが空の場合はダウンロードしない
   if (!postsExist || !markdownContent.trim()) {
@@ -22,11 +22,12 @@ export const downloadMarkdownFile = (
     }
   }
 
+  let url: string | null = null
   try {
     const blob = new Blob([markdownContent], {
       type: 'text/markdown;charset=utf-8',
     })
-    const url = URL.createObjectURL(blob)
+    url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
 
@@ -38,7 +39,7 @@ export const downloadMarkdownFile = (
     const dateStr = `${year}-${month}-${day}`
 
     // キーワードをファイル名に安全な形式に変換
-    const safeKeyword = keyword.trim() 
+    const safeKeyword = keyword.trim()
       ? keyword.trim().replace(/[^a-zA-Z0-9\u3040-\u309F\u30A0-\u30FF\u4E00-\u9FAF]/g, '_')
       : 'search'
 
@@ -52,6 +53,10 @@ export const downloadMarkdownFile = (
     return { success: true }
   } catch (error) {
     console.error('Markdown file download error:', error)
+    // エラーの場合でもリソースをクリーンアップ
+    if (url) {
+      URL.revokeObjectURL(url)
+    }
     return {
       success: false,
       message: 'ファイルのダウンロード中にエラーが発生しました。',

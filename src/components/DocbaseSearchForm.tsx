@@ -7,8 +7,8 @@ import { useSearch } from '../hooks/useSearch'
 import type { ApiError } from '../types/error'
 import { generateMarkdown } from '../utils/markdownGenerator'
 import { DocbaseDomainInput } from './DocbaseDomainInput'
-import { MarkdownPreview } from './MarkdownPreview'
 import { DocbaseTokenInput } from './DocbaseTokenInput'
+import { MarkdownPreview } from './MarkdownPreview'
 
 const LOCAL_STORAGE_DOMAIN_KEY = 'docbaseDomain'
 const LOCAL_STORAGE_TOKEN_KEY = 'docbaseToken'
@@ -308,7 +308,7 @@ const SearchForm = () => {
 
         {posts && posts.length > 0 && !isLoading && !error && (
           <div className="mt-6 pt-5 border-t border-gray-200">
-            <MarkdownPreview 
+            <MarkdownPreview
               markdown={markdownContent}
               title="Markdownプレビュー"
               onDownload={handleDownloadClick}

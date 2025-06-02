@@ -165,7 +165,11 @@ const ThreadCard: FC<ThreadCardProps> = ({
 
       {/* 展開/折りたたみボタン */}
       <div className="mt-3 flex justify-between items-center">
-        <button type="button" onClick={() => onToggleExpansion(thread.parent.ts)} className="text-blue-600 text-sm hover:underline">
+        <button
+          type="button"
+          onClick={() => onToggleExpansion(thread.parent.ts)}
+          className="text-blue-600 text-sm hover:underline"
+        >
           {isExpanded
             ? thread.parent.text.length > 200 || replyCount > 0
               ? '折りたたむ'

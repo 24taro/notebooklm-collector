@@ -1,9 +1,9 @@
 // Slack APIアダプター実装
 // HTTPクライアントアダプターを使用してSlack APIにアクセスし、Result型で結果を返す
 
-import { err, ok, type Result } from 'neverthrow'
-import type { SlackMessage, SlackThread, SlackUser } from '../types/slack'
+import { type Result, err, ok } from 'neverthrow'
 import type { ApiError } from '../types/error'
+import type { SlackMessage, SlackThread, SlackUser } from '../types/slack'
 import type { HttpClient } from './types'
 
 /**
@@ -188,7 +188,7 @@ export function createSlackAdapter(httpClient: HttpClient): SlackAdapter {
       const { token, channel, messageTs } = params
 
       const url = `${API_BASE_URL}/chat.getPermalink?channel=${encodeURIComponent(
-        channel
+        channel,
       )}&message_ts=${encodeURIComponent(messageTs)}`
 
       const result = await httpClient.fetch<SlackApiResponse>(url, {
@@ -310,7 +310,7 @@ function mapSlackErrorToApiError(errorCode: string): ApiError {
  */
 function extractMessagesFromResponse(data: SlackApiResponse): SlackMessage[] {
   const messages: SlackMessage[] = []
-  
+
   if (data.messages && typeof data.messages === 'object' && data.messages !== null) {
     const msgObj = data.messages as Record<string, unknown>
     if ('matches' in msgObj && Array.isArray(msgObj.matches)) {
@@ -333,7 +333,7 @@ function extractMessagesFromResponse(data: SlackApiResponse): SlackMessage[] {
       })
     }
   }
-  
+
   return messages
 }
 

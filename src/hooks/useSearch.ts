@@ -1,11 +1,11 @@
 import type { Result } from 'neverthrow' // Resultを型としてインポート (typeキーワードを明示)
 import { useCallback, useState } from 'react'
 import toast from 'react-hot-toast' // react-hot-toastをインポート
-import { createDocbaseAdapter, type DocbaseAdapter } from '../adapters/docbaseAdapter'
+import { type DocbaseAdapter, createDocbaseAdapter } from '../adapters/docbaseAdapter'
 import { createFetchHttpClient } from '../adapters/fetchHttpClient'
 import type { DocbasePostListItem } from '../types/docbase'
 import type { ApiError } from '../types/error'
-import { getUserFriendlyErrorMessage, getErrorActionSuggestion } from '../utils/errorMessage'
+import { getErrorActionSuggestion, getUserFriendlyErrorMessage } from '../utils/errorMessage'
 
 // 詳細検索条件の型定義
 export interface AdvancedFilters {
@@ -80,7 +80,7 @@ export const useSearch = (options?: UseSearchOptions): UseSearchResult => {
         // ユーザーフレンドリーなエラーメッセージでトースト通知
         const friendlyMessage = getUserFriendlyErrorMessage(apiError)
         toast.error(friendlyMessage)
-        
+
         // リトライ可能なエラーの場合は手動再試行を許可
         if (apiError.type === 'rate_limit' || apiError.type === 'network' || apiError.type === 'unknown') {
           setCanRetry(true)
@@ -154,14 +154,14 @@ export const useSearch = (options?: UseSearchOptions): UseSearchResult => {
     return getErrorActionSuggestion(error)
   }, [error])
 
-  return { 
-    posts, 
-    isLoading, 
-    error, 
-    searchPosts, 
-    canRetry, 
+  return {
+    posts,
+    isLoading,
+    error,
+    searchPosts,
+    canRetry,
     retrySearch,
     getUserFriendlyError,
-    getErrorSuggestion
+    getErrorSuggestion,
   }
 }

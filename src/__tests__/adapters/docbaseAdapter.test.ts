@@ -1,10 +1,9 @@
 // Docbaseアダプターのテスト
 // モックHTTPクライアントを使用してアダプターの動作を検証
 
-// @ts-expect-error Jest型定義の一時的な回避策
-import { describe, expect, it } from '@jest/globals'
+import { describe, expect, it } from 'vitest'
 import { createDocbaseAdapter } from '../../adapters/docbaseAdapter'
-import { createMockHttpClient, createSuccessResponse, createErrorResponse } from '../../adapters/mockHttpClient'
+import { createErrorResponse, createMockHttpClient, createSuccessResponse } from '../../adapters/mockHttpClient'
 import type { DocbasePostsResponse } from '../../types/docbase'
 import type { ApiError } from '../../types/error'
 
@@ -46,7 +45,7 @@ describe('DocbaseAdapter', () => {
       createSuccessResponse(
         `https://api.docbase.io/teams/${mockDomain}/posts?q=%22%E3%83%86%E3%82%B9%E3%83%88%E3%82%AD%E3%83%BC%E3%83%AF%E3%83%BC%E3%83%89%22&page=1&per_page=100`,
         mockPosts,
-        'GET'
+        'GET',
       ),
     ])
 
@@ -77,7 +76,7 @@ describe('DocbaseAdapter', () => {
   })
 
   it('詳細検索条件を含む検索クエリを正しく構築する', async () => {
-    const mockPosts: DocbasePostsResponse = { 
+    const mockPosts: DocbasePostsResponse = {
       posts: [],
       meta: {
         previous_page: null,
@@ -87,9 +86,7 @@ describe('DocbaseAdapter', () => {
     }
     const expectedUrl = `https://api.docbase.io/teams/${mockDomain}/posts?q=%22%E3%83%86%E3%82%B9%E3%83%88%22+tag%3AAPI+author%3Auser123&page=1&per_page=100`
 
-    const mockHttpClient = createMockHttpClient([
-      createSuccessResponse(expectedUrl, mockPosts, 'GET'),
-    ])
+    const mockHttpClient = createMockHttpClient([createSuccessResponse(expectedUrl, mockPosts, 'GET')])
 
     const adapter = createDocbaseAdapter(mockHttpClient)
     const result = await adapter.searchPosts({
@@ -118,7 +115,7 @@ describe('DocbaseAdapter', () => {
       createErrorResponse(
         `https://api.docbase.io/teams/${mockDomain}/posts?q=%22%E3%83%86%E3%82%B9%E3%83%88%E3%82%AD%E3%83%BC%E3%83%AF%E3%83%BC%E3%83%89%22&page=1&per_page=100`,
         unauthorizedError,
-        'GET'
+        'GET',
       ),
     ])
 
@@ -166,12 +163,12 @@ describe('DocbaseAdapter', () => {
       createSuccessResponse(
         `https://api.docbase.io/teams/${mockDomain}/posts?q=%22%E3%83%86%E3%82%B9%E3%83%88%22&page=1&per_page=100`,
         page1Posts,
-        'GET'
+        'GET',
       ),
       createSuccessResponse(
         `https://api.docbase.io/teams/${mockDomain}/posts?q=%22%E3%83%86%E3%82%B9%E3%83%88%22&page=2&per_page=100`,
         page2Posts,
-        'GET'
+        'GET',
       ),
     ])
 
