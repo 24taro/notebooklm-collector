@@ -1,10 +1,10 @@
-import { expect, test } from '@playwright/test'
+import { expect, test, type Page } from '@playwright/test'
 
 // テストのタイムアウトを延長
 test.setTimeout(60000)
 
 test.describe('Storybook動作確認', () => {
-  test('Storybookが正常に起動する', async ({ page }) => {
+  test('Storybookが正常に起動する', async ({ page }: { page: Page }) => {
     await page.goto('/')
 
     // Storybookのタイトルが表示されることを確認
@@ -14,7 +14,7 @@ test.describe('Storybook動作確認', () => {
     await expect(page.locator('[data-item-id="components"]')).toBeVisible()
   })
 
-  test('MarkdownPreview - Default Storyが表示される', async ({ page }) => {
+  test('MarkdownPreview - Default Storyが表示される', async ({ page }: { page: Page }) => {
     await page.goto('/')
 
     // サイドバーが表示されるまで待機
@@ -40,7 +40,7 @@ test.describe('Storybook動作確認', () => {
     await expect(iframe.locator('h2:has-text("機能一覧")')).toBeVisible()
   })
 
-  test('MarkdownPreview - Empty Storyが表示される', async ({ page }) => {
+  test('MarkdownPreview - Empty Storyが表示される', async ({ page }: { page: Page }) => {
     await page.goto('/')
 
     // Empty Storyを選択
@@ -51,7 +51,7 @@ test.describe('Storybook動作確認', () => {
     await expect(iframe.locator('p:has-text("ここにMarkdownプレビューが表示されます。")')).toBeVisible()
   })
 
-  test('SlackAdvancedFilters - Default Storyが表示される', async ({ page }) => {
+  test('SlackAdvancedFilters - Default Storyが表示される', async ({ page }: { page: Page }) => {
     await page.goto('/')
 
     // SlackAdvancedFiltersコンポーネントを展開
@@ -67,7 +67,7 @@ test.describe('Storybook動作確認', () => {
     await expect(iframe.locator('button').filter({ hasText: 'もっと詳細な条件を追加する' }).first()).toBeVisible()
   })
 
-  test('SlackAdvancedFilters - Expanded Storyでフィルターが展開される', async ({ page }) => {
+  test('SlackAdvancedFilters - Expanded Storyでフィルターが展開される', async ({ page }: { page: Page }) => {
     await page.goto('/')
 
     // サイドバーが表示されるまで待機
@@ -90,7 +90,7 @@ test.describe('Storybook動作確認', () => {
     await expect(iframe.locator('input[type="date"]').first()).toBeVisible()
   })
 
-  test('アクセシビリティ - タブキーでのフォーカス移動が正常に動作する', async ({ page }) => {
+  test('アクセシビリティ - タブキーでのフォーカス移動が正常に動作する', async ({ page }: { page: Page }) => {
     await page.goto('/')
 
     // サイドバーが表示されるまで待機
@@ -121,14 +121,14 @@ test.describe('Storybook動作確認', () => {
     await page.keyboard.press('Tab')
 
     // フォーカスの移動を確認（どちらかにフォーカスが当たればOK）
-    const isUserInputFocused = await iframe.locator('input[placeholder="@user"]').isFocused()
-    const isDateInputFocused = await iframe.locator('input[type="date"]').first().isFocused()
+    const isUserInputFocused = await iframe.locator('input[placeholder="@user"]').evaluate((el: HTMLElement) => el === document.activeElement)
+    const isDateInputFocused = await iframe.locator('input[type="date"]').first().evaluate((el: HTMLElement) => el === document.activeElement)
 
     // いずれかの要素にフォーカスが移動していることを確認
     expect(isUserInputFocused || isDateInputFocused).toBeTruthy()
   })
 
-  test('レスポンシブ - モバイル表示で適切にレイアウトされる', async ({ page }) => {
+  test('レスポンシブ - モバイル表示で適切にレイアウトされる', async ({ page }: { page: Page }) => {
     // モバイルサイズに変更
     await page.setViewportSize({ width: 375, height: 667 })
 
@@ -159,7 +159,7 @@ test.describe('Storybook動作確認', () => {
     await expect(container).toBeVisible({ timeout: 15000 })
   })
 
-  test('ダウンロードボタンが正常に動作する', async ({ page }) => {
+  test('ダウンロードボタンが正常に動作する', async ({ page }: { page: Page }) => {
     await page.goto('/')
 
     // MarkdownPreview Default Storyを表示
@@ -177,7 +177,7 @@ test.describe('Storybook動作確認', () => {
     await expect(downloadButton).toBeEnabled()
   })
 
-  test('コードブロックが適切にシンタックスハイライトされる', async ({ page }) => {
+  test('コードブロックが適切にシンタックスハイライトされる', async ({ page }: { page: Page }) => {
     await page.goto('/')
 
     // サイドバーが表示されるまで待機
