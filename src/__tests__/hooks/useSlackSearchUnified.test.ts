@@ -1,10 +1,10 @@
-import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest'
-import { renderHook, act, waitFor } from '@testing-library/react'
-import { ok, err } from 'neverthrow'
-import { useSlackSearchUnified, type SlackSearchParams } from '../../hooks/useSlackSearchUnified'
+import { act, renderHook, waitFor } from '@testing-library/react'
+import { err, ok } from 'neverthrow'
+import { type Mock, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { SlackAdapter } from '../../adapters/slackAdapter'
-import type { SlackMessage, SlackThread, SlackUser } from '../../types/slack'
+import { type SlackSearchParams, useSlackSearchUnified } from '../../hooks/useSlackSearchUnified'
 import type { ApiError } from '../../types/error'
+import type { SlackMessage, SlackThread, SlackUser } from '../../types/slack'
 
 // react-hot-toastのモック
 vi.mock('react-hot-toast', () => {
@@ -12,7 +12,7 @@ vi.mock('react-hot-toast', () => {
   mockToast.success = vi.fn()
   mockToast.error = vi.fn()
   mockToast.dismiss = vi.fn()
-  
+
   return {
     default: mockToast,
   }
@@ -26,7 +26,7 @@ describe('useSlackSearchUnified', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    
+
     // モックデータの準備
     mockMessages = [
       {
@@ -71,7 +71,7 @@ describe('useSlackSearchUnified', () => {
       name: 'testuser',
       real_name: 'Test User',
     }
-    
+
     // モックアダプターの作成
     mockAdapter = {
       searchMessages: vi.fn(),
@@ -109,16 +109,18 @@ describe('useSlackSearchUnified', () => {
 
   describe('検索クエリ構築', () => {
     it('基本的な検索クエリが正しく構築される', async () => {
-      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(ok({
-        messages: [],
-        pagination: { currentPage: 1, totalPages: 1, totalResults: 0, perPage: 20 }
-      }))
+      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(
+        ok({
+          messages: [],
+          pagination: { currentPage: 1, totalPages: 1, totalResults: 0, perPage: 20 },
+        }),
+      )
 
       const { result } = renderHook(() => useSlackSearchUnified({ adapter: mockAdapter }))
 
       const params: SlackSearchParams = {
         token: 'xoxp-test',
-        searchQuery: 'test query'
+        searchQuery: 'test query',
       }
 
       await act(async () => {
@@ -127,16 +129,18 @@ describe('useSlackSearchUnified', () => {
 
       expect(mockAdapter.searchMessages).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: 'test query'
-        })
+          query: 'test query',
+        }),
       )
     })
 
     it('詳細検索条件を含むクエリが正しく構築される', async () => {
-      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(ok({
-        messages: [],
-        pagination: { currentPage: 1, totalPages: 1, totalResults: 0, perPage: 20 }
-      }))
+      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(
+        ok({
+          messages: [],
+          pagination: { currentPage: 1, totalPages: 1, totalResults: 0, perPage: 20 },
+        }),
+      )
 
       const { result } = renderHook(() => useSlackSearchUnified({ adapter: mockAdapter }))
 
@@ -146,7 +150,7 @@ describe('useSlackSearchUnified', () => {
         channel: 'general',
         author: 'john',
         startDate: '2023-01-01',
-        endDate: '2023-12-31'
+        endDate: '2023-12-31',
       }
 
       await act(async () => {
@@ -155,23 +159,25 @@ describe('useSlackSearchUnified', () => {
 
       expect(mockAdapter.searchMessages).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: 'meeting in:#general from:@john after:2023-01-01 before:2023-12-31'
-        })
+          query: 'meeting in:#general from:@john after:2023-01-01 before:2023-12-31',
+        }),
       )
     })
 
     it('チャンネル名から#プレフィックスを除去する', async () => {
-      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(ok({
-        messages: [],
-        pagination: { currentPage: 1, totalPages: 1, totalResults: 0, perPage: 20 }
-      }))
+      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(
+        ok({
+          messages: [],
+          pagination: { currentPage: 1, totalPages: 1, totalResults: 0, perPage: 20 },
+        }),
+      )
 
       const { result } = renderHook(() => useSlackSearchUnified({ adapter: mockAdapter }))
 
       const params: SlackSearchParams = {
         token: 'xoxp-test',
         searchQuery: 'test',
-        channel: '#general'
+        channel: '#general',
       }
 
       await act(async () => {
@@ -180,23 +186,25 @@ describe('useSlackSearchUnified', () => {
 
       expect(mockAdapter.searchMessages).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: 'test in:#general'
-        })
+          query: 'test in:#general',
+        }),
       )
     })
 
     it('作者名から@プレフィックスを除去する', async () => {
-      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(ok({
-        messages: [],
-        pagination: { currentPage: 1, totalPages: 1, totalResults: 0, perPage: 20 }
-      }))
+      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(
+        ok({
+          messages: [],
+          pagination: { currentPage: 1, totalPages: 1, totalResults: 0, perPage: 20 },
+        }),
+      )
 
       const { result } = renderHook(() => useSlackSearchUnified({ adapter: mockAdapter }))
 
       const params: SlackSearchParams = {
         token: 'xoxp-test',
         searchQuery: 'test',
-        author: '@john'
+        author: '@john',
       }
 
       await act(async () => {
@@ -205,8 +213,8 @@ describe('useSlackSearchUnified', () => {
 
       expect(mockAdapter.searchMessages).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: 'test from:@john'
-        })
+          query: 'test from:@john',
+        }),
       )
     })
   })
@@ -218,7 +226,7 @@ describe('useSlackSearchUnified', () => {
       await act(async () => {
         await result.current.handleSearch({
           token: '',
-          searchQuery: 'test'
+          searchQuery: 'test',
         })
       })
 
@@ -231,7 +239,7 @@ describe('useSlackSearchUnified', () => {
       await act(async () => {
         await result.current.handleSearch({
           token: 'xoxp-test',
-          searchQuery: ''
+          searchQuery: '',
         })
       })
 
@@ -241,10 +249,12 @@ describe('useSlackSearchUnified', () => {
 
   describe('検索成功', () => {
     it('検索が成功した場合、結果を正しく更新する', async () => {
-      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(ok({
-        messages: mockMessages,
-        pagination: { currentPage: 1, totalPages: 1, totalResults: 2, perPage: 20 }
-      }))
+      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(
+        ok({
+          messages: mockMessages,
+          pagination: { currentPage: 1, totalPages: 1, totalResults: 2, perPage: 20 },
+        }),
+      )
       ;(mockAdapter.getThreadMessages as Mock).mockResolvedValue(ok(mockThread))
       ;(mockAdapter.getPermalink as Mock).mockResolvedValue(ok('https://slack.com/permalink'))
       ;(mockAdapter.getUserInfo as Mock).mockResolvedValue(ok(mockUser))
@@ -254,7 +264,7 @@ describe('useSlackSearchUnified', () => {
       await act(async () => {
         await result.current.handleSearch({
           token: 'xoxp-test',
-          searchQuery: 'test'
+          searchQuery: 'test',
         })
       })
 
@@ -267,17 +277,19 @@ describe('useSlackSearchUnified', () => {
     })
 
     it('検索結果が0件の場合、適切にメッセージを表示する', async () => {
-      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(ok({
-        messages: [],
-        pagination: { currentPage: 1, totalPages: 1, totalResults: 0, perPage: 20 }
-      }))
+      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(
+        ok({
+          messages: [],
+          pagination: { currentPage: 1, totalPages: 1, totalResults: 0, perPage: 20 },
+        }),
+      )
 
       const { result } = renderHook(() => useSlackSearchUnified({ adapter: mockAdapter }))
 
       await act(async () => {
         await result.current.handleSearch({
           token: 'xoxp-test',
-          searchQuery: 'no results'
+          searchQuery: 'no results',
         })
       })
 
@@ -297,13 +309,14 @@ describe('useSlackSearchUnified', () => {
           text: '同じスレッドの別メッセージ',
           thread_ts: '1234567890.123456',
           channel: { id: 'C123456', name: 'general' },
-        }
+        },
       ]
-
-      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(ok({
-        messages: duplicateMessages,
-        pagination: { currentPage: 1, totalPages: 1, totalResults: 3, perPage: 20 }
-      }))
+      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(
+        ok({
+          messages: duplicateMessages,
+          pagination: { currentPage: 1, totalPages: 1, totalResults: 3, perPage: 20 },
+        }),
+      )
       ;(mockAdapter.getThreadMessages as Mock).mockResolvedValue(ok(mockThread))
       ;(mockAdapter.getPermalink as Mock).mockResolvedValue(ok('https://slack.com/permalink'))
       ;(mockAdapter.getUserInfo as Mock).mockResolvedValue(ok(mockUser))
@@ -313,7 +326,7 @@ describe('useSlackSearchUnified', () => {
       await act(async () => {
         await result.current.handleSearch({
           token: 'xoxp-test',
-          searchQuery: 'test'
+          searchQuery: 'test',
         })
       })
 
@@ -327,30 +340,36 @@ describe('useSlackSearchUnified', () => {
 
   describe('ページネーション', () => {
     it('複数ページの検索結果を取得する', async () => {
-      const page1Messages = Array(100).fill(null).map((_, i) => ({
-        ts: `1234567890.12345${i}`,
-        user: 'U123456',
-        text: `メッセージ${i}`,
-        channel: { id: 'C123456' },
-      }))
+      const page1Messages = Array(100)
+        .fill(null)
+        .map((_, i) => ({
+          ts: `1234567890.12345${i}`,
+          user: 'U123456',
+          text: `メッセージ${i}`,
+          channel: { id: 'C123456' },
+        }))
 
-      const page2Messages = Array(50).fill(null).map((_, i) => ({
-        ts: `1234567900.12345${i}`,
-        user: 'U123456',
-        text: `メッセージ${100 + i}`,
-        channel: { id: 'C123456' },
-      }))
-
+      const page2Messages = Array(50)
+        .fill(null)
+        .map((_, i) => ({
+          ts: `1234567900.12345${i}`,
+          user: 'U123456',
+          text: `メッセージ${100 + i}`,
+          channel: { id: 'C123456' },
+        }))
       ;(mockAdapter.searchMessages as Mock)
-        .mockResolvedValueOnce(ok({
-          messages: page1Messages,
-          pagination: { currentPage: 1, totalPages: 2, totalResults: 150, perPage: 100 }
-        }))
-        .mockResolvedValueOnce(ok({
-          messages: page2Messages,
-          pagination: { currentPage: 2, totalPages: 2, totalResults: 150, perPage: 100 }
-        }))
-
+        .mockResolvedValueOnce(
+          ok({
+            messages: page1Messages,
+            pagination: { currentPage: 1, totalPages: 2, totalResults: 150, perPage: 100 },
+          }),
+        )
+        .mockResolvedValueOnce(
+          ok({
+            messages: page2Messages,
+            pagination: { currentPage: 2, totalPages: 2, totalResults: 150, perPage: 100 },
+          }),
+        )
       ;(mockAdapter.getThreadMessages as Mock).mockResolvedValue(ok(mockThread))
       ;(mockAdapter.getPermalink as Mock).mockResolvedValue(ok('https://slack.com/permalink'))
       ;(mockAdapter.getUserInfo as Mock).mockResolvedValue(ok(mockUser))
@@ -360,7 +379,7 @@ describe('useSlackSearchUnified', () => {
       await act(async () => {
         await result.current.handleSearch({
           token: 'xoxp-test',
-          searchQuery: 'test'
+          searchQuery: 'test',
         })
       })
 
@@ -375,7 +394,7 @@ describe('useSlackSearchUnified', () => {
     it('検索エラーの場合、適切にエラー状態を設定する', async () => {
       const error: ApiError = {
         type: 'unauthorized',
-        message: '認証エラー'
+        message: '認証エラー',
       }
       ;(mockAdapter.searchMessages as Mock).mockResolvedValue(err(error))
 
@@ -384,7 +403,7 @@ describe('useSlackSearchUnified', () => {
       await act(async () => {
         await result.current.handleSearch({
           token: 'invalid-token',
-          searchQuery: 'test'
+          searchQuery: 'test',
         })
       })
 
@@ -396,7 +415,7 @@ describe('useSlackSearchUnified', () => {
     it('ネットワークエラーの場合、リトライ可能にする', async () => {
       const error: ApiError = {
         type: 'network',
-        message: 'ネットワークエラー'
+        message: 'ネットワークエラー',
       }
       ;(mockAdapter.searchMessages as Mock).mockResolvedValue(err(error))
 
@@ -405,7 +424,7 @@ describe('useSlackSearchUnified', () => {
       await act(async () => {
         await result.current.handleSearch({
           token: 'xoxp-test',
-          searchQuery: 'test'
+          searchQuery: 'test',
         })
       })
 
@@ -415,7 +434,7 @@ describe('useSlackSearchUnified', () => {
     it('レート制限エラーの場合、リトライ可能にする', async () => {
       const error: ApiError = {
         type: 'rate_limit',
-        message: 'レート制限エラー'
+        message: 'レート制限エラー',
       }
       ;(mockAdapter.searchMessages as Mock).mockResolvedValue(err(error))
 
@@ -424,7 +443,7 @@ describe('useSlackSearchUnified', () => {
       await act(async () => {
         await result.current.handleSearch({
           token: 'xoxp-test',
-          searchQuery: 'test'
+          searchQuery: 'test',
         })
       })
 
@@ -436,14 +455,14 @@ describe('useSlackSearchUnified', () => {
     it('エラー後に再試行が可能', async () => {
       const error: ApiError = {
         type: 'network',
-        message: 'ネットワークエラー'
+        message: 'ネットワークエラー',
       }
-      ;(mockAdapter.searchMessages as Mock)
-        .mockResolvedValueOnce(err(error))
-        .mockResolvedValueOnce(ok({
+      ;(mockAdapter.searchMessages as Mock).mockResolvedValueOnce(err(error)).mockResolvedValueOnce(
+        ok({
           messages: mockMessages,
-          pagination: { currentPage: 1, totalPages: 1, totalResults: 2, perPage: 20 }
-        }))
+          pagination: { currentPage: 1, totalPages: 1, totalResults: 2, perPage: 20 },
+        }),
+      )
       ;(mockAdapter.getThreadMessages as Mock).mockResolvedValue(ok(mockThread))
       ;(mockAdapter.getPermalink as Mock).mockResolvedValue(ok('https://slack.com/permalink'))
       ;(mockAdapter.getUserInfo as Mock).mockResolvedValue(ok(mockUser))
@@ -454,7 +473,7 @@ describe('useSlackSearchUnified', () => {
       await act(async () => {
         await result.current.handleSearch({
           token: 'xoxp-test',
-          searchQuery: 'test'
+          searchQuery: 'test',
         })
       })
 
@@ -497,7 +516,7 @@ describe('useSlackSearchUnified', () => {
       act(() => {
         result.current.handleSearch({
           token: 'xoxp-test',
-          searchQuery: 'test'
+          searchQuery: 'test',
         })
       })
 
@@ -506,10 +525,12 @@ describe('useSlackSearchUnified', () => {
 
       // 検索完了
       await act(async () => {
-        resolveSearch?.(ok({
-          messages: [],
-          pagination: { currentPage: 1, totalPages: 1, totalResults: 0, perPage: 20 }
-        }))
+        resolveSearch?.(
+          ok({
+            messages: [],
+            pagination: { currentPage: 1, totalPages: 1, totalResults: 0, perPage: 20 },
+          }),
+        )
         await searchPromise
       })
 
@@ -519,10 +540,12 @@ describe('useSlackSearchUnified', () => {
 
   describe('Markdown生成', () => {
     it('検索結果からMarkdownが生成される', async () => {
-      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(ok({
-        messages: mockMessages,
-        pagination: { currentPage: 1, totalPages: 1, totalResults: 2, perPage: 20 }
-      }))
+      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(
+        ok({
+          messages: mockMessages,
+          pagination: { currentPage: 1, totalPages: 1, totalResults: 2, perPage: 20 },
+        }),
+      )
       ;(mockAdapter.getThreadMessages as Mock).mockResolvedValue(ok(mockThread))
       ;(mockAdapter.getPermalink as Mock).mockResolvedValue(ok('https://slack.com/permalink'))
       ;(mockAdapter.getUserInfo as Mock).mockResolvedValue(ok(mockUser))
@@ -532,7 +555,7 @@ describe('useSlackSearchUnified', () => {
       await act(async () => {
         await result.current.handleSearch({
           token: 'xoxp-test',
-          searchQuery: 'test'
+          searchQuery: 'test',
         })
       })
 
@@ -546,10 +569,12 @@ describe('useSlackSearchUnified', () => {
 
   describe('ユーザー情報とパーマリンク取得', () => {
     it('ユーザー情報が正しくマッピングされる', async () => {
-      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(ok({
-        messages: mockMessages,
-        pagination: { currentPage: 1, totalPages: 1, totalResults: 2, perPage: 20 }
-      }))
+      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(
+        ok({
+          messages: mockMessages,
+          pagination: { currentPage: 1, totalPages: 1, totalResults: 2, perPage: 20 },
+        }),
+      )
       ;(mockAdapter.getThreadMessages as Mock).mockResolvedValue(ok(mockThread))
       ;(mockAdapter.getPermalink as Mock).mockResolvedValue(ok('https://slack.com/permalink'))
       ;(mockAdapter.getUserInfo as Mock).mockResolvedValue(ok(mockUser))
@@ -559,7 +584,7 @@ describe('useSlackSearchUnified', () => {
       await act(async () => {
         await result.current.handleSearch({
           token: 'xoxp-test',
-          searchQuery: 'test'
+          searchQuery: 'test',
         })
       })
 
@@ -571,11 +596,12 @@ describe('useSlackSearchUnified', () => {
 
     it('real_nameが無い場合はnameを使用する', async () => {
       const userWithoutRealName = { ...mockUser, real_name: undefined }
-      
-      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(ok({
-        messages: mockMessages,
-        pagination: { currentPage: 1, totalPages: 1, totalResults: 2, perPage: 20 }
-      }))
+      ;(mockAdapter.searchMessages as Mock).mockResolvedValue(
+        ok({
+          messages: mockMessages,
+          pagination: { currentPage: 1, totalPages: 1, totalResults: 2, perPage: 20 },
+        }),
+      )
       ;(mockAdapter.getThreadMessages as Mock).mockResolvedValue(ok(mockThread))
       ;(mockAdapter.getPermalink as Mock).mockResolvedValue(ok('https://slack.com/permalink'))
       ;(mockAdapter.getUserInfo as Mock).mockResolvedValue(ok(userWithoutRealName))
@@ -585,7 +611,7 @@ describe('useSlackSearchUnified', () => {
       await act(async () => {
         await result.current.handleSearch({
           token: 'xoxp-test',
-          searchQuery: 'test'
+          searchQuery: 'test',
         })
       })
 

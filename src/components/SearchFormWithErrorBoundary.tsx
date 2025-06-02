@@ -1,6 +1,6 @@
 /**
  * 検索フォーム用Error Boundaryラッパー
- * 
+ *
  * 各検索フォームコンポーネントを個別のError Boundaryで保護する
  */
 
@@ -14,10 +14,7 @@ interface SearchFormWithErrorBoundaryProps {
   formType: 'slack' | 'docbase'
 }
 
-export function SearchFormWithErrorBoundary({ 
-  children, 
-  formType 
-}: SearchFormWithErrorBoundaryProps) {
+export function SearchFormWithErrorBoundary({ children, formType }: SearchFormWithErrorBoundaryProps) {
   return (
     <ErrorBoundary
       onError={(error, errorInfo) => {

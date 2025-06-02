@@ -1,8 +1,8 @@
-import { describe, expect, it, beforeEach, vi, type Mock } from 'vitest'
-import { renderHook, act, waitFor } from '@testing-library/react'
-import { ok, err } from 'neverthrow'
-import { useSearch, type AdvancedFilters } from '../../hooks/useSearch'
+import { act, renderHook, waitFor } from '@testing-library/react'
+import { err, ok } from 'neverthrow'
+import { type Mock, beforeEach, describe, expect, it, vi } from 'vitest'
 import type { DocbaseAdapter } from '../../adapters/docbaseAdapter'
+import { type AdvancedFilters, useSearch } from '../../hooks/useSearch'
 import type { DocbasePostListItem } from '../../types/docbase'
 import type { ApiError } from '../../types/error'
 
@@ -21,7 +21,7 @@ describe('useSearch', () => {
 
   beforeEach(() => {
     vi.clearAllMocks()
-    
+
     // モックデータの準備
     mockPosts = [
       {
@@ -39,7 +39,7 @@ describe('useSearch', () => {
         url: 'https://example.docbase.io/posts/2',
       },
     ]
-    
+
     // モックアダプターの作成
     mockAdapter = {
       searchPosts: vi.fn(),
@@ -60,7 +60,7 @@ describe('useSearch', () => {
   describe('検索成功', () => {
     it('検索が成功した場合、結果を正しく更新する', async () => {
       ;(mockAdapter.searchPosts as Mock).mockResolvedValue(ok(mockPosts))
-      
+
       const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
 
       await act(async () => {
@@ -75,7 +75,7 @@ describe('useSearch', () => {
 
     it('検索結果が0件の場合、適切にメッセージを表示する', async () => {
       ;(mockAdapter.searchPosts as Mock).mockResolvedValue(ok([]))
-      
+
       const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
 
       await act(async () => {
@@ -89,9 +89,9 @@ describe('useSearch', () => {
 
     it('詳細検索条件付きで検索が成功する', async () => {
       ;(mockAdapter.searchPosts as Mock).mockResolvedValue(ok(mockPosts))
-      
+
       const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
-      
+
       const advancedFilters: AdvancedFilters = {
         tags: 'tag1,tag2',
         author: 'test-author',
@@ -122,7 +122,7 @@ describe('useSearch', () => {
         message: '認証に失敗しました',
       }
       ;(mockAdapter.searchPosts as Mock).mockResolvedValue(err(error))
-      
+
       const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
 
       await act(async () => {
@@ -141,7 +141,7 @@ describe('useSearch', () => {
         message: 'ネットワークエラー',
       }
       ;(mockAdapter.searchPosts as Mock).mockResolvedValue(err(error))
-      
+
       const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
 
       await act(async () => {
@@ -158,7 +158,7 @@ describe('useSearch', () => {
         message: 'レート制限',
       }
       ;(mockAdapter.searchPosts as Mock).mockResolvedValue(err(error))
-      
+
       const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
 
       await act(async () => {
@@ -175,7 +175,7 @@ describe('useSearch', () => {
         message: '不明なエラー',
       }
       ;(mockAdapter.searchPosts as Mock).mockResolvedValue(err(error))
-      
+
       const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
 
       await act(async () => {
@@ -235,7 +235,7 @@ describe('useSearch', () => {
 
     it('キーワードが空でも詳細検索条件があれば検索を実行する', async () => {
       ;(mockAdapter.searchPosts as Mock).mockResolvedValue(ok(mockPosts))
-      
+
       const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
 
       const filters: AdvancedFilters = {
@@ -275,10 +275,8 @@ describe('useSearch', () => {
         type: 'network',
         message: 'ネットワークエラー',
       }
-      ;(mockAdapter.searchPosts as Mock)
-        .mockResolvedValueOnce(err(error))
-        .mockResolvedValueOnce(ok(mockPosts))
-      
+      ;(mockAdapter.searchPosts as Mock).mockResolvedValueOnce(err(error)).mockResolvedValueOnce(ok(mockPosts))
+
       const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
 
       // 最初の検索でエラー
@@ -320,7 +318,7 @@ describe('useSearch', () => {
         resolveSearch = resolve
       })
       ;(mockAdapter.searchPosts as Mock).mockReturnValue(searchPromise)
-      
+
       const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
 
       // 検索開始
@@ -348,7 +346,7 @@ describe('useSearch', () => {
         message: '認証エラー',
       }
       ;(mockAdapter.searchPosts as Mock).mockResolvedValue(err(error))
-      
+
       const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
 
       await act(async () => {
@@ -366,7 +364,7 @@ describe('useSearch', () => {
         message: '認証エラー',
       }
       ;(mockAdapter.searchPosts as Mock).mockResolvedValue(err(error))
-      
+
       const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
 
       await act(async () => {

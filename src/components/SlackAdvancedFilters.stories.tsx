@@ -1,5 +1,5 @@
-import type { Meta, StoryObj } from '@storybook/react'
 import { action } from '@storybook/addon-actions'
+import type { Meta, StoryObj } from '@storybook/react'
 import { SlackAdvancedFilters } from './SlackAdvancedFilters'
 
 const meta: Meta<typeof SlackAdvancedFilters> = {
@@ -9,7 +9,8 @@ const meta: Meta<typeof SlackAdvancedFilters> = {
     layout: 'padded',
     docs: {
       description: {
-        component: 'Slack検索の詳細フィルター条件コンポーネント。チャンネル、投稿者、期間の詳細条件設定機能を提供します。',
+        component:
+          'Slack検索の詳細フィルター条件コンポーネント。チャンネル、投稿者、期間の詳細条件設定機能を提供します。',
       },
     },
   },
@@ -280,7 +281,7 @@ export const InvalidDateRange: Story = {
     onAuthorChange: action('author-changed'),
     startDate: '2023-12-31', // 終了日より後
     onStartDateChange: action('start-date-changed'),
-    endDate: '2023-01-01',   // 開始日より前
+    endDate: '2023-01-01', // 開始日より前
     onEndDateChange: action('end-date-changed'),
     disabled: false,
   },

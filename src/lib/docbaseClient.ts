@@ -1,5 +1,5 @@
 import type { Result } from 'neverthrow'
-import { createDocbaseAdapter, type DocbaseSearchParams } from '../adapters/docbaseAdapter'
+import { type DocbaseSearchParams, createDocbaseAdapter } from '../adapters/docbaseAdapter'
 import { createFetchHttpClient } from '../adapters/fetchHttpClient'
 import type { AdvancedFilters } from '../hooks/useSearch'
 import type { DocbasePostListItem } from '../types/docbase'

@@ -1,6 +1,6 @@
 /**
  * Error Boundary プロバイダーコンポーネント
- * 
+ *
  * アプリケーション全体のエラーハンドリングを提供する
  * Client Componentとして動作し、Server Componentとの橋渡しを行う
  */

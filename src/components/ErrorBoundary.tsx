@@ -1,6 +1,6 @@
 /**
  * Error Boundary コンポーネント
- * 
+ *
  * Reactアプリケーション内で発生した予期しないエラーをキャッチし、
  * ユーザーフレンドリーなエラー画面を表示する。
  * アプリ全体のクラッシュを防ぎ、適切なエラーハンドリングを提供する。
@@ -11,8 +11,8 @@
 import type React from 'react'
 import { Component, type ReactNode } from 'react'
 import type { ErrorInfo } from 'react'
-import { ErrorFallback } from './ErrorFallback'
 import { logError } from '../utils/errorStorage'
+import { ErrorFallback } from './ErrorFallback'
 
 interface ErrorBoundaryProps {
   children: ReactNode

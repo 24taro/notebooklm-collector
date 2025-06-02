@@ -302,7 +302,7 @@ const SearchForm = () => {
 
         {markdownContent && !isLoading && !error && (
           <div className="mt-6 pt-5 border-t border-gray-200">
-            <MarkdownPreview 
+            <MarkdownPreview
               markdown={markdownContent}
               title="Markdownプレビュー"
               emptyMessage="Docbase記事の検索結果がここに表示されます。"

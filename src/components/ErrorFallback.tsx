@@ -1,6 +1,6 @@
 /**
  * エラーフォールバック コンポーネント
- * 
+ *
  * Error Boundaryによってキャッチされたエラーを
  * ユーザーフレンドリーな形で表示し、復旧オプションを提供する。
  */
@@ -100,9 +100,7 @@ ${error?.stack || error?.message || 'Unknown error'}
 
           {/* エラーメッセージ */}
           <div className="text-center">
-            <h1 className="text-lg font-medium text-gray-900 mb-2">
-              申し訳ございません
-            </h1>
+            <h1 className="text-lg font-medium text-gray-900 mb-2">申し訳ございません</h1>
             <p className="text-sm text-gray-600 mb-6">
               予期しないエラーが発生しました。以下の方法で解決を試してください。
             </p>
@@ -165,23 +163,18 @@ ${error?.stack || error?.message || 'Unknown error'}
                     <span className="font-medium">エラー名:</span> {error?.name || 'Unknown'}
                   </div>
                   <div>
-                    <span className="font-medium">メッセージ:</span>{' '}
-                    {error?.message || 'No error message'}
+                    <span className="font-medium">メッセージ:</span> {error?.message || 'No error message'}
                   </div>
                   {isDevelopment && error?.stack && (
                     <div>
                       <span className="font-medium">スタックトレース:</span>
-                      <pre className="mt-1 text-xs whitespace-pre-wrap break-all">
-                        {error.stack}
-                      </pre>
+                      <pre className="mt-1 text-xs whitespace-pre-wrap break-all">{error.stack}</pre>
                     </div>
                   )}
                   {isDevelopment && errorInfo?.componentStack && (
                     <div>
                       <span className="font-medium">コンポーネントスタック:</span>
-                      <pre className="mt-1 text-xs whitespace-pre-wrap break-all">
-                        {errorInfo.componentStack}
-                      </pre>
+                      <pre className="mt-1 text-xs whitespace-pre-wrap break-all">{errorInfo.componentStack}</pre>
                     </div>
                   )}
                 </div>
@@ -191,9 +184,7 @@ ${error?.stack || error?.message || 'Unknown error'}
 
           {/* フィードバック */}
           <div className="mt-6 text-center">
-            <p className="text-xs text-gray-500 mb-2">
-              問題が解決しない場合は、以下のリンクからお報告ください
-            </p>
+            <p className="text-xs text-gray-500 mb-2">問題が解決しない場合は、以下のリンクからお報告ください</p>
             <a
               href={createGitHubIssueUrl()}
               target="_blank"

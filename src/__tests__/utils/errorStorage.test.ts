@@ -1,19 +1,19 @@
 /**
  * errorStorageユーティリティのテスト
- * 
+ *
  * エラーログの保存、取得、管理機能のテスト
  */
 
-import { describe, test, expect, beforeEach, afterAll, vi } from 'vitest'
+import { afterAll, beforeEach, describe, expect, test, vi } from 'vitest'
 import {
-  logError,
-  getErrorLogs,
-  getErrorLog,
-  clearErrorLogs,
   cleanupOldErrorLogs,
-  getErrorLogStats,
-  exportErrorLogsAsCSV,
+  clearErrorLogs,
   debugErrorLogs,
+  exportErrorLogsAsCSV,
+  getErrorLog,
+  getErrorLogStats,
+  getErrorLogs,
+  logError,
 } from '../../utils/errorStorage'
 
 // LocalStorageのモック
@@ -55,7 +55,7 @@ describe('errorStorage', () => {
     consoleGroupSpy.mockClear()
     consoleLogSpy.mockClear()
     consoleGroupEndSpy.mockClear()
-    
+
     // モック実装をリセット
     localStorageMock.getItem.mockImplementation(() => null)
     localStorageMock.setItem.mockImplementation(() => {})
@@ -72,7 +72,7 @@ describe('errorStorage', () => {
   describe('logError', () => {
     test('エラーログを正常に保存する', () => {
       localStorageMock.getItem.mockReturnValue(null)
-      
+
       const error = new Error('Test error')
       const errorInfo = { componentStack: 'Test component stack' }
       const context = {
@@ -105,10 +105,7 @@ describe('errorStorage', () => {
         },
       })
 
-      expect(localStorageMock.setItem).toHaveBeenCalledWith(
-        'notebooklm_error_logs',
-        expect.any(String)
-      )
+      expect(localStorageMock.setItem).toHaveBeenCalledWith('notebooklm_error_logs', expect.any(String))
     })
 
     test('LocalStorage保存に失敗した場合でもエラーオブジェクトを返す', () => {
@@ -235,7 +232,7 @@ describe('errorStorage', () => {
   describe('cleanupOldErrorLogs', () => {
     test('7日以上前のログを削除する', () => {
       const now = Date.now()
-      const eightDaysAgo = now - (8 * 24 * 60 * 60 * 1000)
+      const eightDaysAgo = now - 8 * 24 * 60 * 60 * 1000
 
       const mockLogs = [
         {
@@ -260,7 +257,7 @@ describe('errorStorage', () => {
       expect(result).toBe(1) // 1件削除
       expect(localStorageMock.setItem).toHaveBeenCalledWith(
         'notebooklm_error_logs',
-        JSON.stringify([mockLogs[0]]) // 新しいログのみ残る
+        JSON.stringify([mockLogs[0]]), // 新しいログのみ残る
       )
     })
   })
@@ -322,7 +319,9 @@ describe('errorStorage', () => {
       const result = exportErrorLogsAsCSV()
 
       expect(result).toContain('ID,Timestamp,Error Name,Error Message,URL,User Agent,Viewport Width,Viewport Height')
-      expect(result).toContain('"test-1","2023-01-01T00:00:00.000Z","Error","Test error","https://example.com","Test UserAgent","1920","1080"')
+      expect(result).toContain(
+        '"test-1","2023-01-01T00:00:00.000Z","Error","Test error","https://example.com","Test UserAgent","1920","1080"',
+      )
     })
   })
 

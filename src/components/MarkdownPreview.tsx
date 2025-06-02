@@ -26,13 +26,13 @@ interface MarkdownPreviewProps {
  * @param className 追加のCSSクラス
  * @param emptyMessage 空の時のメッセージ
  */
-export const MarkdownPreview: FC<MarkdownPreviewProps> = ({ 
-  markdown, 
+export const MarkdownPreview: FC<MarkdownPreviewProps> = ({
+  markdown,
   title = 'プレビュー',
   onDownload,
   downloadFileName = 'markdown.md',
   className = '',
-  emptyMessage = 'ここにMarkdownプレビューが表示されます。'
+  emptyMessage = 'ここにMarkdownプレビューが表示されます。',
 }) => {
   if (!markdown) {
     return (
@@ -50,7 +50,7 @@ export const MarkdownPreview: FC<MarkdownPreviewProps> = ({
         <div className="flex items-center justify-between mb-4">
           <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
           {onDownload && (
-            <button 
+            <button
               type="button"
               onClick={onDownload}
               className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
