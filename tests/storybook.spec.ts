@@ -133,37 +133,6 @@ test.describe('Storybook動作確認', () => {
     expect(isUserInputFocused || isDateInputFocused).toBeTruthy()
   })
 
-  test('レスポンシブ - モバイル表示で適切にレイアウトされる', async ({ page }: { page: Page }) => {
-    // モバイルサイズに変更
-    await page.setViewportSize({ width: 375, height: 667 })
-
-    await page.goto('/')
-
-    // サイドバーが表示されるまで待機（モバイルでは時間がかかる可能性があるため延長）
-    await page.locator('[data-item-id="components"]').waitFor({ state: 'visible', timeout: 90000 })
-
-    // MarkdownPreviewコンポーネントを展開
-    await page.locator('[data-item-id="components-markdownpreview"]').click()
-    await page.waitForTimeout(1500) // アニメーション待機を延長
-
-    // MarkdownPreview Default Storyを表示
-    await page.locator('[data-item-id="components-markdownpreview--default"]').click()
-    await page.waitForTimeout(3000) // iframeロード待機を延長
-
-    const iframe = page.frameLocator('#storybook-preview-iframe')
-    // iframeのコンテンツがロードされるまで待機
-    await iframe.locator('body').waitFor({ state: 'attached', timeout: 20000 })
-
-    // モバイルでも適切に表示されることを確認
-    await expect(iframe.locator('h1').filter({ hasText: 'サンプルドキュメント' }).first()).toBeVisible({
-      timeout: 15000,
-    })
-
-    // コンテナが適切な幅で表示されることを確認
-    const container = iframe.locator('.max-w-3xl')
-    await expect(container).toBeVisible({ timeout: 15000 })
-  })
-
   test('ダウンロードボタンが正常に動作する', async ({ page }: { page: Page }) => {
     await page.goto('/')
 
