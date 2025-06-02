@@ -1,10 +1,8 @@
 name: Build Test
 
+# CIワークフローと統合されたため、workflow_dispatchのみで手動実行可能
 on:
-  pull_request:
-    branches: [main]
-  push:
-    branches: [main]
+  workflow_dispatch:
 
 jobs:
   build:
