@@ -1,4 +1,4 @@
-import { test, expect, Page, FrameLocator } from '@playwright/test'
+import { test, expect, type Page, type FrameLocator } from '@playwright/test'
 
 // タイムアウト設定
 test.setTimeout(90000)
