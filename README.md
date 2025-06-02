@@ -116,11 +116,15 @@ after:2023-01-01 before:2023-12-31
 
 ### 技術スタック
 
-- **フレームワーク**: Next.js 15 / React 19
-- **言語**: TypeScript
-- **スタイリング**: Tailwind CSS
-- **品質管理**: Biome (lint/format)
+- **フレームワーク**: Next.js 15.3.2 / React 19
+- **言語**: TypeScript 5
+- **スタイリング**: Tailwind CSS 4.1.7
+- **品質管理**: Biome 1.9.4 (lint/format)
+- **テスト**: Vitest 3.1.4 + Playwright 1.52.0
+- **Storybook**: 8.6.14
 - **エラーハンドリング**: neverthrow Result型
+- **デプロイ**: GitHub Pages
+- **開発体験**: Turbopack (Next.js dev mode)
 
 ### ディレクトリ構成
 
@@ -142,11 +146,30 @@ src/
 ### 開発コマンド
 
 ```bash
-npm run dev          # 開発サーバー起動
-npm run build        # 本番ビルド
-npm run start        # 本番サーバー起動
-npm run lint         # Lintチェック
-npm run type-check   # TypeScript型チェック
+# 開発・ビルド
+npm run dev              # 開発サーバー起動 (Turbopack)
+npm run build            # 本番ビルド
+npm run start            # 本番サーバー起動
+
+# コード品質
+npm run lint             # Biome lintチェック
+npm run lint:fix         # Biome lint自動修正
+npm run format           # Biome format
+npm run type-check       # TypeScript型チェック
+
+# テスト
+npm run test             # Vitestユニットテスト
+npm run test:watch       # Vitestウォッチモード
+npm run test:coverage    # カバレッジ付きテスト
+npm run test:ui          # Vitest UI
+npm run test:e2e         # Playwright E2Eテスト
+npm run test:e2e:ui      # Playwright UI
+npm run test:e2e:debug   # Playwright デバッグ
+
+# Storybook
+npm run storybook        # Storybook開発サーバー
+npm run build-storybook  # Storybookビルド
+npm run storybook:test   # Storybook E2Eテスト
 ```
 
 ### コントリビューション
@@ -202,5 +225,19 @@ npm run type-check   # TypeScript型チェック
 
 ---
 
-**NotebookLM Collector v1.9**  
+## 🌐 デプロイ
+
+このアプリケーションは GitHub Pages でホストされています：
+**URL**: [https://sotaronishioka.github.io/notebooklm-collector/](https://sotaronishioka.github.io/notebooklm-collector/)
+
+### GitHub Pages デプロイ仕様
+
+- **ワークフロー**: `.github/workflows/deploy.yml`
+- **トリガー**: `main` ブランチへのプッシュ
+- **ビルド**: Next.js Static Export (`next build && next export`)
+- **配信**: GitHub Pages 静的サイトホスティング
+
+---
+
+**NotebookLM Collector v0.1.0**  
 🤖 Generated with [Claude Code](https://claude.ai/code)

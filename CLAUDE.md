@@ -6,7 +6,8 @@
 
 **リポジトリ**: https://github.com/sotaroNishioka/notebooklm-collector  
 **プロジェクト名**: Docbase/Slack 連携 NotebookLM 用ドキュメント生成アプリ  
-**バージョン**: v1.9
+**バージョン**: v0.1.0  
+**デプロイ URL**: https://sotaronishioka.github.io/notebooklm-collector/
 
 ### 主要機能
 
@@ -352,14 +353,19 @@ git branch -d issue-42-auth-result-type
 
 ## 技術スタック
 
-| レイヤ         | 技術                   |
-| -------------- | ---------------------- |
-| フレームワーク | Next.js 15 / React     |
-| スタイリング   | Tailwind CSS           |
-| データ取得     | fetch / TanStack Query |
-| ストレージ     | localStorage           |
-| Lint / Format  | Biome                  |
-| 型システム     | TypeScript             |
+| レイヤ         | 技術                     |
+| -------------- | ------------------------ |
+| フレームワーク | Next.js 15.3.2 / React 19 |
+| 言語           | TypeScript 5             |
+| スタイリング   | Tailwind CSS 4.1.7       |
+| データ取得     | fetch API                |
+| ストレージ     | localStorage             |
+| Lint / Format  | Biome 1.9.4              |
+| テスト         | Vitest 3.1.4 / Playwright 1.52.0 |
+| Storybook      | 8.6.14                   |
+| エラーハンドリング | neverthrow Result型    |
+| デプロイ       | GitHub Pages             |
+| 開発体験       | Turbopack                |
 
 ## 重要な注意事項
 
@@ -430,7 +436,214 @@ git branch -d issue-42-auth-result-type
 | 認証方式       | User Token (xoxp-)       | API Token                    |
 | ローカルストレージ | slackApiToken           | docbaseApiToken, docbaseDomain |
 
+## GitHub Pages デプロイワークフロー
+
+### デプロイ設定
+
+```yaml
+# .github/workflows/deploy.yml
+name: Deploy to GitHub Pages
+on:
+  push:
+    branches: [ main ]
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+      
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build
+        run: npm run build
+      
+      - name: Deploy
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./out
+```
+
+### Next.js 静的サイト設定
+
+```typescript
+// next.config.ts
+const isProd = process.env.NODE_ENV === 'production';
+
+const nextConfig: NextConfig = {
+  output: 'export',
+  basePath: isProd ? '/notebooklm-collector' : '',
+  assetPrefix: isProd ? '/notebooklm-collector/' : '',
+  trailingSlash: true,
+  images: {
+    unoptimized: true
+  }
+};
+```
+
+## コンポーネント設計パターン
+
+### エラーバウンダリーパターン
+
+```tsx
+// ErrorBoundaryProvider.tsx
+interface ErrorBoundaryContextType {
+  reportError: (error: Error, errorInfo?: string) => void;
+  clearError: () => void;
+}
+
+const ErrorBoundaryContext = createContext<ErrorBoundaryContextType | null>(null);
+
+export function ErrorBoundaryProvider({ children }: { children: ReactNode }) {
+  const reportError = useCallback((error: Error, errorInfo?: string) => {
+    // エラーログをローカルストレージに保存
+    const errorLog = {
+      message: error.message,
+      stack: error.stack,
+      timestamp: new Date().toISOString(),
+      additionalInfo: errorInfo
+    };
+    saveErrorToStorage(errorLog);
+  }, []);
+
+  const value = useMemo(() => ({ reportError, clearError }), [reportError]);
+  
+  return (
+    <ErrorBoundaryContext.Provider value={value}>
+      <ErrorBoundary>
+        {children}
+      </ErrorBoundary>
+    </ErrorBoundaryContext.Provider>
+  );
+}
+```
+
+### カスタムフックパターン
+
+```tsx
+// useSlackSearchUnified.ts
+interface UseSlackSearchUnifiedReturn {
+  searchResults: SlackThread[];
+  isLoading: boolean;
+  error: string | null;
+  searchMessages: (query: string) => Promise<void>;
+  clearResults: () => void;
+}
+
+export function useSlackSearchUnified(apiToken: string): UseSlackSearchUnifiedReturn {
+  const [searchResults, setSearchResults] = useState<SlackThread[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  const searchMessages = useCallback(async (query: string) => {
+    if (!apiToken.trim() || !query.trim()) return;
+    
+    setIsLoading(true);
+    setError(null);
+    
+    try {
+      const result = await slackAdapter.searchMessages({
+        token: apiToken,
+        query,
+        count: 300
+      });
+      
+      if (result.isOk()) {
+        setSearchResults(result.value);
+      } else {
+        setError(getErrorMessage(result.error));
+      }
+    } catch (err) {
+      setError(err instanceof Error ? err.message : '不明なエラーが発生しました');
+    } finally {
+      setIsLoading(false);
+    }
+  }, [apiToken]);
+
+  return { searchResults, isLoading, error, searchMessages, clearResults };
+}
+```
+
+## テスト戦略
+
+### ユニットテスト (Vitest)
+
+```typescript
+// __tests__/hooks/useSlackSearchUnified.test.ts
+import { renderHook, act } from '@testing-library/react';
+import { describe, it, expect, vi } from 'vitest';
+import { useSlackSearchUnified } from '@/hooks/useSlackSearchUnified';
+
+describe('useSlackSearchUnified', () => {
+  it('検索を実行して結果を返す', async () => {
+    const { result } = renderHook(() => useSlackSearchUnified('test-token'));
+    
+    await act(async () => {
+      await result.current.searchMessages('test query');
+    });
+    
+    expect(result.current.searchResults).toBeDefined();
+  });
+});
+```
+
+### E2Eテスト (Playwright)
+
+```typescript
+// tests/storybook.spec.ts
+import { test, expect } from '@playwright/test';
+
+test('Storybook動作確認', async ({ page }) => {
+  await page.goto('http://localhost:6006');
+  
+  // SlackAdvancedFilters コンポーネントのテスト
+  await page.click('[data-testid="slackadvancedfilters--default"]');
+  
+  // フォームの操作確認
+  await page.fill('input[placeholder="チャンネル名を入力"]', '#general');
+  expect(await page.inputValue('input[placeholder="チャンネル名を入力"]')).toBe('#general');
+});
+```
+
+### 開発コマンド拡張
+
+```bash
+# 開発・ビルド
+npm run dev              # 開発サーバー起動 (Turbopack)
+npm run build            # 本番ビルド
+npm run start            # 本番サーバー起動
+
+# コード品質
+npm run lint             # Biome lintチェック
+npm run lint:fix         # Biome lint自動修正
+npm run format           # Biome format
+npm run type-check       # TypeScript型チェック
+
+# テスト
+npm run test             # Vitestユニットテスト
+npm run test:watch       # Vitestウォッチモード
+npm run test:coverage    # カバレッジ付きテスト
+npm run test:ui          # Vitest UI
+npm run test:e2e         # Playwright E2Eテスト
+npm run test:e2e:ui      # Playwright UI
+npm run test:e2e:debug   # Playwright デバッグ
+
+# Storybook
+npm run storybook        # Storybook開発サーバー
+npm run build-storybook  # Storybookビルド
+npm run storybook:test   # Storybook E2Eテスト
+```
+
 ---
 
-**最終更新**: 2025-05-28  
-**管理者**: ずんだもん（Claude Assistant）
+**最終更新**: 2025-06-03  
+**管理者**: Claude Code Assistant
