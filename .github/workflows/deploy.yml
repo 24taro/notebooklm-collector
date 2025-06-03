@@ -15,16 +15,16 @@ concurrency:
   cancel-in-progress: false
 
 jobs:
-  lint:
+  lint-check:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js 20.x
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
+          node-version: 20.x
           cache: 'npm'
 
       - name: Install dependencies
@@ -39,10 +39,10 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js 20.x
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
+          node-version: 20.x
           cache: 'npm'
 
       - name: Install dependencies
@@ -53,17 +53,17 @@ jobs:
 
   build:
     runs-on: ubuntu-latest
-    needs: [lint, type-check]
+    needs: [lint-check, type-check]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js
+      - name: Setup Node.js 20.x
         uses: actions/setup-node@v4
         with:
-          node-version-file: '.nvmrc'
+          node-version: 20.x
           cache: 'npm'
-
+          
       - name: Restore cache
         uses: actions/cache@v4
         with:
