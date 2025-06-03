@@ -8,6 +8,46 @@
 import type { ProgressStatus, SlackThread } from './slack'
 
 /**
+ * useSlackForm フック戻り値の型
+ */
+export type UseSlackFormResult = {
+  // 検索条件
+  searchQuery: string
+  onSearchQueryChange: (query: string) => void
+  token: string
+  onTokenChange: (token: string) => void
+
+  // 詳細フィルター
+  showAdvanced: boolean
+  onToggleAdvanced: () => void
+  channel: string
+  onChannelChange: (channel: string) => void
+  author: string
+  onAuthorChange: (author: string) => void
+  startDate: string
+  onStartDateChange: (date: string) => void
+  endDate: string
+  onEndDateChange: (date: string) => void
+
+  // 状態
+  isLoading: boolean
+  isDownloading: boolean
+  progressStatus: ProgressStatus
+  hasSearched: boolean
+  error: string | null
+
+  // 結果
+  slackThreads: SlackThread[]
+  userMaps: Record<string, string>
+  permalinkMaps: Record<string, string>
+
+  // イベントハンドラー
+  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
+  onDownload: (markdownContent: string, searchQuery: string, hasContent: boolean) => void
+  onFullDownload: (markdownContent: string, searchQuery: string, hasContent: boolean) => void
+}
+
+/**
  * Slack検索フォーム全体のProps型
  * - SlackSearchForm コンポーネントで使用される巨大な型定義
  * - 検索条件、状態、結果、イベントハンドラーを包含
