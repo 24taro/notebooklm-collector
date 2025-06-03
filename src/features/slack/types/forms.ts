@@ -5,88 +5,35 @@
  * - フォーム状態とイベントハンドラーの型定義
  */
 
-import type { ProgressStatus, SlackThread } from './slack'
+import type { SlackThread } from './slack'
 
 /**
- * useSlackForm フック戻り値の型
+ * useSlackFormフックの戻り値型
  */
 export type UseSlackFormResult = {
-  // 検索条件
+  // Form state
   searchQuery: string
-  onSearchQueryChange: (query: string) => void
+  onSearchQueryChange: (value: string) => void
   token: string
-  onTokenChange: (token: string) => void
-
-  // 詳細フィルター
+  onTokenChange: (value: string | ((val: string) => string)) => void
+  channel: string
+  onChannelChange: (value: string) => void
+  author: string
+  onAuthorChange: (value: string) => void
   showAdvanced: boolean
   onToggleAdvanced: () => void
-  channel: string
-  onChannelChange: (channel: string) => void
-  author: string
-  onAuthorChange: (author: string) => void
-  startDate: string
-  onStartDateChange: (date: string) => void
-  endDate: string
-  onEndDateChange: (date: string) => void
 
-  // 状態
-  isLoading: boolean
-  isDownloading: boolean
-  progressStatus: ProgressStatus
-  hasSearched: boolean
-  error: string | null
-
-  // 結果
-  slackThreads: SlackThread[]
-  userMaps: Record<string, string>
-  permalinkMaps: Record<string, string>
-
-  // イベントハンドラー
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
-  onDownload: (markdownContent: string, searchQuery: string, hasContent: boolean) => void
+  // Search functionality
+  onSearch: () => void
   onFullDownload: (markdownContent: string, searchQuery: string, hasContent: boolean) => void
-}
 
-/**
- * Slack検索フォーム全体のProps型
- * - SlackSearchForm コンポーネントで使用される巨大な型定義
- * - 検索条件、状態、結果、イベントハンドラーを包含
- */
-export type SlackSearchFormProps = {
-  // 検索条件
-  searchQuery: string
-  onSearchQueryChange: (query: string) => void
-  token: string
-  onTokenChange: (token: string) => void
-
-  // 詳細フィルター
-  showAdvanced: boolean
-  onToggleAdvanced: () => void
-  channel: string
-  onChannelChange: (channel: string) => void
-  author: string
-  onAuthorChange: (author: string) => void
-  startDate: string
-  onStartDateChange: (date: string) => void
-  endDate: string
-  onEndDateChange: (date: string) => void
-
-  // 状態
+  // Search state
   isLoading: boolean
-  isDownloading: boolean
-  progressStatus: ProgressStatus
-  hasSearched: boolean
-  error: string | null
 
-  // 結果
-  slackThreads: SlackThread[]
-  userMaps: Record<string, string>
-  permalinkMaps: Record<string, string>
-
-  // イベントハンドラー
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
-  onDownload: (markdownContent: string, searchQuery: string, hasContent: boolean) => void
-  onFullDownload: (markdownContent: string, searchQuery: string, hasContent: boolean) => void
+  // Form validation
+  isValid: boolean
+  tokenError: string | null
+  queryError: string | null
 }
 
 /**
@@ -96,6 +43,7 @@ export type SlackSearchInputProps = {
   searchQuery: string
   onSearchQueryChange: (query: string) => void
   disabled?: boolean
+  isLoading?: boolean
 }
 
 /**
@@ -121,51 +69,16 @@ export type SlackTokenInputRef = {
 export type SlackAdvancedFiltersProps = {
   showAdvanced: boolean
   onToggleAdvanced: () => void
-  channel: string
-  onChannelChange: (channel: string) => void
-  author: string
-  onAuthorChange: (author: string) => void
-  startDate: string
-  onStartDateChange: (date: string) => void
-  endDate: string
-  onEndDateChange: (date: string) => void
+  channel?: string
+  onChannelChange?: (channel: string) => void
+  author?: string
+  onAuthorChange?: (author: string) => void
+  startDate?: string
+  onStartDateChange?: (date: string) => void
+  endDate?: string
+  onEndDateChange?: (date: string) => void
   disabled?: boolean
-}
-
-/**
- * Slack検索アクションボタンのProps型
- */
-export type SlackSearchActionsProps = {
-  isLoading: boolean
-  isDownloading: boolean
-  progressStatus: ProgressStatus
-  hasResults: boolean
-  token: string
-  searchQuery: string
-  onSubmit: (e: React.FormEvent<HTMLFormElement>) => void
-  onDownload: (markdownContent: string, searchQuery: string, hasContent: boolean) => void
-}
-
-/**
- * Slackエラー表示のProps型
- */
-export type SlackErrorDisplayProps = {
-  error: string | null
-}
-
-/**
- * Slack結果表示のProps型
- */
-export type SlackResultsDisplayProps = {
-  slackThreads: SlackThread[]
-  userMaps: Record<string, string>
-  permalinkMaps: Record<string, string>
-  searchQuery: string
-  isLoading: boolean
-  isDownloading: boolean
-  hasSearched: boolean
-  error: string | null
-  onFullDownload: (markdownContent: string, searchQuery: string, hasContent: boolean) => void
+  children?: React.ReactNode
 }
 
 /**

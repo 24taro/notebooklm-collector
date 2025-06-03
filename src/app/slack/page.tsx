@@ -119,7 +119,7 @@ export default function SlackPage() {
           <div className="max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12 shadow-md rounded-lg border border-gray-200">
             <div className="px-0">
               <h2 className="text-4xl font-bold mb-6 text-center text-gray-800">Slack メッセージ検索・収集</h2>
-              <SlackSearchForm {...slackForm} />
+              <SlackSearchForm form={slackForm} />
             </div>
           </div>
         </section>

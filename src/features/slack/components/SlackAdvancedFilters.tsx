@@ -7,7 +7,7 @@
 
 'use client'
 
-import type { SlackAdvancedFiltersProps } from '@/features/slack/types/forms'
+import type { SlackAdvancedFiltersProps } from '../types/forms'
 
 export function SlackAdvancedFilters({
   showAdvanced,
@@ -41,7 +41,7 @@ export function SlackAdvancedFilters({
               id="channel"
               type="text"
               value={channel}
-              onChange={(e) => onChannelChange(e.target.value)}
+              onChange={(e) => onChannelChange?.(e.target.value)}
               placeholder="#general"
               className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
               disabled={disabled}
@@ -55,7 +55,7 @@ export function SlackAdvancedFilters({
               id="author"
               type="text"
               value={author}
-              onChange={(e) => onAuthorChange(e.target.value)}
+              onChange={(e) => onAuthorChange?.(e.target.value)}
               placeholder="@user"
               className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
               disabled={disabled}
@@ -70,7 +70,7 @@ export function SlackAdvancedFilters({
                 id="startDate"
                 type="date"
                 value={startDate}
-                onChange={(e) => onStartDateChange(e.target.value)}
+                onChange={(e) => onStartDateChange?.(e.target.value)}
                 className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
                 disabled={disabled}
               />
@@ -83,7 +83,7 @@ export function SlackAdvancedFilters({
                 id="endDate"
                 type="date"
                 value={endDate}
-                onChange={(e) => onEndDateChange(e.target.value)}
+                onChange={(e) => onEndDateChange?.(e.target.value)}
                 className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
                 disabled={disabled}
               />

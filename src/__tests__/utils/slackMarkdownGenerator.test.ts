@@ -132,10 +132,7 @@ describe('slackMarkdownGenerator', () => {
 
   describe('メタデータ処理', () => {
     it('複数チャンネルを正しく処理する', () => {
-      const multiChannelThreads = [
-        { ...mockThreads[0] },
-        { ...mockThreads[1], channel: 'C789012' },
-      ]
+      const multiChannelThreads = [{ ...mockThreads[0] }, { ...mockThreads[1], channel: 'C789012' }]
 
       const result = generateSlackThreadsMarkdown(multiChannelThreads, mockUserMap, mockPermalinkMap)
 

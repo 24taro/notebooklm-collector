@@ -1,5 +1,5 @@
-import type { SlackAuthorInputProps } from '@/features/slack/types/forms'
 import type { FC } from 'react'
+import type { SlackAuthorInputProps } from '../types/forms'
 
 export const SlackAuthorInput: FC<SlackAuthorInputProps> = ({ author, onAuthorChange, error, disabled }) => {
   return (
