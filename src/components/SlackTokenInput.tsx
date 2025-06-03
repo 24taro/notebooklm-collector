@@ -1,15 +1,5 @@
+import type { SlackTokenInputProps, SlackTokenInputRef } from '@/types/forms'
 import React, { type FC, forwardRef, useImperativeHandle, useRef } from 'react'
-
-type SlackTokenInputProps = {
-  token: string
-  onTokenChange: (token: string) => void
-  error?: string
-  disabled?: boolean
-}
-
-export type SlackTokenInputRef = {
-  focus: () => void
-}
 
 export const SlackTokenInput = forwardRef<SlackTokenInputRef, SlackTokenInputProps>(
   ({ token, onTokenChange, error, disabled }, ref) => {

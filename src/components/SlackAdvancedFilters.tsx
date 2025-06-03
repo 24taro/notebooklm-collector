@@ -7,19 +7,7 @@
 
 'use client'
 
-type SlackAdvancedFiltersProps = {
-  showAdvanced: boolean
-  onToggleAdvanced: () => void
-  channel: string
-  onChannelChange: (channel: string) => void
-  author: string
-  onAuthorChange: (author: string) => void
-  startDate: string
-  onStartDateChange: (date: string) => void
-  endDate: string
-  onEndDateChange: (date: string) => void
-  disabled?: boolean
-}
+import type { SlackAdvancedFiltersProps } from '@/types/forms'
 
 export function SlackAdvancedFilters({
   showAdvanced,
