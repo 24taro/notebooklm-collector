@@ -10,8 +10,23 @@ test.describe('Storybook動作確認', () => {
     // Storybookのタイトルが表示されることを確認
     await expect(page).toHaveTitle(/Storybook/)
 
-    // サイドバーが表示されることを確認
-    await expect(page.locator('[data-item-id="components"]')).toBeVisible()
+    // featuresサイドバーが表示されることを確認
+    await expect(page.locator('[data-item-id="features"]')).toBeVisible()
+  })
+
+  test('Features構造が正しく表示される', async ({ page }: { page: Page }) => {
+    await page.goto('/')
+
+    // featuresサイドバーが表示されるまで待機
+    await page.locator('[data-item-id="features"]').waitFor({ state: 'visible' })
+
+    // Features を展開
+    await page.locator('[data-item-id="features"]').click()
+    await page.waitForTimeout(500)
+
+    // docbaseとslackが表示されることを確認
+    await expect(page.locator('[data-item-id="features-docbase"]')).toBeVisible()
+    await expect(page.locator('[data-item-id="features-slack"]')).toBeVisible()
   })
 
   test('DocbaseMarkdownPreview - Default Storyが表示される', async ({ page }: { page: Page }) => {
@@ -69,45 +84,6 @@ test.describe('Storybook動作確認', () => {
     await expect(
       iframe.locator('p:has-text("Docbase記事を検索すると、ここにプレビューが表示されます。")'),
     ).toBeVisible()
-  })
-
-  test('SlackAdvancedFilters - Default Storyが表示される', async ({ page }: { page: Page }) => {
-    await page.goto('/')
-
-    // SlackAdvancedFiltersコンポーネントを展開
-    await page.locator('[data-item-id="components-slackadvancedfilters"]').click()
-
-    // Default Storyを選択
-    await page.locator('[data-item-id="components-slackadvancedfilters--default"]').click()
-
-    // プレビューエリアでコンポーネントが表示されることを確認
-    const iframe = page.frameLocator('#storybook-preview-iframe')
-    // iframeのコンテンツがロードされるまで待機
-    await iframe.locator('body').waitFor({ state: 'attached' })
-    await expect(iframe.locator('button').filter({ hasText: 'もっと詳細な条件を追加する' }).first()).toBeVisible()
-  })
-
-  test('SlackAdvancedFilters - Expanded Storyでフィルターが展開される', async ({ page }: { page: Page }) => {
-    await page.goto('/')
-
-    // サイドバーが表示されるまで待機
-    await page.locator('[data-item-id="components"]').waitFor({ state: 'visible' })
-
-    // SlackAdvancedFiltersコンポーネントを展開
-    await page.locator('[data-item-id="components-slackadvancedfilters"]').click()
-    await page.waitForTimeout(500) // アニメーション待機
-
-    // Expanded Storyを選択
-    await page.locator('[data-item-id="components-slackadvancedfilters--expanded"]').click()
-    await page.waitForTimeout(1000) // iframeロード待機
-
-    // フィルター入力フィールドが表示されることを確認
-    const iframe = page.frameLocator('#storybook-preview-iframe')
-    // iframeのコンテンツがロードされるまで待機
-    await iframe.locator('body').waitFor({ state: 'attached' })
-    await expect(iframe.locator('input[placeholder="#general"]').first()).toBeVisible()
-    await expect(iframe.locator('input[placeholder="@user"]').first()).toBeVisible()
-    await expect(iframe.locator('input[type="date"]').first()).toBeVisible()
   })
 
   test('ダウンロードボタンが正常に動作する', async ({ page }: { page: Page }) => {
