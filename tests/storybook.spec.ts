@@ -21,8 +21,10 @@ test.describe('Storybook動作確認', () => {
     await page.locator('[data-nodetype="component"]').first().waitFor({ state: 'visible', timeout: 10000 })
 
     // Features に関するコンポーネントが表示されることを確認
-    await expect(page.locator('button[data-action="collapse-root"]', { hasText: 'Features' })).toBeVisible({ timeout: 10000 })
-    
+    await expect(page.locator('button[data-action="collapse-root"]', { hasText: 'Features' })).toBeVisible({
+      timeout: 10000,
+    })
+
     // Docbase コンポーネントが表示されることを確認
     await expect(page.locator('text=Docbase').first()).toBeVisible({ timeout: 10000 })
   })
