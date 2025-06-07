@@ -1,7 +1,7 @@
 import { err, ok } from 'neverthrow'
 import { describe, expect, it, vi } from 'vitest'
 import { createMockHttpClient } from '../../adapters/mockHttpClient'
-import { type SlackAdapter, createSlackAdapter } from '../../adapters/slackAdapter'
+import { type SlackAdapter, createSlackAdapter } from '../../features/slack/adapters/slackAdapter'
 import type { ApiError } from '../../types/error'
 import type { SlackMessage, SlackThread, SlackUser } from '../../types/slack'
 

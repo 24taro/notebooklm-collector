@@ -9,7 +9,11 @@ export { createFetchHttpClient } from './fetchHttpClient'
 export { createMockHttpClient, createSuccessResponse, createErrorResponse } from './mockHttpClient'
 
 // APIアダプター
-export { createDocbaseAdapter, type DocbaseAdapter, type DocbaseSearchParams } from './docbaseAdapter'
+export {
+  createDocbaseAdapter,
+  type DocbaseAdapter,
+  type DocbaseSearchParams,
+} from '../features/docbase/adapters/docbaseAdapter'
 export {
   createSlackAdapter,
   type SlackAdapter,
@@ -21,7 +25,7 @@ export {
 } from './slackAdapter'
 
 // 内部使用のためのインポート
-import { createDocbaseAdapter as _createDocbaseAdapter } from './docbaseAdapter'
+import { createDocbaseAdapter as _createDocbaseAdapter } from '../features/docbase/adapters/docbaseAdapter'
 import { createFetchHttpClient as _createFetchHttpClient } from './fetchHttpClient'
 import { createSlackAdapter as _createSlackAdapter } from './slackAdapter'
 

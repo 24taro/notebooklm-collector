@@ -1,8 +1,8 @@
 import type { Result } from 'neverthrow' // Resultを型としてインポート (typeキーワードを明示)
 import { useCallback, useState } from 'react'
 import toast from 'react-hot-toast' // react-hot-toastをインポート
-import { type DocbaseAdapter, createDocbaseAdapter } from '../adapters/docbaseAdapter'
 import { createFetchHttpClient } from '../adapters/fetchHttpClient'
+import { type DocbaseAdapter, createDocbaseAdapter } from '../features/docbase/adapters/docbaseAdapter'
 import type { DocbasePostListItem } from '../types/docbase'
 import type { ApiError } from '../types/error'
 import { getErrorActionSuggestion, getUserFriendlyErrorMessage } from '../utils/errorMessage'

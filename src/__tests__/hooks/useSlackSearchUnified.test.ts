@@ -1,8 +1,8 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { err, ok } from 'neverthrow'
 import { type Mock, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { SlackAdapter } from '../../adapters/slackAdapter'
-import { type SlackSearchParams, useSlackSearchUnified } from '../../hooks/useSlackSearchUnified'
+import type { SlackAdapter } from '../../features/slack/adapters/slackAdapter'
+import { type SlackSearchParams, useSlackSearchUnified } from '../../features/slack/hooks/useSlackSearchUnified'
 import type { ApiError } from '../../types/error'
 import type { SlackMessage, SlackThread, SlackUser } from '../../types/slack'
 
