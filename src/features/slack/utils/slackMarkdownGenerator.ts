@@ -1,5 +1,5 @@
-import { convertToSlackThreadMarkdown } from '../../../lib/slackdown'
 import type { SlackThread } from '../types/slack'
+import { convertToSlackThreadMarkdown } from './slackTextConverter'
 
 /**
  * 複数のSlackスレッドをLLM最適化Markdown形式で統合
@@ -77,7 +77,9 @@ export const generateSlackThreadsMarkdown = (
     const userName = userMap[thread.parent.user] || thread.parent.user
     const truncatedText =
       thread.parent.text.length > 50 ? `${thread.parent.text.substring(0, 50)}...` : thread.parent.text
-    markdown += `${index + 1}. [Thread ${index + 1}](#thread-${index + 1}) - ${userName} in ${thread.channel} (${formattedDate})\n`
+    markdown += `${index + 1}. [Thread ${index + 1}](#thread-${
+      index + 1
+    }) - ${userName} in ${thread.channel} (${formattedDate})\n`
     markdown += `   "${truncatedText}"\n`
   })
   markdown += '\n---\n\n'
