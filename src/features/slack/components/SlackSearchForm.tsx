@@ -7,12 +7,12 @@
 
 'use client'
 
+import type { UseSlackFormResult } from '../types/forms'
 import { SlackAdvancedFilters } from './SlackAdvancedFilters'
 import { SlackAuthorInput } from './SlackAuthorInput'
 import { SlackChannelInput } from './SlackChannelInput'
 import { SlackSearchInput } from './SlackSearchInput'
 import { SlackTokenInput } from './SlackTokenInput'
-import type { UseSlackFormResult } from '../hooks/useSlackForm'
 
 interface SlackSearchFormProps {
   form: UseSlackFormResult
@@ -32,10 +32,7 @@ export function SlackSearchForm({ form }: SlackSearchFormProps) {
       />
 
       {/* 詳細フィルター */}
-      <SlackAdvancedFilters
-        showAdvanced={form.showAdvanced}
-        onToggleAdvanced={form.onToggleAdvanced}
-      >
+      <SlackAdvancedFilters showAdvanced={form.showAdvanced} onToggleAdvanced={form.onToggleAdvanced}>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <SlackChannelInput channel={form.channel} onChannelChange={form.onChannelChange} />
           <SlackAuthorInput author={form.author} onAuthorChange={form.onAuthorChange} />
@@ -81,7 +78,7 @@ export function SlackSearchForm({ form }: SlackSearchFormProps) {
       {/* 進行状況表示 */}
       {form.isLoading && form.progressStatus && (
         <div className="mt-4 text-center text-sm text-gray-600">
-          <div className="mb-2">{form.progressStatus}</div>
+          <div className="mb-2">{form.progressStatus.message}</div>
           <div className="w-full bg-gray-200 rounded-full h-2">
             <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{ width: '60%' }} />
           </div>
