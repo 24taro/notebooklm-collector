@@ -96,6 +96,7 @@ export type SlackSearchInputProps = {
   searchQuery: string
   onSearchQueryChange: (query: string) => void
   disabled?: boolean
+  isLoading?: boolean
 }
 
 /**
@@ -121,15 +122,16 @@ export type SlackTokenInputRef = {
 export type SlackAdvancedFiltersProps = {
   showAdvanced: boolean
   onToggleAdvanced: () => void
-  channel: string
-  onChannelChange: (channel: string) => void
-  author: string
-  onAuthorChange: (author: string) => void
-  startDate: string
-  onStartDateChange: (date: string) => void
-  endDate: string
-  onEndDateChange: (date: string) => void
+  channel?: string
+  onChannelChange?: (channel: string) => void
+  author?: string
+  onAuthorChange?: (author: string) => void
+  startDate?: string
+  onStartDateChange?: (date: string) => void
+  endDate?: string
+  onEndDateChange?: (date: string) => void
   disabled?: boolean
+  children?: React.ReactNode
 }
 
 /**

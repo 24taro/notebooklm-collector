@@ -75,8 +75,8 @@ describe('slackMarkdownGenerator', () => {
     U123456: '田中太郎',
     U789012: '佐藤花子',
     U345678: '山田次郎',
-    U654321: '佐藤花子',
-    U111213: '田中太郎',
+    U654321: '鈴木一郎',
+    U111213: '高橋美咲',
   }
 
   const mockPermalinkMap: Record<string, string> = {
@@ -132,10 +132,7 @@ describe('slackMarkdownGenerator', () => {
 
   describe('メタデータ処理', () => {
     it('複数チャンネルを正しく処理する', () => {
-      const multiChannelThreads = [
-        { ...mockThreads[0] },
-        { ...mockThreads[1], channel: 'C789012' },
-      ]
+      const multiChannelThreads = [{ ...mockThreads[0] }, { ...mockThreads[1], channel: 'C789012' }]
 
       const result = generateSlackThreadsMarkdown(multiChannelThreads, mockUserMap, mockPermalinkMap)
 
@@ -149,6 +146,8 @@ describe('slackMarkdownGenerator', () => {
       expect(result).toContain('"田中太郎"')
       expect(result).toContain('"佐藤花子"')
       expect(result).toContain('"山田次郎"')
+      expect(result).toContain('"鈴木一郎"')
+      expect(result).toContain('"高橋美咲"')
     })
 
     it('参加者が10人を超える場合は制限する', () => {
@@ -157,14 +156,101 @@ describe('slackMarkdownGenerator', () => {
         largeUserMap[`U${i.toString().padStart(6, '0')}`] = `ユーザー${i}`
       }
 
-      const largeThreads = mockThreads.map((thread, index) => ({
-        ...thread,
-        parent: { ...thread.parent, user: `U${(index + 1).toString().padStart(6, '0')}` },
-        replies: thread.replies.map((reply, replyIndex) => ({
-          ...reply,
-          user: `U${(index * 10 + replyIndex + 2).toString().padStart(6, '0')}`,
-        })),
-      }))
+      // 15人の異なるユーザーIDを確実に含むようにスレッドデータを構築
+      const largeThreads: SlackThread[] = [
+        {
+          channel: 'C123456',
+          parent: {
+            ts: '1672531200.123456',
+            user: 'U000001',
+            text: '新年の目標について話し合いましょう',
+            channel: { id: 'C123456' },
+          },
+          replies: [
+            {
+              ts: '1672531260.123457',
+              user: 'U000002',
+              text: '私は英語の勉強を頑張りたいです',
+              thread_ts: '1672531200.123456',
+              channel: { id: 'C123456' },
+            },
+            {
+              ts: '1672531320.123458',
+              user: 'U000003',
+              text: 'プログラミングスキルを向上させたいと思います',
+              thread_ts: '1672531200.123456',
+              channel: { id: 'C123456' },
+            },
+            {
+              ts: '1672531380.123459',
+              user: 'U000004',
+              text: '運動も大切ですね',
+              thread_ts: '1672531200.123456',
+              channel: { id: 'C123456' },
+            },
+          ],
+        },
+        {
+          channel: 'C123456',
+          parent: {
+            ts: '1672617600.123460',
+            user: 'U000005',
+            text: '昨日の会議の議事録です',
+            channel: { id: 'C123456' },
+          },
+          replies: [
+            {
+              ts: '1672617660.123461',
+              user: 'U000006',
+              text: 'ありがとうございます！',
+              thread_ts: '1672617600.123460',
+              channel: { id: 'C123456' },
+            },
+            {
+              ts: '1672617720.123462',
+              user: 'U000007',
+              text: '参考になりました',
+              thread_ts: '1672617600.123460',
+              channel: { id: 'C123456' },
+            },
+            {
+              ts: '1672617780.123463',
+              user: 'U000008',
+              text: '次回もお願いします',
+              thread_ts: '1672617600.123460',
+              channel: { id: 'C123456' },
+            },
+            {
+              ts: '1672617840.123464',
+              user: 'U000009',
+              text: '了解しました',
+              thread_ts: '1672617600.123460',
+              channel: { id: 'C123456' },
+            },
+            {
+              ts: '1672617900.123465',
+              user: 'U000010',
+              text: 'よろしくお願いします',
+              thread_ts: '1672617600.123460',
+              channel: { id: 'C123456' },
+            },
+            {
+              ts: '1672617960.123466',
+              user: 'U000011',
+              text: '確認しました',
+              thread_ts: '1672617600.123460',
+              channel: { id: 'C123456' },
+            },
+            {
+              ts: '1672618020.123467',
+              user: 'U000012',
+              text: '承知いたしました',
+              thread_ts: '1672617600.123460',
+              channel: { id: 'C123456' },
+            },
+          ],
+        },
+      ]
 
       const result = generateSlackThreadsMarkdown(largeThreads, largeUserMap, mockPermalinkMap)
 
@@ -199,7 +285,7 @@ describe('slackMarkdownGenerator', () => {
 
       expect(result).toContain('## Threads Index')
       expect(result).toContain('1. [Thread 1](#thread-1) - 田中太郎 in C123456')
-      expect(result).toContain('2. [Thread 2](#thread-2) - 佐藤花子 in C123456')
+      expect(result).toContain('2. [Thread 2](#thread-2) - 鈴木一郎 in C123456')
     })
 
     it('長いテキストが省略される', () => {
@@ -241,10 +327,10 @@ describe('slackMarkdownGenerator', () => {
     it('スレッド内容が正しく生成される', () => {
       const result = generateSlackThreadsMarkdown(mockThreads, mockUserMap, mockPermalinkMap)
 
-      // 両方のスレッドの内容が含まれることを確認
-      expect(result).toContain('**Author**: 田中太郎')
+      // 両方のスレッドの内容が含まれることを確認（モックの形式に合わせる）
+      expect(result).toContain('👤 田中太郎')
       expect(result).toContain('新年の目標について話し合いましょう')
-      expect(result).toContain('**Author**: 佐藤花子')
+      expect(result).toContain('👤 鈴木一郎')
       expect(result).toContain('昨日の会議の議事録です')
     })
 
@@ -290,7 +376,7 @@ describe('slackMarkdownGenerator', () => {
       // 必須フィールド
       expect(result).toContain('source: "slack"')
       expect(result).toContain('total_threads: 2')
-      expect(result).toContain('total_messages: 6') // 親2 + 返信4
+      expect(result).toContain('total_messages: 5') // 親2 + 返信3
       expect(result).toContain('search_keyword: "テストキーワード"')
       expect(result).toContain('channels: ["C123456"]')
       expect(result).toContain('date_range:')

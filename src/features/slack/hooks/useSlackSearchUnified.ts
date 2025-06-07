@@ -51,16 +51,19 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
   })
 
   // 進捗の更新
-  const updateProgress = useCallback((phase: ProgressStatus['phase'], message: string, current?: number, total?: number) => {
-    setState(prev => ({
-      ...prev,
-      progressStatus: { phase, message, current, total },
-    }))
-  }, [])
+  const updateProgress = useCallback(
+    (phase: ProgressStatus['phase'], message: string, current?: number, total?: number) => {
+      setState((prev) => ({
+        ...prev,
+        progressStatus: { phase, message, current, total },
+      }))
+    },
+    [],
+  )
 
   // エラーの設定
   const setError = useCallback((error: ApiError) => {
-    setState(prev => ({
+    setState((prev) => ({
       ...prev,
       error,
       isLoading: false,
@@ -71,7 +74,7 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
   const handleSearch = useCallback(
     async (params: SlackSearchParams) => {
       try {
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
           isLoading: true,
           error: null,
@@ -86,16 +89,34 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
         updateProgress('searching', 'Slackメッセージを検索中...')
 
         // 1. メッセージ検索
-        const searchResult = await adapter.searchMessages(params)
-        if (!searchResult.ok) {
+        // SlackSearchParamsを適切にアダプターのSlackSearchParamsに変換
+        let query = params.searchQuery
+        if (params.channel) {
+          query += ` in:${params.channel}`
+        }
+        if (params.author) {
+          query += ` from:${params.author}`
+        }
+        if (params.startDate) {
+          query += ` after:${params.startDate}`
+        }
+        if (params.endDate) {
+          query += ` before:${params.endDate}`
+        }
+
+        const searchResult = await adapter.searchMessages({
+          token: params.token,
+          query,
+        })
+        if (searchResult.isErr()) {
           setError(searchResult.error)
-          toast.error(getUserFriendlyErrorMessage(searchResult.error, 'slack'))
+          toast.error(getUserFriendlyErrorMessage(searchResult.error))
           return
         }
 
         const { messages } = searchResult.value
         if (messages.length === 0) {
-          setState(prev => ({
+          setState((prev) => ({
             ...prev,
             isLoading: false,
             messages: [],
@@ -107,54 +128,59 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
           return
         }
 
-        setState(prev => ({ ...prev, messages }))
+        setState((prev) => ({ ...prev, messages }))
         updateProgress('fetching_threads', `${messages.length}件のメッセージからスレッドを構築中...`)
 
         // 2. スレッド構築
         const threadsResult = await adapter.buildThreadsFromMessages(messages, params.token)
-        if (!threadsResult.ok) {
+        if (threadsResult.isErr()) {
           setError(threadsResult.error)
-          toast.error(getUserFriendlyErrorMessage(threadsResult.error, 'slack'))
+          toast.error(getUserFriendlyErrorMessage(threadsResult.error))
           return
         }
 
         const threads = threadsResult.value
-        setState(prev => ({ ...prev, slackThreads: threads }))
+        setState((prev) => ({ ...prev, slackThreads: threads }))
         updateProgress('fetching_users', `${threads.length}個のスレッドからユーザー情報を取得中...`)
 
         // 3. ユーザー情報取得
         const userMapsResult = await adapter.fetchUserMaps(threads, params.token)
-        if (!userMapsResult.ok) {
+        if (userMapsResult.isErr()) {
           setError(userMapsResult.error)
-          toast.error(getUserFriendlyErrorMessage(userMapsResult.error, 'slack'))
+          toast.error(getUserFriendlyErrorMessage(userMapsResult.error))
           return
         }
 
         const userMaps = userMapsResult.value
-        setState(prev => ({ ...prev, userMaps }))
+        setState((prev) => ({ ...prev, userMaps }))
         updateProgress('generating_permalinks', 'パーマリンクを生成中...')
 
         // 4. パーマリンク生成
         const permalinkMapsResult = await adapter.generatePermalinkMaps(threads, params.token)
-        if (!permalinkMapsResult.ok) {
+        if (permalinkMapsResult.isErr()) {
           // パーマリンクの生成に失敗しても処理を続行
           console.warn('Permalink generation failed:', permalinkMapsResult.error)
         }
 
-        const permalinkMaps = permalinkMapsResult.ok ? permalinkMapsResult.value : {}
-        setState(prev => ({ ...prev, permalinkMaps }))
+        const permalinkMaps = permalinkMapsResult.isOk() ? permalinkMapsResult.value : {}
+        setState((prev) => ({ ...prev, permalinkMaps }))
 
         // 5. プレビュー用Markdown生成（最初の10スレッドのみ）
         const previewThreads = threads.slice(0, 10)
-        const markdownResult = await adapter.generateMarkdown(previewThreads, userMaps, permalinkMaps, params.searchQuery)
-        if (!markdownResult.ok) {
+        const markdownResult = await adapter.generateMarkdown(
+          previewThreads,
+          userMaps,
+          permalinkMaps,
+          params.searchQuery,
+        )
+        if (markdownResult.isErr()) {
           setError(markdownResult.error)
-          toast.error(getUserFriendlyErrorMessage(markdownResult.error, 'slack'))
+          toast.error(getUserFriendlyErrorMessage(markdownResult.error))
           return
         }
 
         const previewMarkdown = markdownResult.value
-        setState(prev => ({
+        setState((prev) => ({
           ...prev,
           currentPreviewMarkdown: previewMarkdown,
           isLoading: false,
@@ -169,7 +195,7 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
           message: error instanceof Error ? error.message : '不明なエラーが発生しました',
         }
         setError(apiError)
-        toast.error(getUserFriendlyErrorMessage(apiError, 'slack'))
+        toast.error(getUserFriendlyErrorMessage(apiError))
       }
     },
     [adapter, updateProgress, setError],
@@ -177,9 +203,9 @@ export function useSlackSearchUnified(options?: UseSlackSearchOptions): UseSlack
 
   // リトライ機能
   const [lastSearchParams, setLastSearchParams] = useState<SlackSearchParams | null>(null)
-  
+
   const canRetry = state.error !== null && lastSearchParams !== null
-  
+
   const retrySearch = useCallback(() => {
     if (lastSearchParams) {
       handleSearch(lastSearchParams)
