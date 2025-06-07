@@ -66,7 +66,9 @@ test.describe('Storybook動作確認', () => {
 
     // 空状態のメッセージが表示されることを確認
     const iframe = page.frameLocator('#storybook-preview-iframe')
-    await expect(iframe.locator('p:has-text("Docbase記事を検索すると、ここにプレビューが表示されます。")')).toBeVisible()
+    await expect(
+      iframe.locator('p:has-text("Docbase記事を検索すると、ここにプレビューが表示されます。")'),
+    ).toBeVisible()
   })
 
   test('SlackAdvancedFilters - Default Storyが表示される', async ({ page }: { page: Page }) => {

@@ -327,10 +327,10 @@ describe('slackMarkdownGenerator', () => {
     it('スレッド内容が正しく生成される', () => {
       const result = generateSlackThreadsMarkdown(mockThreads, mockUserMap, mockPermalinkMap)
 
-      // 両方のスレッドの内容が含まれることを確認（モックの形式に合わせる）
-      expect(result).toContain('👤 田中太郎')
+      // 両方のスレッドの内容が含まれることを確認（新しい形式に合わせる）
+      expect(result).toContain('**Author**: 田中太郎')
       expect(result).toContain('新年の目標について話し合いましょう')
-      expect(result).toContain('👤 鈴木一郎')
+      expect(result).toContain('**Author**: 鈴木一郎')
       expect(result).toContain('昨日の会議の議事録です')
     })
 
