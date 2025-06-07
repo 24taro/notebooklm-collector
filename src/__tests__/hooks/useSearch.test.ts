@@ -1,9 +1,9 @@
 import { act, renderHook, waitFor } from '@testing-library/react'
 import { err, ok } from 'neverthrow'
 import { type Mock, beforeEach, describe, expect, it, vi } from 'vitest'
-import type { DocbaseAdapter } from '../../adapters/docbaseAdapter'
-import { type AdvancedFilters, useSearch } from '../../hooks/useSearch'
-import type { DocbasePostListItem } from '../../types/docbase'
+import type { DocbaseAdapter } from '../../features/docbase/adapters/docbaseAdapter'
+import { type AdvancedFilters, useDocbaseSearch } from '../../features/docbase/hooks/useDocbaseSearch'
+import type { DocbasePostListItem } from '../../features/docbase/types/docbase'
 import type { ApiError } from '../../types/error'
 
 // react-hot-toastのモック
@@ -15,7 +15,7 @@ vi.mock('react-hot-toast', () => ({
   },
 }))
 
-describe('useSearch', () => {
+describe('useDocbaseSearch', () => {
   let mockAdapter: DocbaseAdapter
   let mockPosts: DocbasePostListItem[]
 
@@ -48,7 +48,7 @@ describe('useSearch', () => {
 
   describe('初期状態', () => {
     it('初期状態が正しく設定される', () => {
-      const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
+      const { result } = renderHook(() => useDocbaseSearch({ adapter: mockAdapter }))
 
       expect(result.current.posts).toEqual([])
       expect(result.current.isLoading).toBe(false)
@@ -61,7 +61,7 @@ describe('useSearch', () => {
     it('検索が成功した場合、結果を正しく更新する', async () => {
       ;(mockAdapter.searchPosts as Mock).mockResolvedValue(ok(mockPosts))
 
-      const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
+      const { result } = renderHook(() => useDocbaseSearch({ adapter: mockAdapter }))
 
       await act(async () => {
         await result.current.searchPosts('example', 'test-token', 'test keyword')
@@ -76,7 +76,7 @@ describe('useSearch', () => {
     it('検索結果が0件の場合、適切にメッセージを表示する', async () => {
       ;(mockAdapter.searchPosts as Mock).mockResolvedValue(ok([]))
 
-      const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
+      const { result } = renderHook(() => useDocbaseSearch({ adapter: mockAdapter }))
 
       await act(async () => {
         await result.current.searchPosts('example', 'test-token', 'no results')
@@ -90,7 +90,7 @@ describe('useSearch', () => {
     it('詳細検索条件付きで検索が成功する', async () => {
       ;(mockAdapter.searchPosts as Mock).mockResolvedValue(ok(mockPosts))
 
-      const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
+      const { result } = renderHook(() => useDocbaseSearch({ adapter: mockAdapter }))
 
       const advancedFilters: AdvancedFilters = {
         tags: 'tag1,tag2',
@@ -123,7 +123,7 @@ describe('useSearch', () => {
       }
       ;(mockAdapter.searchPosts as Mock).mockResolvedValue(err(error))
 
-      const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
+      const { result } = renderHook(() => useDocbaseSearch({ adapter: mockAdapter }))
 
       await act(async () => {
         await result.current.searchPosts('example', 'invalid-token', 'keyword')
@@ -142,7 +142,7 @@ describe('useSearch', () => {
       }
       ;(mockAdapter.searchPosts as Mock).mockResolvedValue(err(error))
 
-      const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
+      const { result } = renderHook(() => useDocbaseSearch({ adapter: mockAdapter }))
 
       await act(async () => {
         await result.current.searchPosts('example', 'test-token', 'keyword')
@@ -159,7 +159,7 @@ describe('useSearch', () => {
       }
       ;(mockAdapter.searchPosts as Mock).mockResolvedValue(err(error))
 
-      const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
+      const { result } = renderHook(() => useDocbaseSearch({ adapter: mockAdapter }))
 
       await act(async () => {
         await result.current.searchPosts('example', 'test-token', 'keyword')
@@ -176,7 +176,7 @@ describe('useSearch', () => {
       }
       ;(mockAdapter.searchPosts as Mock).mockResolvedValue(err(error))
 
-      const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
+      const { result } = renderHook(() => useDocbaseSearch({ adapter: mockAdapter }))
 
       await act(async () => {
         await result.current.searchPosts('example', 'test-token', 'keyword')
@@ -189,7 +189,7 @@ describe('useSearch', () => {
 
   describe('バリデーション', () => {
     it('ドメインが空の場合、検索を実行しない', async () => {
-      const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
+      const { result } = renderHook(() => useDocbaseSearch({ adapter: mockAdapter }))
 
       await act(async () => {
         await result.current.searchPosts('', 'test-token', 'keyword')
@@ -201,7 +201,7 @@ describe('useSearch', () => {
     })
 
     it('トークンが空の場合、検索を実行しない', async () => {
-      const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
+      const { result } = renderHook(() => useDocbaseSearch({ adapter: mockAdapter }))
 
       await act(async () => {
         await result.current.searchPosts('example', '', 'keyword')
@@ -213,7 +213,7 @@ describe('useSearch', () => {
     })
 
     it('キーワードと詳細検索条件が全て空の場合、検索を実行しない', async () => {
-      const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
+      const { result } = renderHook(() => useDocbaseSearch({ adapter: mockAdapter }))
 
       const emptyFilters: AdvancedFilters = {
         tags: '',
@@ -236,7 +236,7 @@ describe('useSearch', () => {
     it('キーワードが空でも詳細検索条件があれば検索を実行する', async () => {
       ;(mockAdapter.searchPosts as Mock).mockResolvedValue(ok(mockPosts))
 
-      const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
+      const { result } = renderHook(() => useDocbaseSearch({ adapter: mockAdapter }))
 
       const filters: AdvancedFilters = {
         tags: 'tag1',
@@ -256,7 +256,7 @@ describe('useSearch', () => {
     })
 
     it('全てのパラメータが空の場合、何もしない', async () => {
-      const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
+      const { result } = renderHook(() => useDocbaseSearch({ adapter: mockAdapter }))
 
       await act(async () => {
         await result.current.searchPosts('', '', '')
@@ -277,7 +277,7 @@ describe('useSearch', () => {
       }
       ;(mockAdapter.searchPosts as Mock).mockResolvedValueOnce(err(error)).mockResolvedValueOnce(ok(mockPosts))
 
-      const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
+      const { result } = renderHook(() => useDocbaseSearch({ adapter: mockAdapter }))
 
       // 最初の検索でエラー
       await act(async () => {
@@ -301,7 +301,7 @@ describe('useSearch', () => {
     })
 
     it('前回の検索パラメータがない場合、再試行は何もしない', async () => {
-      const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
+      const { result } = renderHook(() => useDocbaseSearch({ adapter: mockAdapter }))
 
       act(() => {
         result.current.retrySearch()
@@ -319,7 +319,7 @@ describe('useSearch', () => {
       })
       ;(mockAdapter.searchPosts as Mock).mockReturnValue(searchPromise)
 
-      const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
+      const { result } = renderHook(() => useDocbaseSearch({ adapter: mockAdapter }))
 
       // 検索開始
       act(() => {
@@ -347,7 +347,7 @@ describe('useSearch', () => {
       }
       ;(mockAdapter.searchPosts as Mock).mockResolvedValue(err(error))
 
-      const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
+      const { result } = renderHook(() => useDocbaseSearch({ adapter: mockAdapter }))
 
       await act(async () => {
         await result.current.searchPosts('example', 'invalid-token', 'keyword')
@@ -365,7 +365,7 @@ describe('useSearch', () => {
       }
       ;(mockAdapter.searchPosts as Mock).mockResolvedValue(err(error))
 
-      const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
+      const { result } = renderHook(() => useDocbaseSearch({ adapter: mockAdapter }))
 
       await act(async () => {
         await result.current.searchPosts('example', 'invalid-token', 'keyword')
@@ -377,7 +377,7 @@ describe('useSearch', () => {
     })
 
     it('エラーがない場合はnullを返す', () => {
-      const { result } = renderHook(() => useSearch({ adapter: mockAdapter }))
+      const { result } = renderHook(() => useDocbaseSearch({ adapter: mockAdapter }))
 
       expect(result.current.getUserFriendlyError()).toBeNull()
       expect(result.current.getErrorSuggestion()).toBeNull()
