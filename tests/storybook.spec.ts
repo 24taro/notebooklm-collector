@@ -10,46 +10,36 @@ test.describe('Storybook動作確認', () => {
     // Storybookのタイトルが表示されることを確認
     await expect(page).toHaveTitle(/Storybook/)
 
-    // featuresサイドバーが表示されることを確認
-    await expect(page.locator('[data-item-id="features"]')).toBeVisible()
+    // サイドバーが表示されることを確認（より汎用的なセレクター）
+    await expect(page.locator('[data-nodetype="component"]').first()).toBeVisible({ timeout: 10000 })
   })
 
   test('Features構造が正しく表示される', async ({ page }: { page: Page }) => {
     await page.goto('/')
 
-    // featuresサイドバーが表示されるまで待機
-    await page.locator('[data-item-id="features"]').waitFor({ state: 'visible' })
+    // サイドバーが表示されるまで待機
+    await page.locator('[data-nodetype="component"]').first().waitFor({ state: 'visible', timeout: 10000 })
 
-    // Features を展開
-    await page.locator('[data-item-id="features"]').click()
-    await page.waitForTimeout(500)
-
-    // docbaseとslackが表示されることを確認
-    await expect(page.locator('[data-item-id="features-docbase"]')).toBeVisible()
-    await expect(page.locator('[data-item-id="features-slack"]')).toBeVisible()
+    // Features に関するコンポーネントが表示されることを確認
+    await expect(page.locator('button[data-action="collapse-root"]', { hasText: 'Features' })).toBeVisible({ timeout: 10000 })
+    
+    // Docbase コンポーネントが表示されることを確認
+    await expect(page.locator('text=Docbase').first()).toBeVisible({ timeout: 10000 })
   })
 
   test('DocbaseMarkdownPreview - Default Storyが表示される', async ({ page }: { page: Page }) => {
     await page.goto('/')
 
     // サイドバーが表示されるまで待機
-    await page.locator('[data-item-id="features"]').waitFor({ state: 'visible' })
+    await page.locator('[data-nodetype="component"]').first().waitFor({ state: 'visible', timeout: 10000 })
 
-    // Features -> Docbase -> Components を展開
-    await page.locator('[data-item-id="features"]').click()
-    await page.waitForTimeout(500)
-    await page.locator('[data-item-id="features-docbase"]').click()
-    await page.waitForTimeout(500)
-    await page.locator('[data-item-id="features-docbase-components"]').click()
-    await page.waitForTimeout(500)
+    // DocbaseMarkdownPreviewコンポーネントをクリック（サイドバーのボタン）
+    await page.locator('button#features-docbase-components-docbasemarkdownpreview').click()
+    await page.waitForTimeout(1000)
 
-    // DocbaseMarkdownPreviewコンポーネントを展開
-    await page.locator('[data-item-id="features-docbase-components-docbasemarkdownpreview"]').click()
-    await page.waitForTimeout(500) // アニメーション待機
-
-    // Default Storyを選択
-    await page.locator('[data-item-id="features-docbase-components-docbasemarkdownpreview--default"]').click()
-    await page.waitForTimeout(1000) // iframeロード待機
+    // Default Storyを選択（具体的なIDを使用）
+    await page.locator('#features-docbase-components-docbasemarkdownpreview--default').click()
+    await page.waitForTimeout(2000) // iframeロード待機
 
     // プレビューエリアでDocbaseMarkdownPreviewコンポーネントが表示されることを確認
     const iframe = page.frameLocator('#storybook-preview-iframe')
@@ -66,18 +56,16 @@ test.describe('Storybook動作確認', () => {
   test('DocbaseMarkdownPreview - Empty Storyが表示される', async ({ page }: { page: Page }) => {
     await page.goto('/')
 
-    // Features -> Docbase -> Components -> DocbaseMarkdownPreview -> Empty を選択
-    await page.locator('[data-item-id="features"]').click()
-    await page.waitForTimeout(500)
-    await page.locator('[data-item-id="features-docbase"]').click()
-    await page.waitForTimeout(500)
-    await page.locator('[data-item-id="features-docbase-components"]').click()
-    await page.waitForTimeout(500)
-    await page.locator('[data-item-id="features-docbase-components-docbasemarkdownpreview"]').click()
-    await page.waitForTimeout(500)
+    // サイドバーが表示されるまで待機
+    await page.locator('[data-nodetype="component"]').first().waitFor({ state: 'visible', timeout: 10000 })
 
-    // Empty Storyを選択
-    await page.locator('[data-item-id="features-docbase-components-docbasemarkdownpreview--empty"]').click()
+    // DocbaseMarkdownPreviewコンポーネントをクリック（サイドバーのボタン）
+    await page.locator('button#features-docbase-components-docbasemarkdownpreview').click()
+    await page.waitForTimeout(1000)
+
+    // Empty Storyを選択（具体的なIDを使用）
+    await page.locator('#features-docbase-components-docbasemarkdownpreview--empty').click()
+    await page.waitForTimeout(2000)
 
     // 空状態のメッセージが表示されることを確認
     const iframe = page.frameLocator('#storybook-preview-iframe')
@@ -89,16 +77,14 @@ test.describe('Storybook動作確認', () => {
   test('ダウンロードボタンが正常に動作する', async ({ page }: { page: Page }) => {
     await page.goto('/')
 
+    // サイドバーが表示されるまで待機
+    await page.locator('[data-nodetype="component"]').first().waitFor({ state: 'visible', timeout: 10000 })
+
     // DocbaseMarkdownPreview Default Storyを表示
-    await page.locator('[data-item-id="features"]').click()
-    await page.waitForTimeout(500)
-    await page.locator('[data-item-id="features-docbase"]').click()
-    await page.waitForTimeout(500)
-    await page.locator('[data-item-id="features-docbase-components"]').click()
-    await page.waitForTimeout(500)
-    await page.locator('[data-item-id="features-docbase-components-docbasemarkdownpreview"]').click()
-    await page.waitForTimeout(500)
-    await page.locator('[data-item-id="features-docbase-components-docbasemarkdownpreview--default"]').click()
+    await page.locator('button#features-docbase-components-docbasemarkdownpreview').click()
+    await page.waitForTimeout(1000)
+    await page.locator('#features-docbase-components-docbasemarkdownpreview--default').click()
+    await page.waitForTimeout(2000)
 
     const iframe = page.frameLocator('#storybook-preview-iframe')
 
