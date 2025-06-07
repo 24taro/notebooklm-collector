@@ -2,9 +2,9 @@
 // HTTPクライアントアダプターを使用してDocbase APIにアクセスし、Result型で結果を返す
 
 import { type Result, err, ok } from 'neverthrow'
-import type { DocbasePostListItem, DocbasePostsResponse } from '../types/docbase'
-import type { ApiError } from '../../../types/error'
 import type { HttpClient } from '../../../adapters/types'
+import type { ApiError } from '../../../types/error'
+import type { DocbasePostListItem, DocbasePostsResponse } from '../types/docbase'
 
 /**
  * Docbase検索パラメータ

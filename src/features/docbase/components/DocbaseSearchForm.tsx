@@ -1,14 +1,14 @@
 'use client'
 
 import React, { useState, type FormEvent, useEffect, useRef } from 'react'
+import { MarkdownPreview } from '../../../components/MarkdownPreview'
 import { useDownload } from '../../../hooks/useDownload'
 import useLocalStorage from '../../../hooks/useLocalStorage'
-import { useDocbaseSearch } from '../hooks/useDocbaseSearch'
 import type { ApiError } from '../../../types/error'
+import { useDocbaseSearch } from '../hooks/useDocbaseSearch'
 import { generateDocbaseMarkdown } from '../utils/docbaseMarkdownGenerator'
 import { DocbaseDomainInput } from './DocbaseDomainInput'
 import { DocbaseTokenInput } from './DocbaseTokenInput'
-import { MarkdownPreview } from '../../../components/MarkdownPreview'
 
 const LOCAL_STORAGE_DOMAIN_KEY = 'docbaseDomain'
 const LOCAL_STORAGE_TOKEN_KEY = 'docbaseToken'

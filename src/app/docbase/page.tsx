@@ -1,10 +1,10 @@
 'use client' // クライアントコンポーネントとしてマーク
 
 import { Toaster } from 'react-hot-toast' // Toasterをインポート
-import { DocbaseSearchForm } from '../../features/docbase/components/DocbaseSearchForm' // パスを修正
 import Footer from '../../components/Footer'
 // import { SparklesCore } from "../../components/ui/sparkles"; // 架空のUIコンポーネントなのだ -> 一旦コメントアウト
 import Header from '../../components/Header'
+import { DocbaseSearchForm } from '../../features/docbase/components/DocbaseSearchForm' // パスを修正
 
 export default function DocbasePage() {
   // コンポーネント名を DocbasePage に変更

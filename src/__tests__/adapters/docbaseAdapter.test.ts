@@ -2,9 +2,9 @@
 // モックHTTPクライアントを使用してアダプターの動作を検証
 
 import { describe, expect, it } from 'vitest'
-import { createDocbaseAdapter } from '../../adapters/docbaseAdapter'
+import { createDocbaseAdapter } from '../../features/docbase/adapters/docbaseAdapter'
 import { createErrorResponse, createMockHttpClient, createSuccessResponse } from '../../adapters/mockHttpClient'
-import type { DocbasePostsResponse } from '../../types/docbase'
+import type { DocbasePostsResponse } from '../../features/docbase/types/docbase'
 import type { ApiError } from '../../types/error'
 
 describe('DocbaseAdapter', () => {

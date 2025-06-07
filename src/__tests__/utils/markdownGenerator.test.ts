@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
-import type { DocbasePostListItem } from '../../types/docbase'
-import { generateMarkdown } from '../../utils/markdownGenerator'
+import type { DocbasePostListItem } from '../../features/docbase/types/docbase'
+import { generateDocbaseMarkdown } from '../../features/docbase/utils/docbaseMarkdownGenerator'
 
 describe('markdownGenerator', () => {
   const mockPosts: DocbasePostListItem[] = [
@@ -29,17 +29,17 @@ describe('markdownGenerator', () => {
 
   describe('基本機能', () => {
     it('空の配列の場合は空文字列を返す', () => {
-      const result = generateMarkdown([])
+      const result = generateDocbaseMarkdown([])
       expect(result).toBe('')
     })
 
     it('nullまたはundefinedの場合は空文字列を返す', () => {
-      expect(generateMarkdown(null as unknown as DocbasePostListItem[])).toBe('')
-      expect(generateMarkdown(undefined as unknown as DocbasePostListItem[])).toBe('')
+      expect(generateDocbaseMarkdown(null as unknown as DocbasePostListItem[])).toBe('')
+      expect(generateDocbaseMarkdown(undefined as unknown as DocbasePostListItem[])).toBe('')
     })
 
     it('記事リストから正しいMarkdownを生成する', () => {
-      const result = generateMarkdown(mockPosts, 'テストキーワード')
+      const result = generateDocbaseMarkdown(mockPosts, 'テストキーワード')
 
       // YAML Front Matterの確認
       expect(result).toContain('---')
@@ -72,7 +72,7 @@ describe('markdownGenerator', () => {
     })
 
     it('検索キーワードなしでもMarkdownを生成する', () => {
-      const result = generateMarkdown(mockPosts)
+      const result = generateDocbaseMarkdown(mockPosts)
 
       // 検索キーワードが含まれないことを確認
       expect(result).not.toContain('search_keyword:')
@@ -103,7 +103,7 @@ describe('markdownGenerator', () => {
         },
       ]
 
-      const result = generateMarkdown(sameDayPosts)
+      const result = generateDocbaseMarkdown(sameDayPosts)
 
       expect(result).toContain('date_range: "2023-01-01 - 2023-01-01"')
       // Collection Overviewでの日付表示は単一日付になる
@@ -111,14 +111,14 @@ describe('markdownGenerator', () => {
     })
 
     it('複数の日付範囲を正しく処理する', () => {
-      const result = generateMarkdown(mockPosts)
+      const result = generateDocbaseMarkdown(mockPosts)
 
       expect(result).toContain('date_range: "2023-01-01 - 2023-01-03"')
       expect(result).toMatch(/- \*\*Date Range\*\*: 2023\/1\/1 - 2023\/1\/3/)
     })
 
     it('記事の日付が正しく日本語形式でフォーマットされる', () => {
-      const result = generateMarkdown([mockPosts[0]])
+      const result = generateDocbaseMarkdown([mockPosts[0]])
 
       // 目次での日付表示
       expect(result).toMatch(/1\. \[テスト記事1\]\(#article-1\) - 2023\/1\/1/)
@@ -130,7 +130,7 @@ describe('markdownGenerator', () => {
 
   describe('記事内容の処理', () => {
     it('記事のYAML Front Matterが正しく生成される', () => {
-      const result = generateMarkdown([mockPosts[0]])
+      const result = generateDocbaseMarkdown([mockPosts[0]])
 
       expect(result).toContain('```yaml')
       expect(result).toContain('docbase_id: 1')
@@ -141,28 +141,28 @@ describe('markdownGenerator', () => {
     })
 
     it('記事の本文がそのまま含まれる', () => {
-      const result = generateMarkdown([mockPosts[0]])
+      const result = generateDocbaseMarkdown([mockPosts[0]])
 
       expect(result).toContain('## Content')
       expect(result).toContain('これはテスト記事1の内容です。')
     })
 
     it('複数行の記事内容を正しく処理する', () => {
-      const result = generateMarkdown([mockPosts[1]])
+      const result = generateDocbaseMarkdown([mockPosts[1]])
 
       expect(result).toContain('これはテスト記事2の内容です。')
       expect(result).toContain('複数行の内容を含みます。')
     })
 
     it('マークダウン形式の記事内容をそのまま保持する', () => {
-      const result = generateMarkdown([mockPosts[2]])
+      const result = generateDocbaseMarkdown([mockPosts[2]])
 
       expect(result).toContain('# マークダウンタイトル')
       expect(result).toContain('**太字**のテキストと*斜体*のテキスト。')
     })
 
     it('記事間の区切り線が正しく挿入される', () => {
-      const result = generateMarkdown(mockPosts)
+      const result = generateDocbaseMarkdown(mockPosts)
 
       // 記事間に区切り線があることを確認
       const articleSections = result.split('---\n\n')
@@ -172,7 +172,7 @@ describe('markdownGenerator', () => {
 
   describe('ドキュメント情報', () => {
     it('記事の基本情報が正しく含まれる', () => {
-      const result = generateMarkdown([mockPosts[0]])
+      const result = generateDocbaseMarkdown([mockPosts[0]])
 
       expect(result).toContain('## Document Information')
       expect(result).toContain('- **Document ID**: 1')
@@ -180,7 +180,7 @@ describe('markdownGenerator', () => {
     })
 
     it('記事タイトルが適切にレベル1ヘッダーになる', () => {
-      const result = generateMarkdown([mockPosts[0]])
+      const result = generateDocbaseMarkdown([mockPosts[0]])
 
       // 記事のタイトルがH1として表示されることを確認
       expect(result).toMatch(/# テスト記事1\n/)
@@ -199,7 +199,7 @@ describe('markdownGenerator', () => {
         },
       ]
 
-      const result = generateMarkdown(specialPosts)
+      const result = generateDocbaseMarkdown(specialPosts)
 
       expect(result).toContain('title: "タイトル "引用符" & 特殊文字"')
       expect(result).toContain('# タイトル "引用符" & 特殊文字')
@@ -216,7 +216,7 @@ describe('markdownGenerator', () => {
         },
       ]
 
-      const result = generateMarkdown(emptyBodyPosts)
+      const result = generateDocbaseMarkdown(emptyBodyPosts)
 
       expect(result).toContain('# 空の記事')
       expect(result).toContain('## Content')
@@ -225,7 +225,7 @@ describe('markdownGenerator', () => {
     })
 
     it('単一記事でも正しくMarkdownを生成する', () => {
-      const result = generateMarkdown([mockPosts[0]])
+      const result = generateDocbaseMarkdown([mockPosts[0]])
 
       expect(result).toContain('total_articles: 1')
       expect(result).toContain('- **Total Articles**: 1')
@@ -236,7 +236,7 @@ describe('markdownGenerator', () => {
 
   describe('LLM最適化要素', () => {
     it('LLM理解しやすい構造化された見出しを含む', () => {
-      const result = generateMarkdown(mockPosts)
+      const result = generateDocbaseMarkdown(mockPosts)
 
       // 構造化された見出しレベル
       expect(result).toContain('# Docbase Articles Collection')
@@ -249,7 +249,7 @@ describe('markdownGenerator', () => {
     })
 
     it('YAML Front Matterにメタデータが適切に含まれる', () => {
-      const result = generateMarkdown(mockPosts, 'AI学習')
+      const result = generateDocbaseMarkdown(mockPosts, 'AI学習')
 
       expect(result).toMatch(/^---\n/)
       expect(result).toContain('source: "docbase"')
@@ -260,7 +260,7 @@ describe('markdownGenerator', () => {
     })
 
     it('記事ごとのYAMLブロックでメタデータを提供する', () => {
-      const result = generateMarkdown([mockPosts[0]])
+      const result = generateDocbaseMarkdown([mockPosts[0]])
 
       // 記事レベルのYAMLブロック
       expect(result).toContain('```yaml')
