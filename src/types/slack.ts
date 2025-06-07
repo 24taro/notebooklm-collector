@@ -92,5 +92,5 @@ export type UseSlackSearchResult = UseSlackSearchState & {
  * useSlackSearchUnified フックオプション（アダプター注入用）
  */
 export type UseSlackSearchOptions = {
-  adapter?: import('@/adapters/slackAdapter').SlackAdapter
+  adapter?: import('@/features/slack/adapters/slackAdapter').SlackAdapter
 }

@@ -22,12 +22,12 @@ export {
   type SlackPermalinkParams,
   type SlackUserParams,
   type SlackSearchResponse,
-} from './slackAdapter'
+} from '../features/slack/adapters/slackAdapter'
 
 // 内部使用のためのインポート
 import { createDocbaseAdapter as _createDocbaseAdapter } from '../features/docbase/adapters/docbaseAdapter'
+import { createSlackAdapter as _createSlackAdapter } from '../features/slack/adapters/slackAdapter'
 import { createFetchHttpClient as _createFetchHttpClient } from './fetchHttpClient'
-import { createSlackAdapter as _createSlackAdapter } from './slackAdapter'
 
 // デフォルトインスタンス作成用のヘルパー関数
 export function createDefaultDocbaseAdapter() {

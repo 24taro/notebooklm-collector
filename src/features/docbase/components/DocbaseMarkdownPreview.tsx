@@ -7,7 +7,7 @@ import remarkGfm from 'remark-gfm'
 // react-markdownのカスタムコンポーネントのprops型を定義
 // BiomeのnoExplicitAnyを抑制するために、型をanyにしてコメントで説明を追加します
 
-interface MarkdownPreviewProps {
+interface DocbaseMarkdownPreviewProps {
   markdown: string
   title?: string
   onDownload?: () => void
@@ -17,8 +17,8 @@ interface MarkdownPreviewProps {
 }
 
 /**
- * 統一Markdownプレビューコンポーネント
- * DocbaseとSlack両方で共通利用できる設計
+ * Docbase用Markdownプレビューコンポーネント
+ * Docbaseの記事プレビューに特化したMarkdownレンダリング
  * @param markdown 表示するMarkdown文字列
  * @param title プレビューのタイトル
  * @param onDownload ダウンロードハンドラー
@@ -26,7 +26,7 @@ interface MarkdownPreviewProps {
  * @param className 追加のCSSクラス
  * @param emptyMessage 空の時のメッセージ
  */
-export const MarkdownPreview: FC<MarkdownPreviewProps> = ({
+export const DocbaseMarkdownPreview: FC<DocbaseMarkdownPreviewProps> = ({
   markdown,
   title = 'プレビュー',
   onDownload,

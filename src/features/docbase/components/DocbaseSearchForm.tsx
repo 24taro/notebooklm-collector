@@ -1,13 +1,13 @@
 'use client'
 
 import React, { useState, type FormEvent, useEffect, useRef } from 'react'
-import { MarkdownPreview } from '../../../components/MarkdownPreview'
 import { useDownload } from '../../../hooks/useDownload'
 import useLocalStorage from '../../../hooks/useLocalStorage'
 import type { ApiError } from '../../../types/error'
 import { useDocbaseSearch } from '../hooks/useDocbaseSearch'
 import { generateDocbaseMarkdown } from '../utils/docbaseMarkdownGenerator'
 import { DocbaseDomainInput } from './DocbaseDomainInput'
+import { DocbaseMarkdownPreview } from './DocbaseMarkdownPreview'
 import { DocbaseTokenInput } from './DocbaseTokenInput'
 
 const LOCAL_STORAGE_DOMAIN_KEY = 'docbaseDomain'
@@ -308,7 +308,7 @@ export const DocbaseSearchForm = () => {
 
         {posts && posts.length > 0 && !isLoading && !error && (
           <div className="mt-6 pt-5 border-t border-gray-200">
-            <MarkdownPreview
+            <DocbaseMarkdownPreview
               markdown={markdownContent}
               title="Markdownプレビュー"
               onDownload={handleDownloadClick}
