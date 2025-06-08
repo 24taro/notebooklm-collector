@@ -165,7 +165,11 @@ describe("DocbaseAdapter", () => {
         body: `内容${i + 101}`,
         created_at: "2023-01-01T00:00:00Z",
         url: `https://test.docbase.io/posts/${i + 101}`,
-        user: { id: i + 101, name: `ユーザー${i + 101}`, profile_image_url: "" },
+        user: {
+          id: i + 101,
+          name: `ユーザー${i + 101}`,
+          profile_image_url: "",
+        },
         tags: [],
         scope: "everyone",
       })),

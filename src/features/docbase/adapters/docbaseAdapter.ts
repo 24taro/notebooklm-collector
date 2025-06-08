@@ -131,8 +131,7 @@ function buildSearchQuery(
   let query = keyword.trim() ? `"${keyword.trim()}"` : "";
 
   if (advancedFilters) {
-    const { tags, author, titleFilter, startDate, endDate } =
-      advancedFilters;
+    const { tags, author, titleFilter, startDate, endDate } = advancedFilters;
 
     // タグ検索
     if (tags?.trim()) {
@@ -162,7 +161,6 @@ function buildSearchQuery(
     } else if (endDate?.trim()) {
       query += ` created_at:*~${endDate.trim()}`;
     }
-
   }
 
   return query.trim();

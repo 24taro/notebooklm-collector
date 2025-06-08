@@ -127,7 +127,7 @@ describe("markdownGenerator", () => {
             profile_image_url: "https://example.com/user1.jpg",
           },
           tags: [],
-              scope: "everyone",
+          scope: "everyone",
         },
         {
           id: 2,
@@ -141,7 +141,7 @@ describe("markdownGenerator", () => {
             profile_image_url: "https://example.com/user2.jpg",
           },
           tags: [],
-              scope: "everyone",
+          scope: "everyone",
         },
       ];
 
@@ -250,7 +250,7 @@ describe("markdownGenerator", () => {
             profile_image_url: "https://example.com/user.jpg",
           },
           tags: [],
-              scope: "everyone",
+          scope: "everyone",
         },
       ];
 
@@ -273,7 +273,7 @@ describe("markdownGenerator", () => {
             profile_image_url: "https://example.com/user.jpg",
           },
           tags: [],
-              scope: "everyone",
+          scope: "everyone",
         },
       ];
 
@@ -402,7 +402,7 @@ describe("markdownGenerator", () => {
         expect(result).toContain("**作成日**: 2023/01/01");
         expect(result).toContain("**作成者**: テストユーザー1");
         expect(result).toContain("**タグ**: API, テスト");
-  
+
         // 詳細な日時表示がないことを確認
         expect(result).not.toContain("2023年1月1日日曜日");
         expect(result).not.toContain("**ID**:");
@@ -422,7 +422,7 @@ describe("markdownGenerator", () => {
             profile_image_url: "https://example.com/user.jpg",
           },
           tags: [],
-              scope: "everyone",
+          scope: "everyone",
         };
 
         const result = generateDocbaseMarkdownForPreview([longBodyPost]);
@@ -452,7 +452,6 @@ describe("markdownGenerator", () => {
         expect(result).toContain("**作成日**:");
         expect(result).toContain("**作成者**:");
       });
-
     });
 
     describe("日付フォーマット", () => {

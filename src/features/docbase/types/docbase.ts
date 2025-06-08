@@ -14,7 +14,6 @@ export type DocbaseTag = {
   name: string;
 };
 
-
 /**
  * Docbaseの投稿情報を表す型定義
  */
