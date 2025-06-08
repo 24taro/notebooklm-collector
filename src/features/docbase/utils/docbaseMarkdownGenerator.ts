@@ -70,27 +70,16 @@ export const generateDocbaseMarkdown = (posts: DocbasePostListItem[], searchKeyw
           weekday: 'long',
         })
 
-        // 記事のYAML Front Matter
-        let articleMd = `### Article ${index + 1}\n\n`
-        articleMd += '```yaml\n'
-        articleMd += `docbase_id: ${post.id}\n`
-        articleMd += `title: "${post.title}"\n`
-        articleMd += `created_at: "${isoDate}"\n`
-        articleMd += `url: "${post.url}"\n`
-        articleMd += '```\n\n'
+        // 記事のメタデータをシンプルな形式で表示
+        let articleMd = `### Article ${index + 1}: ${post.title}\n\n`
 
-        // LLM理解しやすい構造
-        articleMd += `# ${post.title}\n\n`
+        // メタデータをインライン形式で表示
+        articleMd += `**Created**: ${displayDate} | **ID**: ${post.id} | **URL**: [View Original](${post.url})\n\n`
 
-        articleMd += '## Document Information\n'
-        articleMd += `- **Created**: ${displayDate}\n`
-        articleMd += `- **Source**: [Docbase Article](${post.url})\n`
-        articleMd += `- **Document ID**: ${post.id}\n\n`
-
-        articleMd += '## Content\n\n'
-
-        // 本文をそのまま記載（二重エンコード回避）
-        articleMd += `${post.body}\n\n`
+        // HTMLコメントで記事コンテンツの境界を明確化
+        articleMd += '<!-- DOCBASE_CONTENT_START -->\n'
+        articleMd += `${post.body}\n`
+        articleMd += '<!-- DOCBASE_CONTENT_END -->\n\n'
 
         return articleMd
       })
