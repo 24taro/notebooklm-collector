@@ -19,7 +19,6 @@ describe("markdownGenerator", () => {
         profile_image_url: "https://example.com/user1.jpg",
       },
       tags: [{ name: "API" }, { name: "テスト" }],
-      groups: [{ id: 1, name: "開発チーム" }],
       scope: "everyone",
     },
     {
@@ -34,7 +33,6 @@ describe("markdownGenerator", () => {
         profile_image_url: "https://example.com/user2.jpg",
       },
       tags: [{ name: "ドキュメント" }],
-      groups: [],
       scope: "group",
     },
     {
@@ -49,10 +47,6 @@ describe("markdownGenerator", () => {
         profile_image_url: "https://example.com/user3.jpg",
       },
       tags: [],
-      groups: [
-        { id: 2, name: "デザインチーム" },
-        { id: 3, name: "プロダクトチーム" },
-      ],
       scope: "private",
     },
   ];
@@ -133,8 +127,7 @@ describe("markdownGenerator", () => {
             profile_image_url: "https://example.com/user1.jpg",
           },
           tags: [],
-          groups: [],
-          scope: "everyone",
+              scope: "everyone",
         },
         {
           id: 2,
@@ -148,8 +141,7 @@ describe("markdownGenerator", () => {
             profile_image_url: "https://example.com/user2.jpg",
           },
           tags: [],
-          groups: [],
-          scope: "everyone",
+              scope: "everyone",
         },
       ];
 
@@ -186,7 +178,6 @@ describe("markdownGenerator", () => {
       expect(result).toContain("**Author**: テストユーザー1");
       expect(result).toContain("**ID**: 1");
       expect(result).toContain("**Tags**: API, テスト");
-      expect(result).toContain("**Groups**: 開発チーム");
       expect(result).toContain(
         "**URL**: [View Original](https://example.docbase.io/posts/1)"
       );
@@ -259,8 +250,7 @@ describe("markdownGenerator", () => {
             profile_image_url: "https://example.com/user.jpg",
           },
           tags: [],
-          groups: [],
-          scope: "everyone",
+              scope: "everyone",
         },
       ];
 
@@ -283,8 +273,7 @@ describe("markdownGenerator", () => {
             profile_image_url: "https://example.com/user.jpg",
           },
           tags: [],
-          groups: [],
-          scope: "everyone",
+              scope: "everyone",
         },
       ];
 
@@ -340,7 +329,6 @@ describe("markdownGenerator", () => {
       expect(result).toContain("**Author**: テストユーザー1");
       expect(result).toContain("**ID**: 1");
       expect(result).toContain("**Tags**: API, テスト");
-      expect(result).toContain("**Groups**: 開発チーム");
       expect(result).toContain(
         "**URL**: [View Original](https://example.docbase.io/posts/1)"
       );
@@ -414,8 +402,7 @@ describe("markdownGenerator", () => {
         expect(result).toContain("**作成日**: 2023/01/01");
         expect(result).toContain("**作成者**: テストユーザー1");
         expect(result).toContain("**タグ**: API, テスト");
-        expect(result).toContain("**グループ**: 開発チーム");
-
+  
         // 詳細な日時表示がないことを確認
         expect(result).not.toContain("2023年1月1日日曜日");
         expect(result).not.toContain("**ID**:");
@@ -435,8 +422,7 @@ describe("markdownGenerator", () => {
             profile_image_url: "https://example.com/user.jpg",
           },
           tags: [],
-          groups: [],
-          scope: "everyone",
+              scope: "everyone",
         };
 
         const result = generateDocbaseMarkdownForPreview([longBodyPost]);
@@ -467,26 +453,6 @@ describe("markdownGenerator", () => {
         expect(result).toContain("**作成者**:");
       });
 
-      it("グループがない記事ではグループ行が表示されない", () => {
-        const noGroupPost = {
-          ...mockPosts[1],
-          groups: [],
-        };
-
-        const result = generateDocbaseMarkdownForPreview([noGroupPost]);
-
-        expect(result).not.toContain("**グループ**:");
-        expect(result).toContain("**作成日**:");
-        expect(result).toContain("**作成者**:");
-      });
-
-      it("複数のタグとグループが正しく表示される", () => {
-        const result = generateDocbaseMarkdownForPreview([mockPosts[2]]);
-
-        expect(result).toContain(
-          "**グループ**: デザインチーム, プロダクトチーム"
-        );
-      });
     });
 
     describe("日付フォーマット", () => {

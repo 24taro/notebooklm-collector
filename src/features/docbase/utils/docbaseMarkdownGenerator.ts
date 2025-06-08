@@ -94,11 +94,6 @@ export const generateDocbaseMarkdown = (
             .map((tag) => tag.name)
             .join(", ")}\n`;
         }
-        if (post.groups.length > 0) {
-          articleMd += `**Groups**: ${post.groups
-            .map((group) => group.name)
-            .join(", ")}\n`;
-        }
         articleMd += `**URL**: [View Original](${post.url})\n\n`;
 
         // HTMLコメントで記事コンテンツの境界を明確化
@@ -152,11 +147,6 @@ export const generateDocbaseMarkdownForPreview = (
         if (post.tags.length > 0) {
           articleMd += `**タグ**: ${post.tags
             .map((tag) => tag.name)
-            .join(", ")}  \n`;
-        }
-        if (post.groups.length > 0) {
-          articleMd += `**グループ**: ${post.groups
-            .map((group) => group.name)
             .join(", ")}  \n`;
         }
         articleMd += "\n";

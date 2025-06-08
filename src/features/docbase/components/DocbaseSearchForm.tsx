@@ -36,7 +36,6 @@ export const DocbaseSearchForm = () => {
   const [titleFilter, setTitleFilter] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
-  const [group, setGroup] = useState("");
 
   const { posts, isLoading, error, searchPosts, canRetry, retrySearch } =
     useDocbaseSearch();
@@ -53,7 +52,6 @@ export const DocbaseSearchForm = () => {
       titleFilter,
       startDate,
       endDate,
-      group,
     };
     await searchPosts(domain, token, keyword, advancedFilters);
   };
@@ -230,23 +228,6 @@ export const DocbaseSearchForm = () => {
                     disabled={isLoading || isDownloading}
                   />
                 </div>
-              </div>
-              <div>
-                <label
-                  htmlFor="group"
-                  className="block text-sm font-medium text-docbase-text mb-1"
-                >
-                  グループ名
-                </label>
-                <input
-                  id="group"
-                  type="text"
-                  value={group}
-                  onChange={(e) => setGroup(e.target.value)}
-                  placeholder="例: 開発チーム"
-                  className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm placeholder-docbase-text-sub focus:outline-none focus:ring-1 focus:ring-docbase-primary focus:border-docbase-primary disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
-                  disabled={isLoading || isDownloading}
-                />
               </div>
             </div>
           )}

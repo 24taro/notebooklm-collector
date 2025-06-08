@@ -9,7 +9,6 @@ export interface AdvancedFilters {
   titleFilter: string;
   startDate: string;
   endDate: string;
-  group: string;
 }
 
 // フォーム入力値の型定義

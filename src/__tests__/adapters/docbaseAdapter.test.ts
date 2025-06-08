@@ -29,6 +29,9 @@ describe("DocbaseAdapter", () => {
           body: "テスト内容1",
           created_at: "2023-01-01T00:00:00Z",
           url: "https://test.docbase.io/posts/1",
+          user: { id: 1, name: "テストユーザー1", profile_image_url: "" },
+          tags: [],
+          scope: "everyone",
         },
         {
           id: 2,
@@ -36,6 +39,9 @@ describe("DocbaseAdapter", () => {
           body: "テスト内容2",
           created_at: "2023-01-02T00:00:00Z",
           url: "https://test.docbase.io/posts/2",
+          user: { id: 2, name: "テストユーザー2", profile_image_url: "" },
+          tags: [],
+          scope: "everyone",
         },
       ],
       meta: {
@@ -104,7 +110,6 @@ describe("DocbaseAdapter", () => {
         titleFilter: "",
         startDate: "",
         endDate: "",
-        group: "",
       },
     });
 
@@ -142,6 +147,9 @@ describe("DocbaseAdapter", () => {
         body: `内容${i + 1}`,
         created_at: "2023-01-01T00:00:00Z",
         url: `https://test.docbase.io/posts/${i + 1}`,
+        user: { id: i + 1, name: `ユーザー${i + 1}`, profile_image_url: "" },
+        tags: [],
+        scope: "everyone",
       })),
       meta: {
         previous_page: null,
@@ -157,6 +165,9 @@ describe("DocbaseAdapter", () => {
         body: `内容${i + 101}`,
         created_at: "2023-01-01T00:00:00Z",
         url: `https://test.docbase.io/posts/${i + 101}`,
+        user: { id: i + 101, name: `ユーザー${i + 101}`, profile_image_url: "" },
+        tags: [],
+        scope: "everyone",
       })),
       meta: {
         previous_page: "1",

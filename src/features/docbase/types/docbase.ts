@@ -14,13 +14,6 @@ export type DocbaseTag = {
   name: string;
 };
 
-/**
- * Docbaseグループ情報の型定義
- */
-export type DocbaseGroup = {
-  id: number;
-  name: string;
-};
 
 /**
  * Docbaseの投稿情報を表す型定義
@@ -33,7 +26,6 @@ export type DocbasePostListItem = {
   url: string;
   user: DocbaseUser;
   tags: DocbaseTag[];
-  groups: DocbaseGroup[];
   scope: string;
   // APIレスポンスには他にも多くのフィールドがあるが、今回は必要なもののみ定義
   // 必要に応じて追加する

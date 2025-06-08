@@ -22,7 +22,6 @@ export interface DocbaseSearchParams {
     titleFilter?: string;
     startDate?: string;
     endDate?: string;
-    group?: string;
   };
 }
 
@@ -124,7 +123,7 @@ function buildSearchQuery(
         !advancedFilters.titleFilter?.trim() &&
         !advancedFilters.startDate?.trim() &&
         !advancedFilters.endDate?.trim() &&
-        !advancedFilters.group?.trim()))
+        !advancedFilters.endDate?.trim()))
   ) {
     return "";
   }
@@ -132,7 +131,7 @@ function buildSearchQuery(
   let query = keyword.trim() ? `"${keyword.trim()}"` : "";
 
   if (advancedFilters) {
-    const { tags, author, titleFilter, startDate, endDate, group } =
+    const { tags, author, titleFilter, startDate, endDate } =
       advancedFilters;
 
     // タグ検索
@@ -164,10 +163,6 @@ function buildSearchQuery(
       query += ` created_at:*~${endDate.trim()}`;
     }
 
-    // グループ検索
-    if (group?.trim()) {
-      query += ` group:${group.trim()}`;
-    }
   }
 
   return query.trim();

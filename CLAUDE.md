@@ -399,7 +399,6 @@ git branch -d issue-42-auth-result-type
 | 投稿者   | `author:ユーザーID`                | `author:user123`                                  |
 | タイトル | `title:キーワード`                 | `title:仕様書`                                    |
 | 投稿期間 | `created_at:YYYY-MM-DD~YYYY-MM-DD` | `created_at:2023-01-01~2023-12-31`                |
-| グループ | `group:グループ名`                 | `group:開発チーム`                                |
 
 ### Slack API 連携
 
@@ -425,7 +424,7 @@ git branch -d issue-42-auth-result-type
 | -------------- | ------------------------ | ---------------------------- |
 | 検索方式       | スレッド単位でまとめて表示 | 記事単位で表示               |
 | 最大取得件数   | 300件（スレッド）         | 500件（記事）                |
-| 詳細検索条件   | チャンネル、投稿者、期間  | タグ、投稿者、タイトル、期間、グループ |
+| 詳細検索条件   | チャンネル、投稿者、期間  | タグ、投稿者、タイトル、期間 |
 | プレビュー     | 最初の10スレッドのみ      | 全記事                       |
 | 認証方式       | User Token (xoxp-)       | API Token                    |
 | ローカルストレージ | slackApiToken           | docbaseApiToken, docbaseDomain |
