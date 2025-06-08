@@ -5,7 +5,7 @@ import { useDownload } from '../../../hooks/useDownload'
 import useLocalStorage from '../../../hooks/useLocalStorage'
 import type { ApiError } from '../../../types/error'
 import { useDocbaseSearch } from '../hooks/useDocbaseSearch'
-import { generateDocbaseMarkdown } from '../utils/docbaseMarkdownGenerator'
+import { generateDocbaseMarkdown, generateDocbaseMarkdownForPreview } from '../utils/docbaseMarkdownGenerator'
 import { DocbaseDomainInput } from './DocbaseDomainInput'
 import { DocbaseMarkdownPreview } from './DocbaseMarkdownPreview'
 import { DocbaseTokenInput } from './DocbaseTokenInput'
@@ -50,7 +50,7 @@ export const DocbaseSearchForm = () => {
 
   useEffect(() => {
     if (posts && posts.length > 0) {
-      const md = generateDocbaseMarkdown(posts.slice(0, 10), keyword)
+      const md = generateDocbaseMarkdownForPreview(posts.slice(0, 10), keyword)
       setMarkdownContent(md)
     } else {
       setMarkdownContent('')

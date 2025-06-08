@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { DocbasePostListItem } from '../../features/docbase/types/docbase'
-import { generateDocbaseMarkdown } from '../../features/docbase/utils/docbaseMarkdownGenerator'
+import { generateDocbaseMarkdown, generateDocbaseMarkdownForPreview } from '../../features/docbase/utils/docbaseMarkdownGenerator'
 
 describe('markdownGenerator', () => {
   const mockPosts: DocbasePostListItem[] = [
@@ -303,6 +303,187 @@ describe('markdownGenerator', () => {
       expect(result).toContain('**Tags**: API, テスト')
       expect(result).toContain('**Groups**: 開発チーム')
       expect(result).toContain('**URL**: [View Original](https://example.docbase.io/posts/1)')
+    })
+  })
+
+  describe('generateDocbaseMarkdownForPreview', () => {
+    describe('基本機能', () => {
+      it('空の配列の場合は空文字列を返す', () => {
+        const result = generateDocbaseMarkdownForPreview([])
+        expect(result).toBe('')
+      })
+
+      it('nullまたはundefinedの場合は空文字列を返す', () => {
+        expect(generateDocbaseMarkdownForPreview(null as unknown as DocbasePostListItem[])).toBe('')
+        expect(generateDocbaseMarkdownForPreview(undefined as unknown as DocbasePostListItem[])).toBe('')
+      })
+
+      it('プレビュー用の簡潔なMarkdownを生成する', () => {
+        const result = generateDocbaseMarkdownForPreview(mockPosts, 'テストキーワード')
+
+        // プレビュー用ヘッダーの確認
+        expect(result).toContain('# Docbase 記事プレビュー')
+        expect(result).toContain('**検索キーワード**: テストキーワード')
+        expect(result).toContain('**記事数**: 3件')
+
+        // YAML Front Matterが含まれないことを確認
+        expect(result).not.toContain('---\nsource:')
+        expect(result).not.toContain('generated_at:')
+
+        // HTMLコメントが含まれないことを確認
+        expect(result).not.toContain('<!-- DOCBASE_CONTENT_START -->')
+        expect(result).not.toContain('<!-- DOCBASE_CONTENT_END -->')
+
+        // Articles Indexが含まれないことを確認
+        expect(result).not.toContain('## Articles Index')
+      })
+
+      it('検索キーワードなしでもプレビューを生成する', () => {
+        const result = generateDocbaseMarkdownForPreview(mockPosts)
+
+        expect(result).toContain('# Docbase 記事プレビュー')
+        expect(result).toContain('**記事数**: 3件')
+        expect(result).not.toContain('**検索キーワード**:')
+      })
+    })
+
+    describe('記事の表示形式', () => {
+      it('記事タイトルがH2見出しで表示される', () => {
+        const result = generateDocbaseMarkdownForPreview([mockPosts[0]])
+
+        expect(result).toContain('## テスト記事1')
+        expect(result).not.toContain('### Article 1:')
+      })
+
+      it('メタデータが記事タイトル直下に簡潔に表示される', () => {
+        const result = generateDocbaseMarkdownForPreview([mockPosts[0]])
+
+        expect(result).toContain('**作成日**: 2023/01/01')
+        expect(result).toContain('**作成者**: テストユーザー1')
+        expect(result).toContain('**タグ**: API, テスト')
+        expect(result).toContain('**グループ**: 開発チーム')
+
+        // 詳細な日時表示がないことを確認
+        expect(result).not.toContain('2023年1月1日日曜日')
+        expect(result).not.toContain('**ID**:')
+        expect(result).not.toContain('**URL**:')
+      })
+
+      it('記事内容が150文字で切り詰められる', () => {
+        const longBodyPost = {
+          id: 1,
+          title: '長い記事',
+          body: 'あ'.repeat(200), // 200文字の長い内容
+          created_at: '2023-01-01T10:00:00Z',
+          url: 'https://example.com/1',
+          user: { id: 100, name: 'テストユーザー', profile_image_url: 'https://example.com/user.jpg' },
+          tags: [],
+          groups: [],
+          scope: 'everyone',
+        }
+
+        const result = generateDocbaseMarkdownForPreview([longBodyPost])
+
+        expect(result).toContain('あ'.repeat(150) + '...')
+        expect(result).not.toContain('あ'.repeat(200))
+      })
+
+      it('短い記事内容はそのまま表示される', () => {
+        const result = generateDocbaseMarkdownForPreview([mockPosts[0]])
+
+        expect(result).toContain('これはテスト記事1の内容です。')
+        expect(result).not.toContain('...')
+      })
+    })
+
+    describe('条件分岐の処理', () => {
+      it('タグがない記事ではタグ行が表示されない', () => {
+        const noTagPost = {
+          ...mockPosts[2],
+          tags: [],
+        }
+
+        const result = generateDocbaseMarkdownForPreview([noTagPost])
+
+        expect(result).not.toContain('**タグ**:')
+        expect(result).toContain('**作成日**:')
+        expect(result).toContain('**作成者**:')
+      })
+
+      it('グループがない記事ではグループ行が表示されない', () => {
+        const noGroupPost = {
+          ...mockPosts[1],
+          groups: [],
+        }
+
+        const result = generateDocbaseMarkdownForPreview([noGroupPost])
+
+        expect(result).not.toContain('**グループ**:')
+        expect(result).toContain('**作成日**:')
+        expect(result).toContain('**作成者**:')
+      })
+
+      it('複数のタグとグループが正しく表示される', () => {
+        const result = generateDocbaseMarkdownForPreview([mockPosts[2]])
+
+        expect(result).toContain('**グループ**: デザインチーム, プロダクトチーム')
+      })
+    })
+
+    describe('日付フォーマット', () => {
+      it('日付が簡潔な形式で表示される', () => {
+        const result = generateDocbaseMarkdownForPreview([mockPosts[0]])
+
+        expect(result).toContain('**作成日**: 2023/01/01')
+        expect(result).not.toContain('2023年1月1日')
+        expect(result).not.toContain('19:00')
+      })
+    })
+
+    describe('記事間の区切り', () => {
+      it('複数記事が水平線で区切られる', () => {
+        const result = generateDocbaseMarkdownForPreview(mockPosts)
+
+        // 水平線で区切られることを確認
+        const sections = result.split('---\n\n')
+        expect(sections.length).toBeGreaterThan(2)
+      })
+
+      it('単一記事では区切り線が余分に含まれない', () => {
+        const result = generateDocbaseMarkdownForPreview([mockPosts[0]])
+
+        // ヘッダー部分の区切り線のみ
+        const sections = result.split('---\n\n')
+        expect(sections.length).toBe(2)
+      })
+    })
+
+    describe('プレビューとダウンロード用の違い', () => {
+      it('プレビュー版にはYAML Front Matterが含まれない', () => {
+        const preview = generateDocbaseMarkdownForPreview(mockPosts)
+        const download = generateDocbaseMarkdown(mockPosts)
+
+        expect(download).toContain('---\nsource:')
+        expect(preview).not.toContain('---\nsource:')
+      })
+
+      it('プレビュー版にはHTMLコメントが含まれない', () => {
+        const preview = generateDocbaseMarkdownForPreview(mockPosts)
+        const download = generateDocbaseMarkdown(mockPosts)
+
+        expect(download).toContain('<!-- DOCBASE_CONTENT_START -->')
+        expect(preview).not.toContain('<!-- DOCBASE_CONTENT_START -->')
+      })
+
+      it('プレビュー版には詳細メタデータが含まれない', () => {
+        const preview = generateDocbaseMarkdownForPreview(mockPosts)
+        const download = generateDocbaseMarkdown(mockPosts)
+
+        expect(download).toContain('**ID**:')
+        expect(download).toContain('**URL**:')
+        expect(preview).not.toContain('**ID**:')
+        expect(preview).not.toContain('**URL**:')
+      })
     })
   })
 })

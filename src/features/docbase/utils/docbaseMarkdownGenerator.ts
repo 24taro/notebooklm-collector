@@ -98,3 +98,65 @@ export const generateDocbaseMarkdown = (posts: DocbasePostListItem[], searchKeyw
       .join('---\n\n')
   ) // 各記事の間を水平線で区切る
 }
+
+/**
+ * Docbaseの投稿リストからプレビュー用Markdown文字列を生成する関数
+ * パット見で記事内容を確認できることを目的とした簡潔な表示
+ * @param posts DocbasePostListItemの配列（プレビューでは最初の10件のみ）
+ * @param searchKeyword 検索キーワード（ヘッダー表示用）
+ * @returns プレビュー最適化Markdown文字列
+ */
+export const generateDocbaseMarkdownForPreview = (posts: DocbasePostListItem[], searchKeyword?: string): string => {
+  if (!posts || posts.length === 0) {
+    return ''
+  }
+
+  // プレビュー用の簡潔なヘッダー
+  let markdown = '# Docbase 記事プレビュー\n\n'
+  
+  if (searchKeyword) {
+    markdown += `**検索キーワード**: ${searchKeyword}\n\n`
+  }
+  
+  markdown += `**記事数**: ${posts.length}件\n\n`
+  markdown += '---\n\n'
+
+  // 各記事のプレビュー表示
+  return (
+    markdown +
+    posts
+      .map((post, index) => {
+        // 簡潔な日付フォーマット（例：2024/03/15）
+        const date = new Date(post.created_at)
+        const simpleDate = date.toLocaleDateString('ja-JP', {
+          year: 'numeric',
+          month: '2-digit',
+          day: '2-digit',
+        })
+
+        // 記事タイトル
+        let articleMd = `## ${post.title}\n\n`
+
+        // メタデータを記事タイトル直下に表示
+        articleMd += `**作成日**: ${simpleDate}  \n`
+        articleMd += `**作成者**: ${post.user.name}  \n`
+        if (post.tags.length > 0) {
+          articleMd += `**タグ**: ${post.tags.map((tag) => tag.name).join(', ')}  \n`
+        }
+        if (post.groups.length > 0) {
+          articleMd += `**グループ**: ${post.groups.map((group) => group.name).join(', ')}  \n`
+        }
+        articleMd += '\n'
+
+        // 記事内容を150文字程度で切り詰め
+        const truncatedBody = post.body.length > 150 
+          ? `${post.body.substring(0, 150)}...` 
+          : post.body
+        
+        articleMd += `${truncatedBody}\n\n`
+
+        return articleMd
+      })
+      .join('---\n\n')
+  )
+}
