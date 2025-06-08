@@ -2,7 +2,15 @@
   "$schema": "https://biomejs.dev/schemas/1.5.3/schema.json",
   "organizeImports": {
     "enabled": true,
-    "ignore": [".next/**", "node_modules/**", "public/**", ".github/**", "out/**", "coverage/**", ".claude/**"]
+    "ignore": [
+      ".next/**",
+      "node_modules/**",
+      "public/**",
+      ".github/**",
+      "out/**",
+      "coverage/**",
+      ".claude/**"
+    ]
   },
   "linter": {
     "enabled": true,
@@ -29,7 +37,7 @@
     "formatWithErrors": false,
     "indentStyle": "space",
     "indentWidth": 2,
-    "lineWidth": 120,
+    "lineWidth": 80,
     "ignore": [
       ".next/**",
       "node_modules/**",
@@ -46,10 +54,14 @@
   },
   "javascript": {
     "formatter": {
-      "quoteStyle": "single",
+      "quoteStyle": "double",
       "jsxQuoteStyle": "double",
       "quoteProperties": "asNeeded",
-      "semicolons": "asNeeded"
+      "semicolons": "always",
+      "trailingCommas": "es5",
+      "bracketSpacing": true,
+      "bracketSameLine": false,
+      "arrowParentheses": "always"
     }
   }
 }

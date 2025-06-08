@@ -1,8 +1,8 @@
 // アダプタパターンによる外部依存抽象化のための型定義
 // HTTPクライアントアダプター・APIアダプターの共通インターフェース
 
-import type { Result } from 'neverthrow'
-import type { ApiError } from '../types/error'
+import type { Result } from "neverthrow";
+import type { ApiError } from "../types/error";
 
 /**
  * HTTPクライアントアダプター
@@ -15,25 +15,25 @@ export interface HttpClient {
    * @param options fetchのオプション
    * @returns Promise<Result<T, ApiError>>
    */
-  fetch<T>(url: string, options?: RequestInit): Promise<Result<T, ApiError>>
+  fetch<T>(url: string, options?: RequestInit): Promise<Result<T, ApiError>>;
 }
 
 /**
  * モックレスポンスの定義（テスト用）
  */
 export interface MockResponse {
-  url: string
-  method?: string
-  status: number
-  data?: unknown
-  error?: ApiError
+  url: string;
+  method?: string;
+  status: number;
+  data?: unknown;
+  error?: ApiError;
 }
 
 /**
  * リトライ設定
  */
 export interface RetryConfig {
-  maxRetries: number
-  initialBackoffMs: number
-  retryableErrors: ApiError['type'][]
+  maxRetries: number;
+  initialBackoffMs: number;
+  retryableErrors: ApiError["type"][];
 }

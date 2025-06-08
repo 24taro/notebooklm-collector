@@ -5,40 +5,40 @@
  * LocalStorageに保存し、デバッグやサポートに活用する。
  */
 
-import type { ErrorInfo } from 'react'
+import type { ErrorInfo } from "react";
 
 interface ErrorLog {
-  id: string
-  timestamp: string
+  id: string;
+  timestamp: string;
   error: {
-    name: string
-    message: string
-    stack?: string
-  }
+    name: string;
+    message: string;
+    stack?: string;
+  };
   errorInfo: {
-    componentStack: string
-  }
+    componentStack: string;
+  };
   context: {
-    url: string
-    userAgent: string
+    url: string;
+    userAgent: string;
     viewport: {
-      width: number
-      height: number
-    }
-    userId?: string // 匿名ID
-  }
+      width: number;
+      height: number;
+    };
+    userId?: string; // 匿名ID
+  };
 }
 
 interface ErrorStorageMetadata {
-  version: string
-  maxLogs: number
-  lastCleanup: string
+  version: string;
+  maxLogs: number;
+  lastCleanup: string;
 }
 
-const ERROR_STORAGE_KEY = 'notebooklm_error_logs'
-const ERROR_METADATA_KEY = 'notebooklm_error_metadata'
-const MAX_ERROR_LOGS = 50
-const STORAGE_VERSION = '1.0'
+const ERROR_STORAGE_KEY = "notebooklm_error_logs";
+const ERROR_METADATA_KEY = "notebooklm_error_metadata";
+const MAX_ERROR_LOGS = 50;
+const STORAGE_VERSION = "1.0";
 
 /**
  * エラーログをLocalStorageに保存
@@ -47,11 +47,11 @@ export function logError(
   error: Error,
   errorInfo: ErrorInfo,
   additionalContext: {
-    url: string
-    userAgent: string
-    timestamp: string
-    userId?: string
-  },
+    url: string;
+    userAgent: string;
+    timestamp: string;
+    userId?: string;
+  }
 ): ErrorLog {
   try {
     const errorLog: ErrorLog = {
@@ -60,10 +60,10 @@ export function logError(
       error: {
         name: error.name,
         message: error.message,
-        stack: error.stack || '',
+        stack: error.stack || "",
       },
       errorInfo: {
-        componentStack: errorInfo.componentStack || '',
+        componentStack: errorInfo.componentStack || "",
       },
       context: {
         url: additionalContext.url,
@@ -74,28 +74,28 @@ export function logError(
         },
         userId: additionalContext.userId || getOrCreateUserId(),
       },
-    }
+    };
 
     // 既存のログを取得
-    const existingLogs = getErrorLogs()
+    const existingLogs = getErrorLogs();
 
     // 新しいログを先頭に追加
-    const updatedLogs = [errorLog, ...existingLogs]
+    const updatedLogs = [errorLog, ...existingLogs];
 
     // 最大件数を超えた場合は古いログを削除
-    const trimmedLogs = updatedLogs.slice(0, MAX_ERROR_LOGS)
+    const trimmedLogs = updatedLogs.slice(0, MAX_ERROR_LOGS);
 
     // LocalStorageに保存
-    localStorage.setItem(ERROR_STORAGE_KEY, JSON.stringify(trimmedLogs))
+    localStorage.setItem(ERROR_STORAGE_KEY, JSON.stringify(trimmedLogs));
 
     // メタデータを更新
-    updateMetadata()
+    updateMetadata();
 
-    return errorLog
+    return errorLog;
   } catch (storageError) {
     // LocalStorageの保存に失敗した場合はコンソールにログ出力
-    console.error('Failed to save error log to localStorage:', storageError)
-    console.error('Original error:', error)
+    console.error("Failed to save error log to localStorage:", storageError);
+    console.error("Original error:", error);
 
     // 最低限のログオブジェクトを返す
     return {
@@ -104,10 +104,10 @@ export function logError(
       error: {
         name: error.name,
         message: error.message,
-        stack: error.stack || '',
+        stack: error.stack || "",
       },
       errorInfo: {
-        componentStack: errorInfo.componentStack || '',
+        componentStack: errorInfo.componentStack || "",
       },
       context: {
         url: additionalContext.url,
@@ -117,7 +117,7 @@ export function logError(
           height: window.innerHeight || 0,
         },
       },
-    }
+    };
   }
 }
 
@@ -126,14 +126,14 @@ export function logError(
  */
 export function getErrorLogs(): ErrorLog[] {
   try {
-    const stored = localStorage.getItem(ERROR_STORAGE_KEY)
-    if (!stored) return []
+    const stored = localStorage.getItem(ERROR_STORAGE_KEY);
+    if (!stored) return [];
 
-    const logs = JSON.parse(stored)
-    return Array.isArray(logs) ? logs : []
+    const logs = JSON.parse(stored);
+    return Array.isArray(logs) ? logs : [];
   } catch (error) {
-    console.error('Failed to retrieve error logs:', error)
-    return []
+    console.error("Failed to retrieve error logs:", error);
+    return [];
   }
 }
 
@@ -141,8 +141,8 @@ export function getErrorLogs(): ErrorLog[] {
  * 特定のエラーログを取得
  */
 export function getErrorLog(id: string): ErrorLog | null {
-  const logs = getErrorLogs()
-  return logs.find((log) => log.id === id) || null
+  const logs = getErrorLogs();
+  return logs.find((log) => log.id === id) || null;
 }
 
 /**
@@ -150,12 +150,12 @@ export function getErrorLog(id: string): ErrorLog | null {
  */
 export function clearErrorLogs(): boolean {
   try {
-    localStorage.removeItem(ERROR_STORAGE_KEY)
-    localStorage.removeItem(ERROR_METADATA_KEY)
-    return true
+    localStorage.removeItem(ERROR_STORAGE_KEY);
+    localStorage.removeItem(ERROR_METADATA_KEY);
+    return true;
   } catch (error) {
-    console.error('Failed to clear error logs:', error)
-    return false
+    console.error("Failed to clear error logs:", error);
+    return false;
   }
 }
 
@@ -164,25 +164,25 @@ export function clearErrorLogs(): boolean {
  */
 export function cleanupOldErrorLogs(): number {
   try {
-    const logs = getErrorLogs()
-    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000
+    const logs = getErrorLogs();
+    const sevenDaysAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
 
     const recentLogs = logs.filter((log) => {
-      const logTime = new Date(log.timestamp).getTime()
-      return logTime > sevenDaysAgo
-    })
+      const logTime = new Date(log.timestamp).getTime();
+      return logTime > sevenDaysAgo;
+    });
 
-    const removedCount = logs.length - recentLogs.length
+    const removedCount = logs.length - recentLogs.length;
 
     if (removedCount > 0) {
-      localStorage.setItem(ERROR_STORAGE_KEY, JSON.stringify(recentLogs))
-      updateMetadata()
+      localStorage.setItem(ERROR_STORAGE_KEY, JSON.stringify(recentLogs));
+      updateMetadata();
     }
 
-    return removedCount
+    return removedCount;
   } catch (error) {
-    console.error('Failed to cleanup error logs:', error)
-    return 0
+    console.error("Failed to cleanup error logs:", error);
+    return 0;
   }
 }
 
@@ -190,30 +190,30 @@ export function cleanupOldErrorLogs(): number {
  * エラーログの統計情報を取得
  */
 export function getErrorLogStats(): {
-  totalLogs: number
-  lastError: string | null
-  errorTypes: Record<string, number>
+  totalLogs: number;
+  lastError: string | null;
+  errorTypes: Record<string, number>;
   timeRange: {
-    oldest: string | null
-    newest: string | null
-  }
+    oldest: string | null;
+    newest: string | null;
+  };
 } {
-  const logs = getErrorLogs()
+  const logs = getErrorLogs();
 
-  const errorTypes: Record<string, number> = {}
-  let oldest: string | null = null
-  let newest: string | null = null
+  const errorTypes: Record<string, number> = {};
+  let oldest: string | null = null;
+  let newest: string | null = null;
 
   for (const log of logs) {
     // エラータイプをカウント
-    errorTypes[log.error.name] = (errorTypes[log.error.name] || 0) + 1
+    errorTypes[log.error.name] = (errorTypes[log.error.name] || 0) + 1;
 
     // 時間範囲を更新
     if (!oldest || log.timestamp < oldest) {
-      oldest = log.timestamp
+      oldest = log.timestamp;
     }
     if (!newest || log.timestamp > newest) {
-      newest = log.timestamp
+      newest = log.timestamp;
     }
   }
 
@@ -225,25 +225,25 @@ export function getErrorLogStats(): {
       oldest,
       newest,
     },
-  }
+  };
 }
 
 /**
  * エラーログをCSV形式でエクスポート（デバッグ用）
  */
 export function exportErrorLogsAsCSV(): string {
-  const logs = getErrorLogs()
+  const logs = getErrorLogs();
 
   const headers = [
-    'ID',
-    'Timestamp',
-    'Error Name',
-    'Error Message',
-    'URL',
-    'User Agent',
-    'Viewport Width',
-    'Viewport Height',
-  ]
+    "ID",
+    "Timestamp",
+    "Error Name",
+    "Error Message",
+    "URL",
+    "User Agent",
+    "Viewport Width",
+    "Viewport Height",
+  ];
 
   const rows = logs.map((log) => [
     log.id,
@@ -254,36 +254,39 @@ export function exportErrorLogsAsCSV(): string {
     log.context.userAgent.replace(/"/g, '""'),
     log.context.viewport.width.toString(),
     log.context.viewport.height.toString(),
-  ])
+  ]);
 
-  const csvContent = [headers.join(','), ...rows.map((row) => row.map((cell) => `"${cell}"`).join(','))].join('\n')
+  const csvContent = [
+    headers.join(","),
+    ...rows.map((row) => row.map((cell) => `"${cell}"`).join(",")),
+  ].join("\n");
 
-  return csvContent
+  return csvContent;
 }
 
 /**
  * ユニークなエラーIDを生成
  */
 function generateErrorId(): string {
-  return Date.now().toString(36) + Math.random().toString(36).substr(2, 9)
+  return Date.now().toString(36) + Math.random().toString(36).substr(2, 9);
 }
 
 /**
  * 匿名ユーザーIDを取得または作成
  */
 function getOrCreateUserId(): string {
-  const USER_ID_KEY = 'notebooklm_user_id'
+  const USER_ID_KEY = "notebooklm_user_id";
 
   try {
-    let userId = localStorage.getItem(USER_ID_KEY)
+    let userId = localStorage.getItem(USER_ID_KEY);
     if (!userId) {
-      userId = `user_${Date.now().toString(36)}${Math.random().toString(36).substr(2, 9)}`
-      localStorage.setItem(USER_ID_KEY, userId)
+      userId = `user_${Date.now().toString(36)}${Math.random().toString(36).substr(2, 9)}`;
+      localStorage.setItem(USER_ID_KEY, userId);
     }
-    return userId
+    return userId;
   } catch {
     // LocalStorageにアクセスできない場合は一時的なIDを生成
-    return `temp_${Date.now().toString(36)}`
+    return `temp_${Date.now().toString(36)}`;
   }
 }
 
@@ -296,11 +299,11 @@ function updateMetadata(): void {
       version: STORAGE_VERSION,
       maxLogs: MAX_ERROR_LOGS,
       lastCleanup: new Date().toISOString(),
-    }
+    };
 
-    localStorage.setItem(ERROR_METADATA_KEY, JSON.stringify(metadata))
+    localStorage.setItem(ERROR_METADATA_KEY, JSON.stringify(metadata));
   } catch (error) {
-    console.error('Failed to update error storage metadata:', error)
+    console.error("Failed to update error storage metadata:", error);
   }
 }
 
@@ -308,14 +311,14 @@ function updateMetadata(): void {
  * 開発環境用: エラーログの詳細表示
  */
 export function debugErrorLogs(): void {
-  if (process.env.NODE_ENV !== 'development') return
+  if (process.env.NODE_ENV !== "development") return;
 
-  const logs = getErrorLogs()
-  const stats = getErrorLogStats()
+  const logs = getErrorLogs();
+  const stats = getErrorLogStats();
 
-  console.group('🐛 Error Logs Debug Info')
-  console.log('Stats:', stats)
-  console.log('All Logs:', logs)
-  console.log('CSV Export:', exportErrorLogsAsCSV())
-  console.groupEnd()
+  console.group("🐛 Error Logs Debug Info");
+  console.log("Stats:", stats);
+  console.log("All Logs:", logs);
+  console.log("CSV Export:", exportErrorLogsAsCSV());
+  console.groupEnd();
 }

@@ -1,61 +1,64 @@
 // テスト環境のグローバル設定
-import '@testing-library/jest-dom'
-import * as matchers from '@testing-library/jest-dom/matchers'
-import { cleanup } from '@testing-library/react'
-import { afterEach, expect } from 'vitest'
+import "@testing-library/jest-dom";
+import * as matchers from "@testing-library/jest-dom/matchers";
+import { cleanup } from "@testing-library/react";
+import { afterEach, expect } from "vitest";
 
 // jest-domのマッチャーを拡張
-expect.extend(matchers)
+expect.extend(matchers);
 
 // 各テスト後にReactコンポーネントをクリーンアップ
 afterEach(() => {
-  cleanup()
-})
+  cleanup();
+});
 
 // localStorageのモック
 const localStorageMock = {
   getItem: (key: string) => {
-    const value = localStorageMock.store[key]
-    return value || null
+    const value = localStorageMock.store[key];
+    return value || null;
   },
   setItem: (key: string, value: string) => {
-    localStorageMock.store[key] = value
+    localStorageMock.store[key] = value;
   },
   removeItem: (key: string) => {
-    delete localStorageMock.store[key]
+    delete localStorageMock.store[key];
   },
   clear: () => {
-    localStorageMock.store = {}
+    localStorageMock.store = {};
   },
   store: {} as Record<string, string>,
-}
+};
 
-Object.defineProperty(window, 'localStorage', {
+Object.defineProperty(window, "localStorage", {
   value: localStorageMock,
-})
+});
 
-import { afterAll, beforeAll, beforeEach, vi } from 'vitest'
+import { afterAll, beforeAll, beforeEach, vi } from "vitest";
 
 // fetchのモック設定
-global.fetch = vi.fn()
+global.fetch = vi.fn();
 
 // console.errorのモック（テスト中の不要なエラー出力を抑制）
-const originalError = console.error
+const originalError = console.error;
 beforeAll(() => {
   console.error = (...args: unknown[]) => {
-    if (typeof args[0] === 'string' && args[0].includes('Warning: ReactDOM.render')) {
-      return
+    if (
+      typeof args[0] === "string" &&
+      args[0].includes("Warning: ReactDOM.render")
+    ) {
+      return;
     }
-    originalError.call(console, ...args)
-  }
-})
+    originalError.call(console, ...args);
+  };
+});
 
 afterAll(() => {
-  console.error = originalError
-})
+  console.error = originalError;
+});
 
 // 各テストの前にlocalStorageをクリア
 beforeEach(() => {
-  localStorageMock.clear()
-  vi.clearAllMocks()
-})
+  localStorageMock.clear();
+  vi.clearAllMocks();
+});

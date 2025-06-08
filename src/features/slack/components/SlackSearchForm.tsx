@@ -5,17 +5,17 @@
  * - 検索実行とローディング状態の管理
  */
 
-'use client'
+"use client";
 
-import type { UseSlackFormResult } from '../types/forms'
-import { SlackAdvancedFilters } from './SlackAdvancedFilters'
-import { SlackAuthorInput } from './SlackAuthorInput'
-import { SlackChannelInput } from './SlackChannelInput'
-import { SlackSearchInput } from './SlackSearchInput'
-import { SlackTokenInput } from './SlackTokenInput'
+import type { UseSlackFormResult } from "../types/forms";
+import { SlackAdvancedFilters } from "./SlackAdvancedFilters";
+import { SlackAuthorInput } from "./SlackAuthorInput";
+import { SlackChannelInput } from "./SlackChannelInput";
+import { SlackSearchInput } from "./SlackSearchInput";
+import { SlackTokenInput } from "./SlackTokenInput";
 
 interface SlackSearchFormProps {
-  form: UseSlackFormResult
+  form: UseSlackFormResult;
 }
 
 export function SlackSearchForm({ form }: SlackSearchFormProps) {
@@ -32,15 +32,27 @@ export function SlackSearchForm({ form }: SlackSearchFormProps) {
       />
 
       {/* 詳細フィルター */}
-      <SlackAdvancedFilters showAdvanced={form.showAdvanced} onToggleAdvanced={form.onToggleAdvanced}>
+      <SlackAdvancedFilters
+        showAdvanced={form.showAdvanced}
+        onToggleAdvanced={form.onToggleAdvanced}
+      >
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <SlackChannelInput channel={form.channel} onChannelChange={form.onChannelChange} />
-          <SlackAuthorInput author={form.author} onAuthorChange={form.onAuthorChange} />
+          <SlackChannelInput
+            channel={form.channel}
+            onChannelChange={form.onChannelChange}
+          />
+          <SlackAuthorInput
+            author={form.author}
+            onAuthorChange={form.onAuthorChange}
+          />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="startDate"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               開始日
             </label>
             <input
@@ -52,7 +64,10 @@ export function SlackSearchForm({ form }: SlackSearchFormProps) {
             />
           </div>
           <div>
-            <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-2">
+            <label
+              htmlFor="endDate"
+              className="block text-sm font-medium text-gray-700 mb-2"
+            >
               終了日
             </label>
             <input
@@ -69,10 +84,12 @@ export function SlackSearchForm({ form }: SlackSearchFormProps) {
       {/* 検索ボタン */}
       <button
         type="submit"
-        disabled={form.isLoading || !form.token.trim() || !form.searchQuery.trim()}
+        disabled={
+          form.isLoading || !form.token.trim() || !form.searchQuery.trim()
+        }
         className="w-full bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
       >
-        {form.isLoading ? '検索中...' : 'Slackを検索'}
+        {form.isLoading ? "検索中..." : "Slackを検索"}
       </button>
 
       {/* 進行状況表示 */}
@@ -80,7 +97,10 @@ export function SlackSearchForm({ form }: SlackSearchFormProps) {
         <div className="mt-4 text-center text-sm text-gray-600">
           <div className="mb-2">{form.progressStatus.message}</div>
           <div className="w-full bg-gray-200 rounded-full h-2">
-            <div className="bg-blue-600 h-2 rounded-full animate-pulse" style={{ width: '60%' }} />
+            <div
+              className="bg-blue-600 h-2 rounded-full animate-pulse"
+              style={{ width: "60%" }}
+            />
           </div>
         </div>
       )}
@@ -92,5 +112,5 @@ export function SlackSearchForm({ form }: SlackSearchFormProps) {
         </div>
       )}
     </form>
-  )
+  );
 }

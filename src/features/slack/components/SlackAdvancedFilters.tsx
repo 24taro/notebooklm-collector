@@ -5,20 +5,20 @@
  * - 各フィルター条件の入力フィールド
  */
 
-'use client'
+"use client";
 
-import type { SlackAdvancedFiltersProps } from '@/features/slack/types/forms'
+import type { SlackAdvancedFiltersProps } from "@/features/slack/types/forms";
 
 export function SlackAdvancedFilters({
   showAdvanced,
   onToggleAdvanced,
-  channel = '',
+  channel = "",
   onChannelChange = () => {},
-  author = '',
+  author = "",
   onAuthorChange = () => {},
-  startDate = '',
+  startDate = "",
   onStartDateChange = () => {},
-  endDate = '',
+  endDate = "",
   onEndDateChange = () => {},
   disabled = false,
   children,
@@ -30,7 +30,7 @@ export function SlackAdvancedFilters({
         onClick={onToggleAdvanced}
         className="text-sm text-blue-600 hover:text-blue-800 focus:outline-none"
       >
-        {showAdvanced ? '詳細な条件を閉じる ▲' : 'もっと詳細な条件を追加する ▼'}
+        {showAdvanced ? "詳細な条件を閉じる ▲" : "もっと詳細な条件を追加する ▼"}
       </button>
       {showAdvanced && (
         <div className="space-y-4 p-4 border border-gray-300 rounded-md bg-gray-50">
@@ -39,7 +39,10 @@ export function SlackAdvancedFilters({
           ) : (
             <>
               <div>
-                <label htmlFor="channel" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="channel"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   チャンネル (例: #general)
                 </label>
                 <input
@@ -53,7 +56,10 @@ export function SlackAdvancedFilters({
                 />
               </div>
               <div>
-                <label htmlFor="author" className="block text-sm font-medium text-gray-700 mb-1">
+                <label
+                  htmlFor="author"
+                  className="block text-sm font-medium text-gray-700 mb-1"
+                >
                   投稿者 (例: @user)
                 </label>
                 <input
@@ -68,7 +74,10 @@ export function SlackAdvancedFilters({
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="startDate" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="startDate"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     投稿期間 (開始日)
                   </label>
                   <input
@@ -81,7 +90,10 @@ export function SlackAdvancedFilters({
                   />
                 </div>
                 <div>
-                  <label htmlFor="endDate" className="block text-sm font-medium text-gray-700 mb-1">
+                  <label
+                    htmlFor="endDate"
+                    className="block text-sm font-medium text-gray-700 mb-1"
+                  >
                     投稿期間 (終了日)
                   </label>
                   <input
@@ -99,5 +111,5 @@ export function SlackAdvancedFilters({
         </div>
       )}
     </div>
-  )
+  );
 }

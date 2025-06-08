@@ -1,9 +1,9 @@
-import type { Preview } from '@storybook/react'
-import '../src/app/globals.css'
+import type { Preview } from "@storybook/react";
+import "../src/app/globals.css";
 
 const preview: Preview = {
   parameters: {
-    actions: { argTypesRegex: '^on[A-Z].*' },
+    actions: { argTypesRegex: "^on[A-Z].*" },
     controls: {
       matchers: {
         color: /(background|color)$/i,
@@ -13,31 +13,31 @@ const preview: Preview = {
     viewport: {
       viewports: {
         mobile: {
-          name: 'Mobile',
+          name: "Mobile",
           styles: {
-            width: '375px',
-            height: '667px',
+            width: "375px",
+            height: "667px",
           },
         },
         tablet: {
-          name: 'Tablet',
+          name: "Tablet",
           styles: {
-            width: '768px',
-            height: '1024px',
+            width: "768px",
+            height: "1024px",
           },
         },
         desktop: {
-          name: 'Desktop',
+          name: "Desktop",
           styles: {
-            width: '1024px',
-            height: '768px',
+            width: "1024px",
+            height: "768px",
           },
         },
         large: {
-          name: 'Large Desktop',
+          name: "Large Desktop",
           styles: {
-            width: '1440px',
-            height: '900px',
+            width: "1440px",
+            height: "900px",
           },
         },
       },
@@ -45,23 +45,23 @@ const preview: Preview = {
     a11y: {
       config: {},
       options: {
-        checks: { 'color-contrast': { options: { noScroll: true } } },
+        checks: { "color-contrast": { options: { noScroll: true } } },
         restoreScroll: true,
       },
     },
   },
   globalTypes: {
     theme: {
-      description: 'Global theme for components',
-      defaultValue: 'light',
+      description: "Global theme for components",
+      defaultValue: "light",
       toolbar: {
-        title: 'Theme',
-        icon: 'circlehollow',
-        items: ['light', 'dark'],
+        title: "Theme",
+        icon: "circlehollow",
+        items: ["light", "dark"],
         dynamicTitle: true,
       },
     },
   },
-}
+};
 
-export default preview
+export default preview;

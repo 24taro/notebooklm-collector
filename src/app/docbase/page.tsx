@@ -1,10 +1,10 @@
-'use client' // クライアントコンポーネントとしてマーク
+"use client"; // クライアントコンポーネントとしてマーク
 
-import { Toaster } from 'react-hot-toast' // Toasterをインポート
-import Footer from '../../components/Footer'
+import { Toaster } from "react-hot-toast"; // Toasterをインポート
+import Footer from "../../components/Footer";
 // import { SparklesCore } from "../../components/ui/sparkles"; // 架空のUIコンポーネントなのだ -> 一旦コメントアウト
-import Header from '../../components/Header'
-import { DocbaseSearchForm } from '../../features/docbase/components/DocbaseSearchForm' // パスを修正
+import Header from "../../components/Header";
+import { DocbaseSearchForm } from "../../features/docbase/components/DocbaseSearchForm"; // パスを修正
 
 export default function DocbasePage() {
   // コンポーネント名を DocbasePage に変更
@@ -26,17 +26,18 @@ export default function DocbasePage() {
       <Toaster
         position="top-center"
         toastOptions={{
-          className: '!border !border-gray-200 !bg-white !text-gray-700 !shadow-lg !rounded-md',
+          className:
+            "!border !border-gray-200 !bg-white !text-gray-700 !shadow-lg !rounded-md",
           success: {
             iconTheme: {
-              primary: '#3B82F6', // Docbase風ブルー
-              secondary: '#FFFFFF',
+              primary: "#3B82F6", // Docbase風ブルー
+              secondary: "#FFFFFF",
             },
           },
           error: {
             iconTheme: {
-              primary: '#EF4444', // 赤
-              secondary: '#FFFFFF',
+              primary: "#EF4444", // 赤
+              secondary: "#FFFFFF",
             },
           },
         }}
@@ -63,7 +64,11 @@ export default function DocbasePage() {
           <div className="flex flex-col items-center">
             <button
               type="button"
-              onClick={() => document.getElementById('main-tool-section')?.scrollIntoView({ behavior: 'smooth' })}
+              onClick={() =>
+                document
+                  .getElementById("main-tool-section")
+                  ?.scrollIntoView({ behavior: "smooth" })
+              }
               className="px-8 py-3 bg-docbase-primary hover:bg-docbase-primary-dark text-white font-semibold rounded-md shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 ease-in-out text-lg"
             >
               今すぐMarkdownを生成
@@ -77,29 +82,31 @@ export default function DocbasePage() {
         {/* 使い方説明セクション */}
         <section className="w-full mt-12">
           <div className="max-w-screen-lg mx-auto px-6 sm:px-10 lg:px-24 py-16 rounded-xl border border-gray-200 bg-background-light">
-            <h2 className="text-3xl md:text-4xl font-bold mb-20 text-center text-gray-800">利用はかんたん3ステップ</h2>
+            <h2 className="text-3xl md:text-4xl font-bold mb-20 text-center text-gray-800">
+              利用はかんたん3ステップ
+            </h2>
             <div className="grid md:grid-cols-3 gap-x-8 gap-y-10 relative">
               {[
                 {
-                  step: '1',
-                  title: '情報を入力',
+                  step: "1",
+                  title: "情報を入力",
                   description:
-                    'Docbaseドメイン、APIトークン、検索したいキーワードの3点を入力します。ドメインとトークンは保存可能です。',
-                  icon: '⌨️',
+                    "Docbaseドメイン、APIトークン、検索したいキーワードの3点を入力します。ドメインとトークンは保存可能です。",
+                  icon: "⌨️",
                 },
                 {
-                  step: '2',
-                  title: '検索して生成',
+                  step: "2",
+                  title: "検索して生成",
                   description:
-                    '「検索実行」ボタンを押すと、Docbaseから記事を取得し、NotebookLM用Markdownをプレビューします。',
-                  icon: '🔍',
+                    "「検索実行」ボタンを押すと、Docbaseから記事を取得し、NotebookLM用Markdownをプレビューします。",
+                  icon: "🔍",
                 },
                 {
-                  step: '3',
-                  title: 'ダウンロード',
+                  step: "3",
+                  title: "ダウンロード",
                   description:
-                    '生成されたMarkdown内容を確認し、「ダウンロード」ボタンでファイルとして保存。すぐにAIに学習させられます。',
-                  icon: '💾',
+                    "生成されたMarkdown内容を確認し、「ダウンロード」ボタンでファイルとして保存。すぐにAIに学習させられます。",
+                  icon: "💾",
                 },
               ].map((item, index) => (
                 <div key={item.step} className="text-center md:text-left">
@@ -109,8 +116,12 @@ export default function DocbasePage() {
                     </span>
                     <span className="text-3xl">{item.icon}</span>
                   </div>
-                  <h3 className="text-lg font-semibold mb-2 text-gray-800">{item.title}</h3>
-                  <p className="text-gray-600 text-sm leading-relaxed">{item.description}</p>
+                  <h3 className="text-lg font-semibold mb-2 text-gray-800">
+                    {item.title}
+                  </h3>
+                  <p className="text-gray-600 text-sm leading-relaxed">
+                    {item.description}
+                  </p>
                 </div>
               ))}
             </div>
@@ -121,9 +132,12 @@ export default function DocbasePage() {
         <section className="w-full mt-12">
           <div className="max-w-screen-lg mx-auto px-6 sm:px-10 lg:px-24 py-16 rounded-xl border border-gray-200 bg-background-light">
             <div className="text-center">
-              <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-gray-800">🔒 セキュリティについて</h2>
+              <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-gray-800">
+                🔒 セキュリティについて
+              </h2>
               <p className="text-gray-600 text-lg leading-relaxed max-w-3xl mx-auto">
-                入力されたDocbase APIトークンや取得された記事の内容は、お使いのブラウザ内でのみ処理されます。
+                入力されたDocbase
+                APIトークンや取得された記事の内容は、お使いのブラウザ内でのみ処理されます。
                 これらの情報が外部のサーバーに送信されたり、保存されたりすることは一切ありませんので、安心してご利用いただけます。
               </p>
             </div>
@@ -134,7 +148,9 @@ export default function DocbasePage() {
         <section id="main-tool-section" className="w-full my-12 bg-white">
           <div className="max-w-screen-lg mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-10 md:py-12 shadow-md rounded-lg border border-gray-200">
             <div className="px-0">
-              <h2 className="text-4xl font-bold mb-6 text-center text-gray-800">DocBase 記事検索・収集</h2>
+              <h2 className="text-4xl font-bold mb-6 text-center text-gray-800">
+                DocBase 記事検索・収集
+              </h2>
               <DocbaseSearchForm />
             </div>
           </div>
@@ -142,5 +158,5 @@ export default function DocbasePage() {
       </div>
       <Footer />
     </main>
-  )
+  );
 }
