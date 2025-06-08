@@ -171,6 +171,6 @@ export const generateDocbaseMarkdownForPreview = (
 
         return articleMd;
       })
-      .join("---\n\n")
+      .join("---\n\n\n")
   );
 };

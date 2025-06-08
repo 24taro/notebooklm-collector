@@ -503,8 +503,8 @@ describe("markdownGenerator", () => {
       it("複数記事が水平線で区切られる", () => {
         const result = generateDocbaseMarkdownForPreview(mockPosts);
 
-        // 水平線で区切られることを確認
-        const sections = result.split("---\n\n");
+        // 水平線で区切られることを確認（プレビューでは改行が3つ）
+        const sections = result.split("---\n\n\n");
         expect(sections.length).toBeGreaterThan(2);
       });
 
@@ -512,7 +512,7 @@ describe("markdownGenerator", () => {
         const result = generateDocbaseMarkdownForPreview([mockPosts[0]]);
 
         // 単一記事では区切り線がないことを確認
-        const sections = result.split("---\n\n");
+        const sections = result.split("---\n\n\n");
         expect(sections.length).toBe(1);
       });
     });

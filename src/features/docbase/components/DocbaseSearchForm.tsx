@@ -371,8 +371,6 @@ export const DocbaseSearchForm = () => {
           <div className="mt-6 pt-5 border-t border-gray-200">
             <DocbaseMarkdownPreview
               markdown={markdownContent}
-              title="Markdownプレビュー"
-              onDownload={handleDownloadClick}
               emptyMessage="Docbase記事の検索結果がここに表示されます。"
             />
             {posts && posts.length > 10 && (
