@@ -10,6 +10,10 @@ describe('markdownGenerator', () => {
       body: 'これはテスト記事1の内容です。',
       created_at: '2023-01-01T10:00:00Z',
       url: 'https://example.docbase.io/posts/1',
+      user: { id: 100, name: 'テストユーザー1', profile_image_url: 'https://example.com/user1.jpg' },
+      tags: [{ name: 'API' }, { name: 'テスト' }],
+      groups: [{ id: 1, name: '開発チーム' }],
+      scope: 'everyone',
     },
     {
       id: 2,
@@ -17,6 +21,10 @@ describe('markdownGenerator', () => {
       body: 'これはテスト記事2の内容です。\n複数行の内容を含みます。',
       created_at: '2023-01-02T15:30:00Z',
       url: 'https://example.docbase.io/posts/2',
+      user: { id: 101, name: 'テストユーザー2', profile_image_url: 'https://example.com/user2.jpg' },
+      tags: [{ name: 'ドキュメント' }],
+      groups: [],
+      scope: 'group',
     },
     {
       id: 3,
@@ -24,6 +32,13 @@ describe('markdownGenerator', () => {
       body: '# マークダウンタイトル\n\n**太字**のテキストと*斜体*のテキスト。',
       created_at: '2023-01-03T09:15:00Z',
       url: 'https://example.docbase.io/posts/3',
+      user: { id: 102, name: 'テストユーザー3', profile_image_url: 'https://example.com/user3.jpg' },
+      tags: [],
+      groups: [
+        { id: 2, name: 'デザインチーム' },
+        { id: 3, name: 'プロダクトチーム' },
+      ],
+      scope: 'private',
     },
   ]
 
@@ -66,9 +81,9 @@ describe('markdownGenerator', () => {
 
       // 記事内容の確認
       expect(result).toContain('## Articles Content')
-      expect(result).toContain('### Article 1')
-      expect(result).toContain('### Article 2')
-      expect(result).toContain('### Article 3')
+      expect(result).toContain('### Article 1: テスト記事1')
+      expect(result).toContain('### Article 2: テスト記事2')
+      expect(result).toContain('### Article 3: マークダウン記事')
     })
 
     it('検索キーワードなしでもMarkdownを生成する', () => {
@@ -93,6 +108,10 @@ describe('markdownGenerator', () => {
           body: '内容1',
           created_at: '2023-01-01T10:00:00Z',
           url: 'https://example.com/1',
+          user: { id: 100, name: 'テストユーザー1', profile_image_url: 'https://example.com/user1.jpg' },
+          tags: [],
+          groups: [],
+          scope: 'everyone',
         },
         {
           id: 2,
@@ -100,6 +119,10 @@ describe('markdownGenerator', () => {
           body: '内容2',
           created_at: '2023-01-01T15:00:00Z',
           url: 'https://example.com/2',
+          user: { id: 101, name: 'テストユーザー2', profile_image_url: 'https://example.com/user2.jpg' },
+          tags: [],
+          groups: [],
+          scope: 'everyone',
         },
       ]
 
@@ -123,28 +146,29 @@ describe('markdownGenerator', () => {
       // 目次での日付表示
       expect(result).toMatch(/1\. \[テスト記事1\]\(#article-1\) - 2023\/1\/1/)
 
-      // 記事詳細での日付表示（長い形式）
-      expect(result).toMatch(/- \*\*Created\*\*: 2023年1月1日日曜日/)
+      // 記事詳細での日付表示（時刻ありの長い形式）
+      expect(result).toMatch(/\*\*Created\*\*: 2023年1月1日日曜日 19:00/)
     })
   })
 
   describe('記事内容の処理', () => {
-    it('記事のYAML Front Matterが正しく生成される', () => {
+    it('記事のメタデータが改行区切りで生成される', () => {
       const result = generateDocbaseMarkdown([mockPosts[0]])
 
-      expect(result).toContain('```yaml')
-      expect(result).toContain('docbase_id: 1')
-      expect(result).toContain('title: "テスト記事1"')
-      expect(result).toContain('created_at: "2023-01-01T10:00:00.000Z"')
-      expect(result).toContain('url: "https://example.docbase.io/posts/1"')
-      expect(result).toContain('```')
+      expect(result).toContain('**Created**: 2023年1月1日日曜日 19:00')
+      expect(result).toContain('**Author**: テストユーザー1')
+      expect(result).toContain('**ID**: 1')
+      expect(result).toContain('**Tags**: API, テスト')
+      expect(result).toContain('**Groups**: 開発チーム')
+      expect(result).toContain('**URL**: [View Original](https://example.docbase.io/posts/1)')
     })
 
-    it('記事の本文がそのまま含まれる', () => {
+    it('記事の本文がHTMLコメントで囲まれて含まれる', () => {
       const result = generateDocbaseMarkdown([mockPosts[0]])
 
-      expect(result).toContain('## Content')
+      expect(result).toContain('<!-- DOCBASE_CONTENT_START -->')
       expect(result).toContain('これはテスト記事1の内容です。')
+      expect(result).toContain('<!-- DOCBASE_CONTENT_END -->')
     })
 
     it('複数行の記事内容を正しく処理する', () => {
@@ -154,11 +178,13 @@ describe('markdownGenerator', () => {
       expect(result).toContain('複数行の内容を含みます。')
     })
 
-    it('マークダウン形式の記事内容をそのまま保持する', () => {
+    it('マークダウン形式の記事内容がHTMLコメント内で保持される', () => {
       const result = generateDocbaseMarkdown([mockPosts[2]])
 
+      expect(result).toContain('<!-- DOCBASE_CONTENT_START -->')
       expect(result).toContain('# マークダウンタイトル')
       expect(result).toContain('**太字**のテキストと*斜体*のテキスト。')
+      expect(result).toContain('<!-- DOCBASE_CONTENT_END -->')
     })
 
     it('記事間の区切り線が正しく挿入される', () => {
@@ -171,19 +197,19 @@ describe('markdownGenerator', () => {
   })
 
   describe('ドキュメント情報', () => {
-    it('記事の基本情報が正しく含まれる', () => {
+    it('記事の基本情報が改行区切りで含まれる', () => {
       const result = generateDocbaseMarkdown([mockPosts[0]])
 
-      expect(result).toContain('## Document Information')
-      expect(result).toContain('- **Document ID**: 1')
-      expect(result).toContain('- **Source**: [Docbase Article](https://example.docbase.io/posts/1)')
+      expect(result).toContain('**Author**: テストユーザー1')
+      expect(result).toContain('**ID**: 1')
+      expect(result).toContain('**URL**: [View Original](https://example.docbase.io/posts/1)')
     })
 
-    it('記事タイトルが適切にレベル1ヘッダーになる', () => {
+    it('記事タイトルが見出しに組み込まれる', () => {
       const result = generateDocbaseMarkdown([mockPosts[0]])
 
-      // 記事のタイトルがH1として表示されることを確認
-      expect(result).toMatch(/# テスト記事1\n/)
+      // 記事のタイトルがH3見出しに組み込まれることを確認
+      expect(result).toContain('### Article 1: テスト記事1')
     })
   })
 
@@ -196,13 +222,16 @@ describe('markdownGenerator', () => {
           body: '内容',
           created_at: '2023-01-01T10:00:00Z',
           url: 'https://example.com/1',
+          user: { id: 100, name: 'テストユーザー', profile_image_url: 'https://example.com/user.jpg' },
+          tags: [],
+          groups: [],
+          scope: 'everyone',
         },
       ]
 
       const result = generateDocbaseMarkdown(specialPosts)
 
-      expect(result).toContain('title: "タイトル "引用符" & 特殊文字"')
-      expect(result).toContain('# タイトル "引用符" & 特殊文字')
+      expect(result).toContain('### Article 1: タイトル "引用符" & 特殊文字')
     })
 
     it('空の本文を持つ記事を処理する', () => {
@@ -213,13 +242,18 @@ describe('markdownGenerator', () => {
           body: '',
           created_at: '2023-01-01T10:00:00Z',
           url: 'https://example.com/1',
+          user: { id: 100, name: 'テストユーザー', profile_image_url: 'https://example.com/user.jpg' },
+          tags: [],
+          groups: [],
+          scope: 'everyone',
         },
       ]
 
       const result = generateDocbaseMarkdown(emptyBodyPosts)
 
-      expect(result).toContain('# 空の記事')
-      expect(result).toContain('## Content')
+      expect(result).toContain('### Article 1: 空の記事')
+      expect(result).toContain('<!-- DOCBASE_CONTENT_START -->')
+      expect(result).toContain('<!-- DOCBASE_CONTENT_END -->')
       // 空の本文でもエラーにならないことを確認
       expect(result).toBeTruthy()
     })
@@ -229,8 +263,8 @@ describe('markdownGenerator', () => {
 
       expect(result).toContain('total_articles: 1')
       expect(result).toContain('- **Total Articles**: 1')
-      expect(result).toContain('### Article 1')
-      expect(result).not.toContain('### Article 2')
+      expect(result).toContain('### Article 1: テスト記事1')
+      expect(result).not.toContain('### Article 2:')
     })
   })
 
@@ -243,9 +277,9 @@ describe('markdownGenerator', () => {
       expect(result).toContain('## Collection Overview')
       expect(result).toContain('## Articles Index')
       expect(result).toContain('## Articles Content')
-      expect(result).toContain('### Article 1')
-      expect(result).toContain('## Document Information')
-      expect(result).toContain('## Content')
+      expect(result).toContain('### Article 1: テスト記事1')
+      expect(result).toContain('<!-- DOCBASE_CONTENT_START -->')
+      expect(result).toContain('<!-- DOCBASE_CONTENT_END -->')
     })
 
     it('YAML Front Matterにメタデータが適切に含まれる', () => {
@@ -259,16 +293,16 @@ describe('markdownGenerator', () => {
       expect(result).toMatch(/---\n\n/)
     })
 
-    it('記事ごとのYAMLブロックでメタデータを提供する', () => {
+    it('記事ごとのメタデータが改行区切りで提供される', () => {
       const result = generateDocbaseMarkdown([mockPosts[0]])
 
-      // 記事レベルのYAMLブロック
-      expect(result).toContain('```yaml')
-      expect(result).toContain('docbase_id: 1')
-      expect(result).toContain('title: "テスト記事1"')
-      expect(result).toContain('created_at: "2023-01-01T10:00:00.000Z"')
-      expect(result).toContain('url: "https://example.docbase.io/posts/1"')
-      expect(result).toContain('```')
+      // 改行区切りのメタデータ
+      expect(result).toContain('**Created**: 2023年1月1日日曜日 19:00')
+      expect(result).toContain('**Author**: テストユーザー1')
+      expect(result).toContain('**ID**: 1')
+      expect(result).toContain('**Tags**: API, テスト')
+      expect(result).toContain('**Groups**: 開発チーム')
+      expect(result).toContain('**URL**: [View Original](https://example.docbase.io/posts/1)')
     })
   })
 })
