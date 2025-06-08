@@ -5,24 +5,24 @@
  * - プレゼンテーション層とロジック層の分離
  */
 
-import { useDownload } from '@/hooks/useDownload'
-import useLocalStorage from '@/hooks/useLocalStorage'
-import { useState } from 'react'
-import type React from 'react'
-import { useSlackSearchUnified } from './useSlackSearchUnified'
+import { useDownload } from "@/hooks/useDownload";
+import useLocalStorage from "@/hooks/useLocalStorage";
+import { useState } from "react";
+import type React from "react";
+import { useSlackSearchUnified } from "./useSlackSearchUnified";
 
 export function useSlackForm() {
   // フォーム状態
-  const [token, setToken] = useLocalStorage<string>('slackApiToken', '')
-  const [searchQuery, setSearchQuery] = useState<string>('')
-  const [startDate, setStartDate] = useState<string>('')
-  const [endDate, setEndDate] = useState<string>('')
-  const [channel, setChannel] = useState<string>('')
-  const [author, setAuthor] = useState<string>('')
-  const [showAdvanced, setShowAdvanced] = useState<boolean>(false)
+  const [token, setToken] = useLocalStorage<string>("slackApiToken", "");
+  const [searchQuery, setSearchQuery] = useState<string>("");
+  const [startDate, setStartDate] = useState<string>("");
+  const [endDate, setEndDate] = useState<string>("");
+  const [channel, setChannel] = useState<string>("");
+  const [author, setAuthor] = useState<string>("");
+  const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
 
   // フック統合
-  const { isDownloading, handleDownload } = useDownload()
+  const { isDownloading, handleDownload } = useDownload();
   const {
     isLoading,
     progressStatus,
@@ -34,11 +34,11 @@ export function useSlackForm() {
     threadMarkdowns,
     currentPreviewMarkdown,
     handleSearch: searchSlack,
-  } = useSlackSearchUnified()
+  } = useSlackSearchUnified();
 
   // イベントハンドラー
   const handleFormSubmit = (event: React.FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
+    event.preventDefault();
     searchSlack({
       token,
       searchQuery,
@@ -46,28 +46,36 @@ export function useSlackForm() {
       author,
       startDate,
       endDate,
-    })
-  }
+    });
+  };
 
-  const handlePreviewDownload = (markdownContent: string, searchQuery: string, hasContent: boolean) => {
+  const handlePreviewDownload = (
+    markdownContent: string,
+    searchQuery: string,
+    hasContent: boolean
+  ) => {
     if (hasContent && currentPreviewMarkdown) {
-      handleDownload(currentPreviewMarkdown, searchQuery, hasContent, 'slack')
+      handleDownload(currentPreviewMarkdown, searchQuery, hasContent, "slack");
     } else {
-      handleDownload(markdownContent, searchQuery, hasContent, 'slack')
+      handleDownload(markdownContent, searchQuery, hasContent, "slack");
     }
-  }
+  };
 
-  const handleFullDownload = (markdownContent: string, searchQuery: string, hasContent: boolean) => {
+  const handleFullDownload = (
+    markdownContent: string,
+    searchQuery: string,
+    hasContent: boolean
+  ) => {
     if (hasContent && threadMarkdowns.length > 0) {
       // TODO: Issue #39で統一フックによるMarkdown生成実装
       // const fullMarkdown = generateSlackThreadsMarkdown(slackThreads, userMaps, permalinkMaps, searchQuery)
-      handleDownload(markdownContent, searchQuery, hasContent, 'slack')
+      handleDownload(markdownContent, searchQuery, hasContent, "slack");
     } else {
-      handleDownload(markdownContent, searchQuery, hasContent, 'slack')
+      handleDownload(markdownContent, searchQuery, hasContent, "slack");
     }
-  }
+  };
 
-  const toggleAdvanced = () => setShowAdvanced(!showAdvanced)
+  const toggleAdvanced = () => setShowAdvanced(!showAdvanced);
 
   return {
     // 検索条件
@@ -104,5 +112,5 @@ export function useSlackForm() {
     onSubmit: handleFormSubmit,
     onDownload: handlePreviewDownload,
     onFullDownload: handleFullDownload,
-  }
+  };
 }

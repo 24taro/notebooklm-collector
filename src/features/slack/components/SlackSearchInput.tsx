@@ -5,12 +5,19 @@
  * - 無効化状態の対応
  */
 
-import type { SlackSearchInputProps } from '@/features/slack/types/forms'
+import type { SlackSearchInputProps } from "@/features/slack/types/forms";
 
-export function SlackSearchInput({ searchQuery, onSearchQueryChange, disabled = false }: SlackSearchInputProps) {
+export function SlackSearchInput({
+  searchQuery,
+  onSearchQueryChange,
+  disabled = false,
+}: SlackSearchInputProps) {
   return (
     <div>
-      <label htmlFor="searchQuery" className="block text-base font-medium text-gray-700 mb-1">
+      <label
+        htmlFor="searchQuery"
+        className="block text-base font-medium text-gray-700 mb-1"
+      >
         検索キーワード
       </label>
       <input
@@ -24,5 +31,5 @@ export function SlackSearchInput({ searchQuery, onSearchQueryChange, disabled = 
         required
       />
     </div>
-  )
+  );
 }

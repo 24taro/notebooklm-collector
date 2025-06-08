@@ -1,19 +1,21 @@
-'use client'
+"use client";
 
-import type { FC, ReactNode } from 'react'
-import ReactMarkdown, { type ExtraProps as ReactMarkdownExtraProps } from 'react-markdown'
-import remarkGfm from 'remark-gfm'
+import type { FC, ReactNode } from "react";
+import ReactMarkdown, {
+  type ExtraProps as ReactMarkdownExtraProps,
+} from "react-markdown";
+import remarkGfm from "remark-gfm";
 
 // react-markdownのカスタムコンポーネントのprops型を定義
 // BiomeのnoExplicitAnyを抑制するために、型をanyにしてコメントで説明を追加します
 
 interface DocbaseMarkdownPreviewProps {
-  markdown: string
-  title?: string
-  onDownload?: () => void
-  downloadFileName?: string
-  className?: string
-  emptyMessage?: string
+  markdown: string;
+  title?: string;
+  onDownload?: () => void;
+  downloadFileName?: string;
+  className?: string;
+  emptyMessage?: string;
 }
 
 /**
@@ -28,11 +30,11 @@ interface DocbaseMarkdownPreviewProps {
  */
 export const DocbaseMarkdownPreview: FC<DocbaseMarkdownPreviewProps> = ({
   markdown,
-  title = 'プレビュー',
+  title = "プレビュー",
   onDownload,
-  downloadFileName = 'markdown.md',
-  className = '',
-  emptyMessage = 'ここにMarkdownプレビューが表示されます。',
+  downloadFileName = "markdown.md",
+  className = "",
+  emptyMessage = "ここにMarkdownプレビューが表示されます。",
 }) => {
   if (!markdown) {
     return (
@@ -41,7 +43,7 @@ export const DocbaseMarkdownPreview: FC<DocbaseMarkdownPreviewProps> = ({
           <p className="text-gray-500">{emptyMessage}</p>
         </div>
       </div>
-    )
+    );
   }
 
   return (
@@ -60,42 +62,92 @@ export const DocbaseMarkdownPreview: FC<DocbaseMarkdownPreviewProps> = ({
           )}
         </div>
       )}
-      <div className="border rounded-lg p-6 bg-gray-50">
-        <div className="prose max-w-none prose-neutral prose-sm sm:prose-base lg:prose-lg xl:prose-xl">
+      <div className="border border-gray-200 rounded-xl p-8 bg-white shadow-sm">
+        <div className="prose max-w-none prose-neutral prose-sm sm:prose-base lg:prose-lg xl:prose-xl docbase-preview">
           <ReactMarkdown
             remarkPlugins={[remarkGfm]}
             components={{
               // biome-ignore lint/suspicious/noExplicitAny: カスタムコンポーネントの型解決が複雑なため一時的にanyを使用
-              h2: ({ node, children, ...props }: any) => (
-                <h2 className="text-3xl font-bold mt-8 mb-4 pb-2 border-b-2 border-blue-600 text-gray-800" {...props}>
+              h1: ({ node, children, ...props }: any) => (
+                <h1
+                  className="text-xl font-semibold mt-6 mb-4 text-slate-800 bg-slate-50 px-4 py-3 rounded-lg border-l-4 border-slate-400"
+                  {...props}
+                >
                   {children}
-                </h2>
+                </h1>
               ),
               // biome-ignore lint/suspicious/noExplicitAny: カスタムコンポーネントの型解決が複雑なため一時的にanyを使用
+              h2: ({ node, children, ...props }: any) => {
+                // プレビューの記事タイトル（DocbaseタイトルのH2）か記事内のH2かを判定
+                const childrenText = Array.isArray(children)
+                  ? children.join("")
+                  : children;
+                const isDocbaseTitle = markdown.includes(
+                  `## ${childrenText}\n\n**作成日**:`
+                );
+
+                if (isDocbaseTitle) {
+                  // Docbaseの記事タイトル
+                  const isFirstTitle =
+                    markdown.indexOf(`## ${childrenText}`) ===
+                    markdown.indexOf("##");
+                  return (
+                    <h2
+                      className={`text-2xl font-bold mb-8 text-slate-800 bg-gradient-to-r from-slate-50 via-blue-50 to-slate-50 px-6 py-4 rounded-xl border border-slate-200 shadow-sm hover:shadow-md transition-shadow duration-200 ${
+                        isFirstTitle ? "mt-0" : "mt-16"
+                      }`}
+                      {...props}
+                    >
+                      {children}
+                    </h2>
+                  );
+                }
+                // 記事内のH2タイトル
+                return (
+                  <h2
+                    className="text-lg font-semibold mt-6 mb-3 text-slate-700 bg-slate-50 px-4 py-2 rounded-lg border-l-4 border-slate-300"
+                    {...props}
+                  >
+                    {children}
+                  </h2>
+                );
+              },
+              // biome-ignore lint/suspicious/noExplicitAny: カスタムコンポーネントの型解決が複雑なため一時的にanyを使用
               h3: ({ node, children, ...props }: any) => (
-                <h3 className="text-2xl font-bold mt-6 mb-3 text-gray-800" {...props}>
+                <h3
+                  className="text-base font-semibold mt-4 mb-2 text-slate-700 bg-slate-50 px-3 py-2 rounded-lg border-l-3 border-slate-300"
+                  {...props}
+                >
                   {children}
                 </h3>
               ),
               // biome-ignore lint/suspicious/noExplicitAny: カスタムコンポーネントの型解決が複雑なため一時的にanyを使用
               h4: ({ node, children, ...props }: any) => (
-                <h4 className="text-xl font-bold mt-4 mb-2 text-gray-700" {...props}>
+                <h4
+                  className="text-sm font-medium mt-3 mb-2 text-slate-600 bg-slate-50 px-3 py-1 rounded border-l-2 border-slate-300"
+                  {...props}
+                >
                   {children}
                 </h4>
               ),
               // biome-ignore lint/suspicious/noExplicitAny: カスタムコンポーネントの型解決が複雑なため一時的にanyを使用
               blockquote: ({ node, children, ...props }: any) => (
-                <blockquote className="my-4 pl-4 border-l-4 border-gray-300 text-gray-600 bg-gray-100 py-2" {...props}>
+                <blockquote
+                  className="my-6 pl-6 border-l-4 border-blue-300 text-slate-700 bg-blue-50 py-4 rounded-r-lg italic"
+                  {...props}
+                >
                   {children}
                 </blockquote>
               ),
               // biome-ignore lint/suspicious/noExplicitAny: カスタムコンポーネントの型解決が複雑なため一時的にanyを使用
               code: ({ node, inline, className, children, ...props }: any) => {
-                const match = /language-(\w+)/.exec(className || '')
+                const match = /language-(\w+)/.exec(className || "");
                 return !inline && match ? (
-                  <div className="my-4 bg-gray-800 rounded-md overflow-hidden shadow">
-                    <div className="px-4 py-2 text-sm text-gray-300 bg-gray-700">{match[1]}</div>
-                    <pre className="p-4 text-sm leading-relaxed overflow-x-auto text-gray-100">
+                  <div className="my-6 bg-slate-900 rounded-xl overflow-hidden shadow-lg">
+                    <div className="px-4 py-2 text-sm text-slate-300 bg-slate-800 font-medium">
+                      {match[1]}
+                    </div>
+                    <pre className="p-6 text-sm leading-relaxed overflow-x-auto text-slate-100">
                       <code {...props} className={className}>
                         {children}
                       </code>
@@ -104,18 +156,65 @@ export const DocbaseMarkdownPreview: FC<DocbaseMarkdownPreviewProps> = ({
                 ) : (
                   <code
                     {...props}
-                    className={className || 'px-1 py-0.5 bg-gray-200 text-gray-800 rounded-sm text-sm font-mono'}
+                    className={
+                      className ||
+                      "px-2 py-1 bg-slate-100 text-slate-800 rounded text-sm font-mono border border-slate-200"
+                    }
                   >
                     {children}
                   </code>
-                )
+                );
               },
               // biome-ignore lint/suspicious/noExplicitAny: カスタムコンポーネントの型解決が複雑なため一時的にanyを使用
               a: ({ node, children, ...props }: any) => (
-                <a className="text-blue-600 hover:underline hover:text-blue-800" {...props}>
+                <a
+                  className="text-blue-600 hover:underline hover:text-blue-800"
+                  {...props}
+                >
                   {children}
                 </a>
               ),
+              // biome-ignore lint/suspicious/noExplicitAny: カスタムコンポーネントの型解決が複雑なため一時的にanyを使用
+              hr: ({ node, ...props }: any) => (
+                <hr className="my-16 border-slate-200" {...props} />
+              ),
+              // biome-ignore lint/suspicious/noExplicitAny: カスタムコンポーネントの型解決が複雑なため一時的にanyを使用
+              p: ({ node, children, ...props }: any) => {
+                // メタデータを含むpタグか、通常の本文pタグかを判定
+                const containsMetadata =
+                  Array.isArray(children) &&
+                  children.some(
+                    (child) =>
+                      typeof child === "object" && child?.type === "strong"
+                  );
+
+                return (
+                  <p
+                    className={`leading-relaxed text-slate-700 ${containsMetadata ? "mb-2 text-sm" : "mt-6 mb-4"}`}
+                    {...props}
+                  >
+                    {children}
+                  </p>
+                );
+              },
+              // biome-ignore lint/suspicious/noExplicitAny: カスタムコンポーネントの型解決が複雑なため一時的にanyを使用
+              strong: ({ node, children, ...props }: any) => {
+                // メタデータラベル（作成日:、作成者:など）の場合、その後に余白を追加
+                const isMetadataLabel =
+                  typeof children === "string" && children.includes(":");
+                return (
+                  <strong
+                    className={
+                      isMetadataLabel
+                        ? "font-semibold text-slate-600"
+                        : "font-semibold text-slate-800"
+                    }
+                    {...props}
+                  >
+                    {children}
+                  </strong>
+                );
+              },
             }}
           >
             {markdown}
@@ -123,5 +222,5 @@ export const DocbaseMarkdownPreview: FC<DocbaseMarkdownPreviewProps> = ({
         </div>
       </div>
     </div>
-  )
-}
+  );
+};

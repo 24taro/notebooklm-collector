@@ -5,55 +5,60 @@
  * ユーザーフレンドリーな形で表示し、復旧オプションを提供する。
  */
 
-'use client'
+"use client";
 
-import React, { useState } from 'react'
-import type { ErrorInfo } from 'react'
+import React, { useState } from "react";
+import type { ErrorInfo } from "react";
 
 interface ErrorFallbackProps {
-  error: Error | null
-  errorInfo: ErrorInfo | null
-  errorId: string | null
-  onReset: () => void
+  error: Error | null;
+  errorInfo: ErrorInfo | null;
+  errorId: string | null;
+  onReset: () => void;
 }
 
-export function ErrorFallback({ error, errorInfo, errorId, onReset }: ErrorFallbackProps) {
-  const [showDetails, setShowDetails] = useState(false)
-  const isDevelopment = process.env.NODE_ENV === 'development'
+export function ErrorFallback({
+  error,
+  errorInfo,
+  errorId,
+  onReset,
+}: ErrorFallbackProps) {
+  const [showDetails, setShowDetails] = useState(false);
+  const isDevelopment = process.env.NODE_ENV === "development";
 
   const handleReload = () => {
-    window.location.reload()
-  }
+    window.location.reload();
+  };
 
   const handleGoHome = () => {
-    window.location.href = '/'
-  }
+    window.location.href = "/";
+  };
 
   const handleClearStorage = () => {
     try {
-      localStorage.clear()
-      sessionStorage.clear()
-      onReset()
+      localStorage.clear();
+      sessionStorage.clear();
+      onReset();
     } catch (err) {
-      console.error('Failed to clear storage:', err)
-      handleReload()
+      console.error("Failed to clear storage:", err);
+      handleReload();
     }
-  }
+  };
 
   const createGitHubIssueUrl = () => {
-    const title = `[Error Report] ${error?.name || 'Unexpected Error'}`
+    const title = `[Error Report] ${error?.name || "Unexpected Error"}`;
     const body = `
 ## エラー情報
 
 **エラーID**: ${errorId}
-**発生時刻**: ${new Date().toLocaleString('ja-JP')}
+**発生時刻**: ${new Date().toLocaleString("ja-JP")}
 **URL**: ${window.location.href}
 **ブラウザ**: ${navigator.userAgent}
 
 ## エラー詳細
 
 \`\`\`
-${error?.stack || error?.message || 'Unknown error'}
+${error?.stack || error?.message || "Unknown error"}
 \`\`\`
 
 ## 再現手順
@@ -69,11 +74,11 @@ ${error?.stack || error?.message || 'Unknown error'}
 ## 追加情報
 
 [その他、参考になる情報があれば記載してください]
-`.trim()
+`.trim();
 
-    const repoUrl = 'https://github.com/sotaroNishioka/notebooklm-collector'
-    return `${repoUrl}/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`
-  }
+    const repoUrl = "https://github.com/sotaroNishioka/notebooklm-collector";
+    return `${repoUrl}/issues/new?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`;
+  };
 
   return (
     <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 sm:px-6 lg:px-8">
@@ -100,7 +105,9 @@ ${error?.stack || error?.message || 'Unknown error'}
 
           {/* エラーメッセージ */}
           <div className="text-center">
-            <h1 className="text-lg font-medium text-gray-900 mb-2">申し訳ございません</h1>
+            <h1 className="text-lg font-medium text-gray-900 mb-2">
+              申し訳ございません
+            </h1>
             <p className="text-sm text-gray-600 mb-6">
               予期しないエラーが発生しました。以下の方法で解決を試してください。
             </p>
@@ -148,7 +155,7 @@ ${error?.stack || error?.message || 'Unknown error'}
               onClick={() => setShowDetails(!showDetails)}
               className="w-full text-sm text-gray-500 hover:text-gray-700 focus:outline-none focus:underline transition-colors"
             >
-              {showDetails ? '詳細を非表示' : 'エラー詳細を表示'}
+              {showDetails ? "詳細を非表示" : "エラー詳細を表示"}
             </button>
 
             {showDetails && (
@@ -160,21 +167,29 @@ ${error?.stack || error?.message || 'Unknown error'}
                     </div>
                   )}
                   <div>
-                    <span className="font-medium">エラー名:</span> {error?.name || 'Unknown'}
+                    <span className="font-medium">エラー名:</span>{" "}
+                    {error?.name || "Unknown"}
                   </div>
                   <div>
-                    <span className="font-medium">メッセージ:</span> {error?.message || 'No error message'}
+                    <span className="font-medium">メッセージ:</span>{" "}
+                    {error?.message || "No error message"}
                   </div>
                   {isDevelopment && error?.stack && (
                     <div>
                       <span className="font-medium">スタックトレース:</span>
-                      <pre className="mt-1 text-xs whitespace-pre-wrap break-all">{error.stack}</pre>
+                      <pre className="mt-1 text-xs whitespace-pre-wrap break-all">
+                        {error.stack}
+                      </pre>
                     </div>
                   )}
                   {isDevelopment && errorInfo?.componentStack && (
                     <div>
-                      <span className="font-medium">コンポーネントスタック:</span>
-                      <pre className="mt-1 text-xs whitespace-pre-wrap break-all">{errorInfo.componentStack}</pre>
+                      <span className="font-medium">
+                        コンポーネントスタック:
+                      </span>
+                      <pre className="mt-1 text-xs whitespace-pre-wrap break-all">
+                        {errorInfo.componentStack}
+                      </pre>
                     </div>
                   )}
                 </div>
@@ -184,7 +199,9 @@ ${error?.stack || error?.message || 'Unknown error'}
 
           {/* フィードバック */}
           <div className="mt-6 text-center">
-            <p className="text-xs text-gray-500 mb-2">問題が解決しない場合は、以下のリンクからお報告ください</p>
+            <p className="text-xs text-gray-500 mb-2">
+              問題が解決しない場合は、以下のリンクからお報告ください
+            </p>
             <a
               href={createGitHubIssueUrl()}
               target="_blank"
@@ -197,5 +214,5 @@ ${error?.stack || error?.message || 'Unknown error'}
         </div>
       </div>
     </div>
-  )
+  );
 }

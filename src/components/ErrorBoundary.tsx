@@ -6,36 +6,42 @@
  * アプリ全体のクラッシュを防ぎ、適切なエラーハンドリングを提供する。
  */
 
-'use client'
+"use client";
 
-import type React from 'react'
-import { Component, type ReactNode } from 'react'
-import type { ErrorInfo } from 'react'
-import { logError } from '../utils/errorStorage'
-import { ErrorFallback } from './ErrorFallback'
+import type React from "react";
+import { Component, type ReactNode } from "react";
+import type { ErrorInfo } from "react";
+import { logError } from "../utils/errorStorage";
+import { ErrorFallback } from "./ErrorFallback";
 
 interface ErrorBoundaryProps {
-  children: ReactNode
-  fallback?: React.ComponentType<{ error: Error | null; resetError: () => void }>
-  onError?: (error: Error, errorInfo: ErrorInfo) => void
+  children: ReactNode;
+  fallback?: React.ComponentType<{
+    error: Error | null;
+    resetError: () => void;
+  }>;
+  onError?: (error: Error, errorInfo: ErrorInfo) => void;
 }
 
 interface ErrorBoundaryState {
-  hasError: boolean
-  error: Error | null
-  errorInfo: ErrorInfo | null
-  errorId: string | null
+  hasError: boolean;
+  error: Error | null;
+  errorInfo: ErrorInfo | null;
+  errorId: string | null;
 }
 
-export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundaryState> {
+export class ErrorBoundary extends Component<
+  ErrorBoundaryProps,
+  ErrorBoundaryState
+> {
   constructor(props: ErrorBoundaryProps) {
-    super(props)
+    super(props);
     this.state = {
       hasError: false,
       error: null,
       errorInfo: null,
       errorId: null,
-    }
+    };
   }
 
   static getDerivedStateFromError(error: Error): Partial<ErrorBoundaryState> {
@@ -43,35 +49,36 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
     return {
       hasError: true,
       error,
-      errorId: Date.now().toString(36) + Math.random().toString(36).substr(2, 9),
-    }
+      errorId:
+        Date.now().toString(36) + Math.random().toString(36).substr(2, 9),
+    };
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // エラー情報を state に保存
     this.setState({
       errorInfo,
-    })
+    });
 
     // エラーログを記録
     const errorLog = logError(error, errorInfo, {
       url: window.location.href,
       userAgent: navigator.userAgent,
       timestamp: new Date().toISOString(),
-    })
+    });
 
     // 開発環境でのデバッグ情報
-    if (process.env.NODE_ENV === 'development') {
-      console.group('🚨 Error Boundary Caught Error')
-      console.error('Error:', error)
-      console.error('Error Info:', errorInfo)
-      console.error('Component Stack:', errorInfo.componentStack)
-      console.error('Error Log ID:', errorLog.id)
-      console.groupEnd()
+    if (process.env.NODE_ENV === "development") {
+      console.group("🚨 Error Boundary Caught Error");
+      console.error("Error:", error);
+      console.error("Error Info:", errorInfo);
+      console.error("Component Stack:", errorInfo.componentStack);
+      console.error("Error Log ID:", errorLog.id);
+      console.groupEnd();
     }
 
     // プロップスで渡されたエラーハンドラを実行
-    this.props.onError?.(error, errorInfo)
+    this.props.onError?.(error, errorInfo);
   }
 
   resetError = () => {
@@ -80,15 +87,20 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
       error: null,
       errorInfo: null,
       errorId: null,
-    })
-  }
+    });
+  };
 
   render() {
     if (this.state.hasError) {
       // カスタムフォールバックコンポーネントがある場合はそれを使用
       if (this.props.fallback) {
-        const FallbackComponent = this.props.fallback
-        return <FallbackComponent error={this.state.error} resetError={this.resetError} />
+        const FallbackComponent = this.props.fallback;
+        return (
+          <FallbackComponent
+            error={this.state.error}
+            resetError={this.resetError}
+          />
+        );
       }
 
       // デフォルトのエラーフォールバックを表示
@@ -99,9 +111,9 @@ export class ErrorBoundary extends Component<ErrorBoundaryProps, ErrorBoundarySt
           errorId={this.state.errorId}
           onReset={this.resetError}
         />
-      )
+      );
     }
 
-    return this.props.children
+    return this.props.children;
   }
 }

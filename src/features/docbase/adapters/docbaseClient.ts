@@ -1,12 +1,15 @@
-import type { Result } from 'neverthrow'
-import { createFetchHttpClient } from '../../../adapters/fetchHttpClient'
-import type { ApiError } from '../../../types/error'
-import type { DocbasePostListItem } from '../types/docbase'
-import type { AdvancedFilters } from '../types/forms'
-import { type DocbaseSearchParams, createDocbaseAdapter } from './docbaseAdapter'
+import type { Result } from "neverthrow";
+import { createFetchHttpClient } from "../../../adapters/fetchHttpClient";
+import type { ApiError } from "../../../types/error";
+import type { DocbasePostListItem } from "../types/docbase";
+import type { AdvancedFilters } from "../types/forms";
+import {
+  type DocbaseSearchParams,
+  createDocbaseAdapter,
+} from "./docbaseAdapter";
 
 // デフォルトのDocbaseアダプターインスタンス
-const defaultAdapter = createDocbaseAdapter(createFetchHttpClient())
+const defaultAdapter = createDocbaseAdapter(createFetchHttpClient());
 
 /**
  * Docbase APIから投稿リストを取得する関数（アダプターパターンを使用）
@@ -22,12 +25,12 @@ export const fetchDocbasePosts = async (
   domain: string,
   token: string,
   keyword: string,
-  advancedFilters?: AdvancedFilters,
+  advancedFilters?: AdvancedFilters
 ): Promise<Result<DocbasePostListItem[], ApiError>> => {
   return defaultAdapter.searchPosts({
     domain,
     token,
     keyword,
     advancedFilters,
-  })
-}
+  });
+};

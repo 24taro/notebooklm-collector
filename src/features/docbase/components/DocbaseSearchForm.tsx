@@ -1,99 +1,110 @@
-'use client'
+"use client";
 
-import React, { useState, type FormEvent, useEffect, useRef } from 'react'
-import { useDownload } from '../../../hooks/useDownload'
-import useLocalStorage from '../../../hooks/useLocalStorage'
-import type { ApiError } from '../../../types/error'
-import { useDocbaseSearch } from '../hooks/useDocbaseSearch'
-import { generateDocbaseMarkdown } from '../utils/docbaseMarkdownGenerator'
-import { DocbaseDomainInput } from './DocbaseDomainInput'
-import { DocbaseMarkdownPreview } from './DocbaseMarkdownPreview'
-import { DocbaseTokenInput } from './DocbaseTokenInput'
+import React, { useState, type FormEvent, useEffect, useRef } from "react";
+import { useDownload } from "../../../hooks/useDownload";
+import useLocalStorage from "../../../hooks/useLocalStorage";
+import type { ApiError } from "../../../types/error";
+import { useDocbaseSearch } from "../hooks/useDocbaseSearch";
+import {
+  generateDocbaseMarkdown,
+  generateDocbaseMarkdownForPreview,
+} from "../utils/docbaseMarkdownGenerator";
+import { DocbaseDomainInput } from "./DocbaseDomainInput";
+import { DocbaseMarkdownPreview } from "./DocbaseMarkdownPreview";
+import { DocbaseTokenInput } from "./DocbaseTokenInput";
 
-const LOCAL_STORAGE_DOMAIN_KEY = 'docbaseDomain'
-const LOCAL_STORAGE_TOKEN_KEY = 'docbaseToken'
+const LOCAL_STORAGE_DOMAIN_KEY = "docbaseDomain";
+const LOCAL_STORAGE_TOKEN_KEY = "docbaseToken";
 
 /**
  * 検索フォームコンポーネント
  */
 export const DocbaseSearchForm = () => {
-  const [keyword, setKeyword] = useState('')
-  const [domain, setDomain] = useLocalStorage<string>(LOCAL_STORAGE_DOMAIN_KEY, '')
-  const [token, setToken] = useLocalStorage<string>(LOCAL_STORAGE_TOKEN_KEY, '')
-  const [markdownContent, setMarkdownContent] = useState('')
-  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false)
-  const [tags, setTags] = useState('')
-  const [author, setAuthor] = useState('')
-  const [titleFilter, setTitleFilter] = useState('')
-  const [startDate, setStartDate] = useState('')
-  const [endDate, setEndDate] = useState('')
-  const [group, setGroup] = useState('')
+  const [keyword, setKeyword] = useState("");
+  const [domain, setDomain] = useLocalStorage<string>(
+    LOCAL_STORAGE_DOMAIN_KEY,
+    ""
+  );
+  const [token, setToken] = useLocalStorage<string>(
+    LOCAL_STORAGE_TOKEN_KEY,
+    ""
+  );
+  const [markdownContent, setMarkdownContent] = useState("");
+  const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
+  const [tags, setTags] = useState("");
+  const [author, setAuthor] = useState("");
+  const [titleFilter, setTitleFilter] = useState("");
+  const [startDate, setStartDate] = useState("");
+  const [endDate, setEndDate] = useState("");
 
-  const { posts, isLoading, error, searchPosts, canRetry, retrySearch } = useDocbaseSearch()
-  const { isDownloading, handleDownload } = useDownload()
+  const { posts, isLoading, error, searchPosts, canRetry, retrySearch } =
+    useDocbaseSearch();
+  const { isDownloading, handleDownload } = useDownload();
 
-  const tokenInputRef = useRef<HTMLInputElement>(null)
+  const tokenInputRef = useRef<HTMLInputElement>(null);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
-    event.preventDefault()
-    setMarkdownContent('')
+    event.preventDefault();
+    setMarkdownContent("");
     const advancedFilters = {
       tags,
       author,
       titleFilter,
       startDate,
       endDate,
-      group,
-    }
-    await searchPosts(domain, token, keyword, advancedFilters)
-  }
+    };
+    await searchPosts(domain, token, keyword, advancedFilters);
+  };
 
   useEffect(() => {
     if (posts && posts.length > 0) {
-      const md = generateDocbaseMarkdown(posts.slice(0, 10), keyword)
-      setMarkdownContent(md)
+      const md = generateDocbaseMarkdownForPreview(posts.slice(0, 10), keyword);
+      setMarkdownContent(md);
     } else {
-      setMarkdownContent('')
+      setMarkdownContent("");
     }
-  }, [posts, keyword])
+  }, [posts, keyword]);
 
   useEffect(() => {
-    if (error?.type === 'unauthorized') {
-      tokenInputRef.current?.focus()
+    if (error?.type === "unauthorized") {
+      tokenInputRef.current?.focus();
     }
-  }, [error])
+  }, [error]);
 
   const handleDownloadClick = () => {
-    const postsExist = posts && posts.length > 0
+    const postsExist = posts && posts.length > 0;
     if (postsExist) {
       // ダウンロード時は全件のMarkdownを生成
-      const fullMarkdown = generateDocbaseMarkdown(posts, keyword)
-      handleDownload(fullMarkdown, keyword, postsExist, 'docbase')
+      const fullMarkdown = generateDocbaseMarkdown(posts, keyword);
+      handleDownload(fullMarkdown, keyword, postsExist, "docbase");
     } else {
-      handleDownload(markdownContent, keyword, postsExist, 'docbase')
+      handleDownload(markdownContent, keyword, postsExist, "docbase");
     }
-  }
+  };
 
   const renderErrorCause = (currentError: ApiError | null) => {
-    if (!currentError) return null
+    if (!currentError) return null;
 
-    if (currentError.type === 'network' || currentError.type === 'unknown') {
+    if (currentError.type === "network" || currentError.type === "unknown") {
       if (currentError.cause) {
         if (currentError.cause instanceof Error) {
-          return <p className="text-sm">詳細: {currentError.cause.message}</p>
+          return <p className="text-sm">詳細: {currentError.cause.message}</p>;
         }
-        return <p className="text-sm">詳細: {String(currentError.cause)}</p>
+        return <p className="text-sm">詳細: {String(currentError.cause)}</p>;
       }
     }
-    return null
-  }
+    return null;
+  };
 
   return (
     <div className="max-w-3xl mx-auto">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
           <div>
-            <label htmlFor="keyword" className="block text-base font-medium text-docbase-text mb-1">
+            <label
+              htmlFor="keyword"
+              className="block text-base font-medium text-docbase-text mb-1"
+            >
               検索キーワード
             </label>
             <input
@@ -107,8 +118,16 @@ export const DocbaseSearchForm = () => {
               required
             />
           </div>
-          <DocbaseDomainInput domain={domain} onDomainChange={setDomain} disabled={isLoading || isDownloading} />
-          <DocbaseTokenInput token={token} onTokenChange={setToken} disabled={isLoading || isDownloading} />
+          <DocbaseDomainInput
+            domain={domain}
+            onDomainChange={setDomain}
+            disabled={isLoading || isDownloading}
+          />
+          <DocbaseTokenInput
+            token={token}
+            onTokenChange={setToken}
+            disabled={isLoading || isDownloading}
+          />
         </div>
 
         {/* 詳細検索の開閉ボタンと入力フィールドを追加 */}
@@ -118,13 +137,18 @@ export const DocbaseSearchForm = () => {
             onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
             className="text-sm text-docbase-primary hover:text-docbase-primary-dark focus:outline-none"
           >
-            {showAdvancedSearch ? '詳細な条件を閉じる ▲' : 'もっと詳細な条件を追加する ▼'}
+            {showAdvancedSearch
+              ? "詳細な条件を閉じる ▲"
+              : "もっと詳細な条件を追加する ▼"}
           </button>
 
           {showAdvancedSearch && (
             <div className="space-y-4 p-4 border border-gray-300 rounded-md bg-gray-50">
               <div>
-                <label htmlFor="tags" className="block text-sm font-medium text-docbase-text mb-1">
+                <label
+                  htmlFor="tags"
+                  className="block text-sm font-medium text-docbase-text mb-1"
+                >
                   タグ (カンマ区切り)
                 </label>
                 <input
@@ -138,7 +162,10 @@ export const DocbaseSearchForm = () => {
                 />
               </div>
               <div>
-                <label htmlFor="author" className="block text-sm font-medium text-docbase-text mb-1">
+                <label
+                  htmlFor="author"
+                  className="block text-sm font-medium text-docbase-text mb-1"
+                >
                   投稿者 (ユーザーID)
                 </label>
                 <input
@@ -152,7 +179,10 @@ export const DocbaseSearchForm = () => {
                 />
               </div>
               <div>
-                <label htmlFor="titleFilter" className="block text-sm font-medium text-docbase-text mb-1">
+                <label
+                  htmlFor="titleFilter"
+                  className="block text-sm font-medium text-docbase-text mb-1"
+                >
                   タイトルに含むキーワード
                 </label>
                 <input
@@ -167,7 +197,10 @@ export const DocbaseSearchForm = () => {
               </div>
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
-                  <label htmlFor="startDate" className="block text-sm font-medium text-docbase-text mb-1">
+                  <label
+                    htmlFor="startDate"
+                    className="block text-sm font-medium text-docbase-text mb-1"
+                  >
                     投稿期間 (開始日)
                   </label>
                   <input
@@ -180,7 +213,10 @@ export const DocbaseSearchForm = () => {
                   />
                 </div>
                 <div>
-                  <label htmlFor="endDate" className="block text-sm font-medium text-docbase-text mb-1">
+                  <label
+                    htmlFor="endDate"
+                    className="block text-sm font-medium text-docbase-text mb-1"
+                  >
                     投稿期間 (終了日)
                   </label>
                   <input
@@ -193,20 +229,6 @@ export const DocbaseSearchForm = () => {
                   />
                 </div>
               </div>
-              <div>
-                <label htmlFor="group" className="block text-sm font-medium text-docbase-text mb-1">
-                  グループ名
-                </label>
-                <input
-                  id="group"
-                  type="text"
-                  value={group}
-                  onChange={(e) => setGroup(e.target.value)}
-                  placeholder="例: 開発チーム"
-                  className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm placeholder-docbase-text-sub focus:outline-none focus:ring-1 focus:ring-docbase-primary focus:border-docbase-primary disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
-                  disabled={isLoading || isDownloading}
-                />
-              </div>
             </div>
           )}
         </div>
@@ -215,7 +237,9 @@ export const DocbaseSearchForm = () => {
           <button
             type="submit"
             className="w-full inline-flex items-center justify-center py-2.5 px-4 border border-transparent shadow-sm text-sm font-medium rounded-sm text-white bg-docbase-primary hover:bg-docbase-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-docbase-primary disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors duration-150 ease-in-out"
-            disabled={isLoading || isDownloading || !domain || !token || !keyword}
+            disabled={
+              isLoading || isDownloading || !domain || !token || !keyword
+            }
           >
             {isLoading ? (
               <>
@@ -226,7 +250,14 @@ export const DocbaseSearchForm = () => {
                   viewBox="0 0 24 24"
                 >
                   <title>検索処理ローディング</title>
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
                   <path
                     className="opacity-75"
                     fill="currentColor"
@@ -236,7 +267,7 @@ export const DocbaseSearchForm = () => {
                 検索中...
               </>
             ) : (
-              '検索実行'
+              "検索実行"
             )}
           </button>
           <button
@@ -254,7 +285,14 @@ export const DocbaseSearchForm = () => {
                   viewBox="0 0 24 24"
                 >
                   <title>ダウンロード処理ローディング</title>
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" />
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  />
                   <path
                     className="opacity-75"
                     fill="currentColor"
@@ -264,7 +302,7 @@ export const DocbaseSearchForm = () => {
                 生成中...
               </>
             ) : (
-              'Markdownダウンロード'
+              "Markdownダウンロード"
             )}
           </button>
         </div>
@@ -302,7 +340,11 @@ export const DocbaseSearchForm = () => {
               <p className="font-medium">エラーが発生しました:</p>
             </div>
             <p className="ml-7 mt-0.5 text-red-600">{error.message}</p>
-            {renderErrorCause(error) && <div className="ml-7 mt-1 text-xs text-red-500">{renderErrorCause(error)}</div>}
+            {renderErrorCause(error) && (
+              <div className="ml-7 mt-1 text-xs text-red-500">
+                {renderErrorCause(error)}
+              </div>
+            )}
           </div>
         )}
 
@@ -310,8 +352,6 @@ export const DocbaseSearchForm = () => {
           <div className="mt-6 pt-5 border-t border-gray-200">
             <DocbaseMarkdownPreview
               markdown={markdownContent}
-              title="Markdownプレビュー"
-              onDownload={handleDownloadClick}
               emptyMessage="Docbase記事の検索結果がここに表示されます。"
             />
             {posts && posts.length > 10 && (
@@ -320,13 +360,15 @@ export const DocbaseSearchForm = () => {
               </p>
             )}
             {posts && posts.length > 0 && (
-              <p className="mt-2 text-sm text-docbase-text-sub">取得件数: {posts.length}件</p>
+              <p className="mt-2 text-sm text-docbase-text-sub">
+                取得件数: {posts.length}件
+              </p>
             )}
           </div>
         )}
       </form>
     </div>
-  )
-}
+  );
+};
 
 // Named exportのみ使用

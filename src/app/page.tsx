@@ -1,8 +1,8 @@
-'use client' // クライアントコンポーネントとしてマーク
+"use client"; // クライアントコンポーネントとしてマーク
 
-import Link from 'next/link'
-import Footer from '../components/Footer'
-import Header from '../components/Header'
+import Link from "next/link";
+import Footer from "../components/Footer";
+import Header from "../components/Header";
 
 export default function HomePage() {
   return (
@@ -20,23 +20,33 @@ export default function HomePage() {
             href="/docbase"
             className="block p-8 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow border border-gray-200"
           >
-            <h2 className="text-3xl font-semibold mb-3 text-docbase-primary">Docbase連携</h2>
-            <p className="text-gray-700 mb-2">Docbaseの記事を検索・収集し、Markdownを生成します。</p>
+            <h2 className="text-3xl font-semibold mb-3 text-docbase-primary">
+              Docbase連携
+            </h2>
+            <p className="text-gray-700 mb-2">
+              Docbaseの記事を検索・収集し、Markdownを生成します。
+            </p>
             <p className="text-sm text-gray-500">最大500件まで収集可能</p>
           </Link>
           <Link
             href="/slack"
             className="block p-8 bg-white rounded-lg shadow-lg hover:shadow-xl transition-shadow border border-gray-200"
           >
-            <h2 className="text-3xl font-semibold mb-3 text-indigo-600">Slack連携</h2>
-            <p className="text-gray-700 mb-2">Slackのスレッドを検索・収集し、NotebookLM用Markdownを生成します。</p>
+            <h2 className="text-3xl font-semibold mb-3 text-indigo-600">
+              Slack連携
+            </h2>
+            <p className="text-gray-700 mb-2">
+              Slackのスレッドを検索・収集し、NotebookLM用Markdownを生成します。
+            </p>
             <p className="text-sm text-gray-500">最大300件まで収集可能</p>
           </Link>
         </div>
         {/* セキュリティ説明セクション */}
         <div className="w-full max-w-4xl">
           <div className="px-6 py-8 rounded-xl border border-gray-200 bg-gray-50">
-            <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">🔒 セキュリティについて</h2>
+            <h2 className="text-2xl font-bold mb-4 text-center text-gray-800">
+              🔒 セキュリティについて
+            </h2>
             <p className="text-gray-600 text-center leading-relaxed">
               入力されたAPIトークンや取得されたデータは、お使いのブラウザ内でのみ処理されます。
               <br />
@@ -47,5 +57,5 @@ export default function HomePage() {
       </div>
       <Footer />
     </main>
-  )
+  );
 }

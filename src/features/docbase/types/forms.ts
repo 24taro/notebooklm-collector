@@ -4,18 +4,17 @@
 
 // 詳細検索条件の型定義
 export interface AdvancedFilters {
-  tags: string
-  author: string
-  titleFilter: string
-  startDate: string
-  endDate: string
-  group: string
+  tags: string;
+  author: string;
+  titleFilter: string;
+  startDate: string;
+  endDate: string;
 }
 
 // フォーム入力値の型定義
 export interface DocbaseFormValues {
-  keyword: string
-  domain: string
-  token: string
-  advancedFilters: AdvancedFilters
+  keyword: string;
+  domain: string;
+  token: string;
+  advancedFilters: AdvancedFilters;
 }

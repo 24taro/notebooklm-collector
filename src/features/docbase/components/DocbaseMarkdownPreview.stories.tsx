@@ -1,49 +1,50 @@
-import { action } from '@storybook/addon-actions'
-import type { Meta, StoryObj } from '@storybook/react'
-import { DocbaseMarkdownPreview } from './DocbaseMarkdownPreview'
+import { action } from "@storybook/addon-actions";
+import type { Meta, StoryObj } from "@storybook/react";
+import { DocbaseMarkdownPreview } from "./DocbaseMarkdownPreview";
 
 const meta: Meta<typeof DocbaseMarkdownPreview> = {
-  title: 'Features/Docbase/Components/DocbaseMarkdownPreview',
+  title: "Features/Docbase/Components/DocbaseMarkdownPreview",
   component: DocbaseMarkdownPreview,
   parameters: {
-    layout: 'padded',
+    layout: "padded",
     docs: {
       description: {
-        component: 'Docbase用Markdownプレビューコンポーネント。Docbaseの記事プレビューに特化したMarkdownレンダリング。',
+        component:
+          "Docbase用Markdownプレビューコンポーネント。Docbaseの記事プレビューに特化したMarkdownレンダリング。",
       },
     },
   },
-  tags: ['autodocs'],
+  tags: ["autodocs"],
   argTypes: {
     markdown: {
-      control: 'text',
-      description: '表示するMarkdown文字列',
+      control: "text",
+      description: "表示するMarkdown文字列",
     },
     title: {
-      control: 'text',
-      description: 'プレビューのタイトル',
+      control: "text",
+      description: "プレビューのタイトル",
     },
     onDownload: {
-      action: 'downloaded',
-      description: 'ダウンロードハンドラー',
+      action: "downloaded",
+      description: "ダウンロードハンドラー",
     },
     downloadFileName: {
-      control: 'text',
-      description: 'ダウンロードファイル名',
+      control: "text",
+      description: "ダウンロードファイル名",
     },
     className: {
-      control: 'text',
-      description: '追加のCSSクラス',
+      control: "text",
+      description: "追加のCSSクラス",
     },
     emptyMessage: {
-      control: 'text',
-      description: '空の時のメッセージ',
+      control: "text",
+      description: "空の時のメッセージ",
     },
   },
-}
+};
 
-export default meta
-type Story = StoryObj<typeof meta>
+export default meta;
+type Story = StoryObj<typeof meta>;
 
 // 基本的な使用例
 export const Default: Story = {
@@ -83,38 +84,39 @@ function fetchDocbasePosts(domain: string, token: string): Promise<DocbasePost[]
 > これは引用ブロックです。Docbaseの記事でよく使用される重要な情報を強調します。
 
 [関連記事へのリンク](https://example.docbase.io/posts/123)`,
-    title: 'Docbase記事プレビュー',
-    onDownload: action('download-clicked'),
-    downloadFileName: 'docbase-article.md',
+    title: "Docbase記事プレビュー",
+    onDownload: action("download-clicked"),
+    downloadFileName: "docbase-article.md",
   },
-}
+};
 
 // 空状態
 export const Empty: Story = {
   args: {
-    markdown: '',
-    title: 'Docbase記事プレビュー',
-    emptyMessage: 'Docbase記事を検索すると、ここにプレビューが表示されます。',
+    markdown: "",
+    title: "Docbase記事プレビュー",
+    emptyMessage: "Docbase記事を検索すると、ここにプレビューが表示されます。",
   },
-}
+};
 
 // カスタム空メッセージ
 export const CustomEmptyMessage: Story = {
   args: {
-    markdown: '',
-    title: 'Docbase検索結果',
-    emptyMessage: '検索条件に該当する記事が見つかりませんでした。検索キーワードを変更してお試しください。',
+    markdown: "",
+    title: "Docbase検索結果",
+    emptyMessage:
+      "検索条件に該当する記事が見つかりませんでした。検索キーワードを変更してお試しください。",
   },
-}
+};
 
 // ローディング状態（空状態をローディングメッセージで代用）
 export const Loading: Story = {
   args: {
-    markdown: '',
-    title: 'Docbase記事を読み込み中...',
-    emptyMessage: '📄 Docbaseから記事を取得しています...',
+    markdown: "",
+    title: "Docbase記事を読み込み中...",
+    emptyMessage: "📄 Docbaseから記事を取得しています...",
   },
-}
+};
 
 // 短文コンテンツ
 export const ShortContent: Story = {
@@ -130,11 +132,11 @@ export const ShortContent: Story = {
 - [ ] API仕様書の更新
 - [x] デザインレビューの実施
 - [ ] テストケースの追加`,
-    title: 'ミーティング議事録',
-    onDownload: action('download-clicked'),
-    downloadFileName: 'meeting-minutes.md',
+    title: "ミーティング議事録",
+    onDownload: action("download-clicked"),
+    downloadFileName: "meeting-minutes.md",
   },
-}
+};
 
 // 長文コンテンツ（Docbase記事らしい内容）
 export const LongContent: Story = {
@@ -336,11 +338,11 @@ GET /api/v1/posts?tag=API&author=user123&created_after=2023-01-01
 
 このガイドラインに従うことで、一貫性があり使いやすいAPIを提供できます。
 詳細な実装については、各エンドポイントの仕様書を参照してください。`,
-    title: 'API設計ガイドライン',
-    onDownload: action('download-clicked'),
-    downloadFileName: 'api-guidelines.md',
+    title: "API設計ガイドライン",
+    onDownload: action("download-clicked"),
+    downloadFileName: "api-guidelines.md",
   },
-}
+};
 
 // コードブロック中心のコンテンツ
 export const CodeHeavyContent: Story = {
@@ -484,11 +486,11 @@ export const docbaseConfig = {
   apiToken: process.env.DOCBASE_API_TOKEN!,
 } as const
 \`\`\``,
-    title: 'Docbase API実装例',
-    onDownload: action('download-clicked'),
-    downloadFileName: 'docbase-implementation.md',
+    title: "Docbase API実装例",
+    onDownload: action("download-clicked"),
+    downloadFileName: "docbase-implementation.md",
   },
-}
+};
 
 // ダウンロード機能なし
 export const NoDownload: Story = {
@@ -501,10 +503,10 @@ export const NoDownload: Story = {
 - Docbase記事の基本情報
 - タグ情報
 - 作成日時`,
-    title: 'シンプルプレビュー',
+    title: "シンプルプレビュー",
     // onDownloadを指定しない
   },
-}
+};
 
 // タイトルなし
 export const NoTitle: Story = {
@@ -515,9 +517,9 @@ export const NoTitle: Story = {
 
 Docbaseから取得した記事のプレビュー状態を確認できます。`,
     // titleを指定しない
-    onDownload: action('download-clicked'),
+    onDownload: action("download-clicked"),
   },
-}
+};
 
 // カスタムクラス適用
 export const CustomStyling: Story = {
@@ -530,8 +532,8 @@ export const CustomStyling: Story = {
 - 背景色の変更
 - 余白の調整
 - Docbase専用のスタイリング`,
-    title: 'カスタムスタイル',
-    className: 'bg-blue-50 p-8 rounded-xl',
-    onDownload: action('download-clicked'),
+    title: "カスタムスタイル",
+    className: "bg-blue-50 p-8 rounded-xl",
+    onDownload: action("download-clicked"),
   },
-}
+};
