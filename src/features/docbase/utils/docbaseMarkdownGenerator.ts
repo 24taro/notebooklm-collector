@@ -112,12 +112,12 @@ export const generateDocbaseMarkdownForPreview = (posts: DocbasePostListItem[], 
   }
 
   // プレビュー用の簡潔なヘッダー
-  let markdown = '# Docbase 記事プレビュー\n\n'
-  
+  let markdown = ''
+
   if (searchKeyword) {
     markdown += `**検索キーワード**: ${searchKeyword}\n\n`
   }
-  
+
   markdown += `**記事数**: ${posts.length}件\n\n`
   markdown += '---\n\n'
 
@@ -149,10 +149,8 @@ export const generateDocbaseMarkdownForPreview = (posts: DocbasePostListItem[], 
         articleMd += '\n'
 
         // 記事内容を150文字程度で切り詰め
-        const truncatedBody = post.body.length > 150 
-          ? `${post.body.substring(0, 150)}...` 
-          : post.body
-        
+        const truncatedBody = post.body.length > 150 ? `${post.body.substring(0, 150)}...` : post.body
+
         articleMd += `${truncatedBody}\n\n`
 
         return articleMd

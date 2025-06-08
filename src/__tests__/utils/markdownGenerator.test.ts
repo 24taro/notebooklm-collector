@@ -1,6 +1,9 @@
 import { describe, expect, it } from 'vitest'
 import type { DocbasePostListItem } from '../../features/docbase/types/docbase'
-import { generateDocbaseMarkdown, generateDocbaseMarkdownForPreview } from '../../features/docbase/utils/docbaseMarkdownGenerator'
+import {
+  generateDocbaseMarkdown,
+  generateDocbaseMarkdownForPreview,
+} from '../../features/docbase/utils/docbaseMarkdownGenerator'
 
 describe('markdownGenerator', () => {
   const mockPosts: DocbasePostListItem[] = [
@@ -322,7 +325,6 @@ describe('markdownGenerator', () => {
         const result = generateDocbaseMarkdownForPreview(mockPosts, 'テストキーワード')
 
         // プレビュー用ヘッダーの確認
-        expect(result).toContain('# Docbase 記事プレビュー')
         expect(result).toContain('**検索キーワード**: テストキーワード')
         expect(result).toContain('**記事数**: 3件')
 
@@ -341,7 +343,6 @@ describe('markdownGenerator', () => {
       it('検索キーワードなしでもプレビューを生成する', () => {
         const result = generateDocbaseMarkdownForPreview(mockPosts)
 
-        expect(result).toContain('# Docbase 記事プレビュー')
         expect(result).toContain('**記事数**: 3件')
         expect(result).not.toContain('**検索キーワード**:')
       })
@@ -384,7 +385,7 @@ describe('markdownGenerator', () => {
 
         const result = generateDocbaseMarkdownForPreview([longBodyPost])
 
-        expect(result).toContain('あ'.repeat(150) + '...')
+        expect(result).toContain(`${'あ'.repeat(150)}...`)
         expect(result).not.toContain('あ'.repeat(200))
       })
 
