@@ -63,18 +63,30 @@ export const generateDocbaseMarkdown = (posts: DocbasePostListItem[], searchKeyw
         // 日付フォーマット
         const date = new Date(post.created_at)
         const isoDate = date.toISOString()
-        const displayDate = date.toLocaleDateString('ja-JP', {
+        const displayDateWithTime = date.toLocaleDateString('ja-JP', {
           year: 'numeric',
           month: 'long',
           day: 'numeric',
           weekday: 'long',
+          hour: '2-digit',
+          minute: '2-digit',
+          timeZone: 'Asia/Tokyo',
         })
 
         // 記事のメタデータをシンプルな形式で表示
         let articleMd = `### Article ${index + 1}: ${post.title}\n\n`
 
-        // メタデータをインライン形式で表示
-        articleMd += `**Created**: ${displayDate} | **ID**: ${post.id} | **URL**: [View Original](${post.url})\n\n`
+        // メタデータを改行区切りで表示
+        articleMd += `**Created**: ${displayDateWithTime}\n`
+        articleMd += `**Author**: ${post.user.name}\n`
+        articleMd += `**ID**: ${post.id}\n`
+        if (post.tags.length > 0) {
+          articleMd += `**Tags**: ${post.tags.map((tag) => tag.name).join(', ')}\n`
+        }
+        if (post.groups.length > 0) {
+          articleMd += `**Groups**: ${post.groups.map((group) => group.name).join(', ')}\n`
+        }
+        articleMd += `**URL**: [View Original](${post.url})\n\n`
 
         // HTMLコメントで記事コンテンツの境界を明確化
         articleMd += '<!-- DOCBASE_CONTENT_START -->\n'

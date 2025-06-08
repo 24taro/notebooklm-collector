@@ -10,6 +10,10 @@ describe('markdownGenerator', () => {
       body: 'これはテスト記事1の内容です。',
       created_at: '2023-01-01T10:00:00Z',
       url: 'https://example.docbase.io/posts/1',
+      user: { id: 100, name: 'テストユーザー1', profile_image_url: 'https://example.com/user1.jpg' },
+      tags: [{ name: 'API' }, { name: 'テスト' }],
+      groups: [{ id: 1, name: '開発チーム' }],
+      scope: 'everyone',
     },
     {
       id: 2,
@@ -17,6 +21,10 @@ describe('markdownGenerator', () => {
       body: 'これはテスト記事2の内容です。\n複数行の内容を含みます。',
       created_at: '2023-01-02T15:30:00Z',
       url: 'https://example.docbase.io/posts/2',
+      user: { id: 101, name: 'テストユーザー2', profile_image_url: 'https://example.com/user2.jpg' },
+      tags: [{ name: 'ドキュメント' }],
+      groups: [],
+      scope: 'group',
     },
     {
       id: 3,
@@ -24,6 +32,13 @@ describe('markdownGenerator', () => {
       body: '# マークダウンタイトル\n\n**太字**のテキストと*斜体*のテキスト。',
       created_at: '2023-01-03T09:15:00Z',
       url: 'https://example.docbase.io/posts/3',
+      user: { id: 102, name: 'テストユーザー3', profile_image_url: 'https://example.com/user3.jpg' },
+      tags: [],
+      groups: [
+        { id: 2, name: 'デザインチーム' },
+        { id: 3, name: 'プロダクトチーム' },
+      ],
+      scope: 'private',
     },
   ]
 
@@ -93,6 +108,10 @@ describe('markdownGenerator', () => {
           body: '内容1',
           created_at: '2023-01-01T10:00:00Z',
           url: 'https://example.com/1',
+          user: { id: 100, name: 'テストユーザー1', profile_image_url: 'https://example.com/user1.jpg' },
+          tags: [],
+          groups: [],
+          scope: 'everyone',
         },
         {
           id: 2,
@@ -100,6 +119,10 @@ describe('markdownGenerator', () => {
           body: '内容2',
           created_at: '2023-01-01T15:00:00Z',
           url: 'https://example.com/2',
+          user: { id: 101, name: 'テストユーザー2', profile_image_url: 'https://example.com/user2.jpg' },
+          tags: [],
+          groups: [],
+          scope: 'everyone',
         },
       ]
 
@@ -123,17 +146,20 @@ describe('markdownGenerator', () => {
       // 目次での日付表示
       expect(result).toMatch(/1\. \[テスト記事1\]\(#article-1\) - 2023\/1\/1/)
 
-      // 記事詳細での日付表示（長い形式）
-      expect(result).toMatch(/\*\*Created\*\*: 2023年1月1日日曜日/)
+      // 記事詳細での日付表示（時刻ありの長い形式）
+      expect(result).toMatch(/\*\*Created\*\*: 2023年1月1日日曜日 19:00/)
     })
   })
 
   describe('記事内容の処理', () => {
-    it('記事のメタデータがインライン形式で生成される', () => {
+    it('記事のメタデータが改行区切りで生成される', () => {
       const result = generateDocbaseMarkdown([mockPosts[0]])
 
-      expect(result).toContain('**Created**: 2023年1月1日日曜日')
+      expect(result).toContain('**Created**: 2023年1月1日日曜日 19:00')
+      expect(result).toContain('**Author**: テストユーザー1')
       expect(result).toContain('**ID**: 1')
+      expect(result).toContain('**Tags**: API, テスト')
+      expect(result).toContain('**Groups**: 開発チーム')
       expect(result).toContain('**URL**: [View Original](https://example.docbase.io/posts/1)')
     })
 
@@ -171,9 +197,10 @@ describe('markdownGenerator', () => {
   })
 
   describe('ドキュメント情報', () => {
-    it('記事の基本情報がインライン形式で含まれる', () => {
+    it('記事の基本情報が改行区切りで含まれる', () => {
       const result = generateDocbaseMarkdown([mockPosts[0]])
 
+      expect(result).toContain('**Author**: テストユーザー1')
       expect(result).toContain('**ID**: 1')
       expect(result).toContain('**URL**: [View Original](https://example.docbase.io/posts/1)')
     })
@@ -195,6 +222,10 @@ describe('markdownGenerator', () => {
           body: '内容',
           created_at: '2023-01-01T10:00:00Z',
           url: 'https://example.com/1',
+          user: { id: 100, name: 'テストユーザー', profile_image_url: 'https://example.com/user.jpg' },
+          tags: [],
+          groups: [],
+          scope: 'everyone',
         },
       ]
 
@@ -211,6 +242,10 @@ describe('markdownGenerator', () => {
           body: '',
           created_at: '2023-01-01T10:00:00Z',
           url: 'https://example.com/1',
+          user: { id: 100, name: 'テストユーザー', profile_image_url: 'https://example.com/user.jpg' },
+          tags: [],
+          groups: [],
+          scope: 'everyone',
         },
       ]
 
@@ -258,12 +293,15 @@ describe('markdownGenerator', () => {
       expect(result).toMatch(/---\n\n/)
     })
 
-    it('記事ごとのメタデータがインライン形式で提供される', () => {
+    it('記事ごとのメタデータが改行区切りで提供される', () => {
       const result = generateDocbaseMarkdown([mockPosts[0]])
 
-      // インライン形式のメタデータ
-      expect(result).toContain('**Created**: 2023年1月1日日曜日')
+      // 改行区切りのメタデータ
+      expect(result).toContain('**Created**: 2023年1月1日日曜日 19:00')
+      expect(result).toContain('**Author**: テストユーザー1')
       expect(result).toContain('**ID**: 1')
+      expect(result).toContain('**Tags**: API, テスト')
+      expect(result).toContain('**Groups**: 開発チーム')
       expect(result).toContain('**URL**: [View Original](https://example.docbase.io/posts/1)')
     })
   })

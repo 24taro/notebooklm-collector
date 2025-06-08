@@ -1,4 +1,28 @@
 /**
+ * Docbaseユーザー情報の型定義
+ */
+export type DocbaseUser = {
+  id: number
+  name: string
+  profile_image_url: string
+}
+
+/**
+ * Docbaseタグ情報の型定義
+ */
+export type DocbaseTag = {
+  name: string
+}
+
+/**
+ * Docbaseグループ情報の型定義
+ */
+export type DocbaseGroup = {
+  id: number
+  name: string
+}
+
+/**
  * Docbaseの投稿情報を表す型定義
  */
 export type DocbasePostListItem = {
@@ -7,15 +31,15 @@ export type DocbasePostListItem = {
   body: string
   created_at: string // ISO-8601形式の文字列
   url: string
-  // APIレスポンスには他にも多くのフィールドがあるが、今回は仕様書に記載のあるもののみ定義
+  user: DocbaseUser
+  tags: DocbaseTag[]
+  groups: DocbaseGroup[]
+  scope: string
+  // APIレスポンスには他にも多くのフィールドがあるが、今回は必要なもののみ定義
   // 必要に応じて追加する
-  // user: { ... },
-  // tags: [ ... ],
   // comments: [ ... ],
-  // groups: [ ... ],
   // draft: boolean,
   // archieved: boolean,
-  // scope: string,
   // sharing_url: string | null,
   // organization: { ... }
 }
