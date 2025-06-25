@@ -5,6 +5,7 @@ import { useDownload } from "../../../hooks/useDownload";
 import useLocalStorage from "../../../hooks/useLocalStorage";
 import type { ApiError } from "../../../types/error";
 import { useDocbaseSearch } from "../hooks/useDocbaseSearch";
+import type { DocbasePostListItem } from "../types/docbase";
 import {
   generateDocbaseMarkdown,
   generateDocbaseMarkdownForPreview,
@@ -16,10 +17,21 @@ import { DocbaseTokenInput } from "./DocbaseTokenInput";
 const LOCAL_STORAGE_DOMAIN_KEY = "docbaseDomain";
 const LOCAL_STORAGE_TOKEN_KEY = "docbaseToken";
 
+interface DocbaseSearchFormProps {
+  onSearchResults?: (results: {
+    posts: DocbasePostListItem[];
+    markdownContent: string;
+    isLoading: boolean;
+    error: ApiError | null;
+  }) => void;
+}
+
 /**
  * 検索フォームコンポーネント
  */
-export const DocbaseSearchForm = () => {
+export const DocbaseSearchForm = ({
+  onSearchResults,
+}: DocbaseSearchFormProps) => {
   const [keyword, setKeyword] = useState("");
   const [domain, setDomain] = useLocalStorage<string>(
     LOCAL_STORAGE_DOMAIN_KEY,
@@ -63,7 +75,17 @@ export const DocbaseSearchForm = () => {
     } else {
       setMarkdownContent("");
     }
-  }, [posts, keyword]);
+
+    // 親コンポーネントに検索結果を通知
+    if (onSearchResults) {
+      onSearchResults({
+        posts: posts || [],
+        markdownContent,
+        isLoading,
+        error,
+      });
+    }
+  }, [posts, keyword, markdownContent, isLoading, error, onSearchResults]);
 
   useEffect(() => {
     if (error?.type === "unauthorized") {
@@ -344,25 +366,6 @@ export const DocbaseSearchForm = () => {
               <div className="ml-7 mt-1 text-xs text-red-500">
                 {renderErrorCause(error)}
               </div>
-            )}
-          </div>
-        )}
-
-        {posts && posts.length > 0 && !isLoading && !error && (
-          <div className="mt-6 pt-5 border-t border-gray-200">
-            <DocbaseMarkdownPreview
-              markdown={markdownContent}
-              emptyMessage="Docbase記事の検索結果がここに表示されます。"
-            />
-            {posts && posts.length > 10 && (
-              <p className="mt-2 text-sm text-docbase-text-sub">
-                プレビューには最初の10件のMarkdownが生成されます。すべての内容を確認するには、ファイルをダウンロードしてください。
-              </p>
-            )}
-            {posts && posts.length > 0 && (
-              <p className="mt-2 text-sm text-docbase-text-sub">
-                取得件数: {posts.length}件
-              </p>
             )}
           </div>
         )}
