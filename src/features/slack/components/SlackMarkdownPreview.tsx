@@ -53,6 +53,11 @@ export const SlackMarkdownPreview: FC<SlackMarkdownPreviewProps> = ({
   if (!threads || threads.length === 0) {
     return (
       <div className={`max-w-3xl mx-auto ${className}`}>
+        {title && (
+          <div className="mb-1">
+            <h2 className="text-base font-medium text-gray-800">{title}</h2>
+          </div>
+        )}
         <div className="p-6 bg-white rounded-lg shadow border border-gray-200 min-h-[200px] flex items-center justify-center">
           <p className="text-gray-500">{emptyMessage}</p>
         </div>
