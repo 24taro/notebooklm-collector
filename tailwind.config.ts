@@ -11,13 +11,11 @@ export default {
     extend: {
       colors: {
         docbase: {
-          primary: "#3B82F6", // DocbaseのブルーCF
-          "primary-dark": "#2563EB",
+          primary: "#5692ce", // 落ち着いたブルーグレー
+          "primary-dark": "#4a7fb3",
           text: "#1F2937",
           "text-sub": "#6B7280",
-          bg: "#F8FAFC",
         },
-        "background-light": "#F9FAFB",
       },
       lineClamp: {
         1: "1",

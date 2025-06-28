@@ -5,10 +5,8 @@
   --color-foreground: oklch(0 0 0);
   --color-primary: oklch(64.49% 0.11 249.89);
   --color-primary-dark: oklch(55.49% 0.11 249.89);
-  --color-background-light: oklch(98.5% 0.002 247.839);
   --color-docbase-primary: oklch(64.49% 0.11 249.89);
   --color-docbase-primary-dark: oklch(55.49% 0.11 249.89);
-  --color-docbase-bg: oklch(29.85% 0.0384 249.22deg);
   --font-sans: var(--font-noto-sans-jp);
   --font-mono: var(--font-geist-mono);
 }
