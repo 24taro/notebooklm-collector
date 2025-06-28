@@ -4,9 +4,9 @@
 
 ## プロジェクト概要
 
-**リポジトリ**: https://github.com/sotaroNishioka/notebooklm-collector  
+**リポジトリ**: https://github.com/24taro/notebooklm-collector  
 **プロジェクト名**: Docbase/Slack 連携 NotebookLM 用ドキュメント生成アプリ  
-**バージョン**: v1.9
+**バージョン**: v2.0
 
 ### 主要機能
 
@@ -27,7 +27,7 @@
 - コンテキストが不明瞭な時は、ユーザーに確認する
 - 実装には標準語の日本語でコメントを入れる
 - 必ず日本語で返答する
-- このプロジェクトは https://github.com/sotaroNishioka/notebooklm-collector で管理されている
+- このプロジェクトは https://github.com/24taro/notebooklm-collector で管理されている
 - できるかぎりMCPサーバーから提供されている機能群を利用して作業を行う
 
 ### 人格設定（ずんだもん）
@@ -70,12 +70,17 @@
 
 1. **Result 型の使用**
    ```ts
-   import { err, ok, Result } from "npm:neverthrow";
+   import { err, ok, Result } from "neverthrow";
 
    type ApiError =
-     | { type: "network"; message: string }
+     | { type: "network"; message: string; cause?: unknown }
+     | { type: "unknown"; message: string; cause?: unknown }
+     | { type: "unauthorized"; message: string }
+     | { type: "rate_limit"; message: string }
      | { type: "notFound"; message: string }
-     | { type: "unauthorized"; message: string };
+     | { type: "validation"; message: string }
+     | { type: "missing_scope"; message: string }
+     | { type: "slack_api"; message: string };
 
    async function fetchUser(id: string): Promise<Result<User, ApiError>> {
      try {
@@ -158,46 +163,48 @@
 
 3. **Adapter パターン（外部依存の抽象化）**
    ```ts
-   // types/api.ts
-   export type ApiError =
-     | { type: 'network'; message: string }
-     | { type: 'notFound'; message: string }
-     | { type: 'unauthorized'; message: string };
+   // adapters/types.ts
+   import { Result } from "neverthrow";
+   import type { ApiError } from "@/types/error";
 
-   // Result型（neverthrow推奨だが、独自定義でもOK）
-   export type Result<T, E> = { ok: true; value: T } | { ok: false; error: E };
+   export interface HttpClient {
+     request<T>(config: {
+       url: string;
+       method?: string;
+       headers?: Record<string, string>;
+       body?: unknown;
+     }): Promise<Result<T, ApiError>>;
+   }
 
-   // fetcher.ts
-   export type Fetcher = <T>(path: string, options?: RequestInit) => Promise<Result<T, ApiError>>;
+   // docbaseAdapter.ts
+   export interface DocbaseAdapter {
+     searchPosts(params: {
+       domain: string;
+       token: string;
+       query: string;
+       page?: number;
+       perPage?: number;
+     }): Promise<Result<DocbasePostsResponse, ApiError>>;
+   }
 
-   export function createFetcher(baseUrl: string, defaultHeaders?: Record<string, string>): Fetcher {
-     return async <T>(path: string, options?: RequestInit) => {
-       try {
-         const res = await fetch(`${baseUrl}${path}`, {
-           ...options,
+   export function createDocbaseAdapter(httpClient: HttpClient): DocbaseAdapter {
+     return {
+       async searchPosts(params) {
+         const { domain, token, query, page = 1, perPage = 100 } = params;
+         const queryParams = new URLSearchParams({
+           q: query,
+           page: page.toString(),
+           per_page: perPage.toString(),
+         });
+
+         return httpClient.request<DocbasePostsResponse>({
+           url: `https://api.docbase.io/teams/${domain}/posts?${queryParams}`,
            headers: {
-             ...(defaultHeaders || {}),
-             ...(options?.headers || {}),
+             "X-DocBaseToken": token,
+             "Content-Type": "application/json",
            },
          });
-         if (!res.ok) {
-           switch (res.status) {
-             case 404:
-               return { ok: false, error: { type: 'notFound', message: 'Not found' } };
-             case 401:
-               return { ok: false, error: { type: 'unauthorized', message: 'Unauthorized' } };
-             default:
-               return { ok: false, error: { type: 'network', message: `HTTP error: ${res.status}` } };
-           }
-         }
-         const data = (await res.json()) as T;
-         return { ok: true, value: data };
-       } catch (e) {
-         return {
-           ok: false,
-           error: { type: 'network', message: e instanceof Error ? e.message : 'Unknown error' },
-         };
-       }
+       },
      };
    }
    ```
@@ -227,12 +234,25 @@
 ### Docbase 関連型
 
 ```ts
+type DocbaseUser = {
+  id: number;
+  name: string;
+  profile_image_url: string;
+};
+
+type DocbaseTag = {
+  name: string;
+};
+
 type DocbasePostListItem = {
   id: number;
   title: string;
   body: string;
   created_at: string; // ISO-8601
   url: string;
+  user: DocbaseUser;
+  tags: DocbaseTag[];
+  scope: string;
 };
 ```
 
@@ -449,12 +469,16 @@ await supabase.auth.signInWithOtp({ email });
 
 | レイヤ         | 技術                   |
 | -------------- | ---------------------- |
-| フレームワーク | Next.js 15 / React     |
-| スタイリング   | Tailwind CSS           |
-| データ取得     | fetch / TanStack Query |
+| フレームワーク | Next.js 15 / React 19  |
+| スタイリング   | Tailwind CSS 4         |
+| データ取得     | fetch                  |
+| エラー処理     | neverthrow             |
+| トースト通知   | react-hot-toast        |
 | ストレージ     | localStorage           |
 | Lint / Format  | Biome                  |
 | 型システム     | TypeScript             |
+| テスト         | Vitest / Playwright    |
+| Storybook      | Storybook 8            |
 
 ## セキュリティ考慮事項
 
@@ -469,9 +493,10 @@ await supabase.auth.signInWithOtp({ email });
 #### 主要ユースケース
 
 1. **情報収集**
-   * ユーザーが「キーワード」「Docbase ドメイン」「Docbase トークン」およびオプションで詳細検索条件（タグ、投稿者、タイトル、投稿期間、グループ）を入力
+   * ユーザーが「Docbase ドメイン」「Docbase トークン」「検索キーワード」およびオプションで詳細検索条件（タグ、投稿者、タイトル、投稿期間、グループ）を入力
+   * 入力フィールドは論理的な順序で配置（接続情報→検索内容）
    * メインの検索キーワードは「完全一致」として扱われる
-   * **検索リクエスト** `/teams/{domain}/posts?q={query}` を実行し、該当メモの *ID / title / created_at / url / body* を最大500件まで取得
+   * **検索リクエスト** `/teams/{domain}/posts?q={query}` を実行し、該当メモの *ID / title / created_at / url / body / user / tags / scope* を最大500件まで取得
    * 取得したメモの `body` を結合し 1 つの Markdown ファイルへ整形
 
 2. **NotebookLM 学習**
@@ -480,9 +505,9 @@ await supabase.auth.signInWithOtp({ email });
 #### UI ワイヤフロー
 
 ```
-[キーワード & ドメイン & トークン入力]
+[ドメイン & トークン & キーワード入力]
         ↓ searchDocbase()
-[Markdown プレビュー (全文)]
+[Markdown プレビュー (最大10件表示)]
         ↓ [Markdown DL]
 [DL 完了トースト]
 ```
@@ -654,10 +679,12 @@ Slack連携では複数のAPIを組み合わせた段階的処理を実装：
 * **useErrorRecovery**: エラー状態からの復旧支援
 
 ### UI/UXの実装詳細
-* **洗練されたMarkdownプレビュー**: カスタムReactMarkdownコンポーネント
+* **ミニマルデザイン**: シンプルで直感的なUI
+* **アコーディオン式Markdownプレビュー**: スペース効率的な表示
 * **折りたたみ式詳細検索**: AdvancedFiltersコンポーネント
 * **プログレス表示**: 段階的な進捗状況の可視化
 * **エラートースト**: react-hot-toastによるユーザーフレンドリーな通知
+* **論理的な入力順序**: 接続情報（ドメイン・トークン）→検索内容
 
 ### テスト体制
 * **単体テスト**: Vitest + Testing Library
@@ -667,12 +694,20 @@ Slack連携では複数のAPIを組み合わせた段階的処理を実装：
 
 ## デプロイ & CI/CD
 
-1. GitHub Actions で `biome check` → `tsc --noEmit` → `next build && next export`
-2. `main` ブランチ push で `actions/upload-pages-artifact@v1` → `actions/deploy-pages@v1`
-3. 公開 URL: `https://<org|user>.github.io/<repo>/`
-   * Next.js の `assetPrefix` を Pages パスに合わせること
+### GitHub Actions ワークフロー
+1. `main` ブランチへのプッシュで自動デプロイ
+2. ジョブ構成:
+   - **lint**: `biome check`
+   - **type-check**: `tsc --noEmit`
+   - **build**: `next build` → `next export`
+   - **deploy**: `actions/upload-pages-artifact@v3` → `actions/deploy-pages@v4`
+
+### デプロイ設定
+- **GitHub Pages**: カスタムドメイン対応
+- **公開 URL**: https://collector.24taro.com/
+- **サブパス不要**: カスタムドメイン使用時はbasePath/assetPrefix設定不要
 
 ---
 
-**最終更新**: 2025-06-17  
+**最終更新**: 2025-06-28  
 **管理者**: ずんだもん（Claude Assistant）
