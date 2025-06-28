@@ -81,7 +81,7 @@ export function SlackSearchForm({ form }: SlackSearchFormProps) {
       {/* 検索ボタン */}
       <button
         type="submit"
-        disabled={form.isLoading || !form.token || form.token.trim() === ""}
+        disabled={form.isLoading || !form.token.trim()}
         className="w-full inline-flex items-center justify-center py-2.5 px-4 border border-transparent shadow-sm text-sm font-medium rounded-sm text-white bg-docbase-primary hover:bg-docbase-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-docbase-primary disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors duration-150 ease-in-out"
       >
         {form.isLoading ? "検索中..." : "Slackを検索"}
