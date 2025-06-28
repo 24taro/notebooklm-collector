@@ -417,7 +417,7 @@ export function createSlackAdapter(httpClient: HttpClient): SlackAdapter {
       const permalinkMaps: Record<string, string> = {};
 
       for (const thread of threads) {
-        // 親メッセージのパーマリンク
+        // 親メッセージのパーマリンクのみ取得（スレッドリンクとして使用）
         const parentPermalinkResult = await this.getPermalink({
           token,
           channel: thread.channel,
@@ -428,18 +428,7 @@ export function createSlackAdapter(httpClient: HttpClient): SlackAdapter {
           permalinkMaps[thread.parent.ts] = parentPermalinkResult.value;
         }
 
-        // 返信メッセージのパーマリンク
-        for (const reply of thread.replies) {
-          const replyPermalinkResult = await this.getPermalink({
-            token,
-            channel: thread.channel,
-            messageTs: reply.ts,
-          });
-
-          if (replyPermalinkResult.isOk()) {
-            permalinkMaps[reply.ts] = replyPermalinkResult.value;
-          }
-        }
+        // 返信メッセージのパーマリンクは取得しない（API呼び出し削減）
       }
 
       return ok(permalinkMaps);
