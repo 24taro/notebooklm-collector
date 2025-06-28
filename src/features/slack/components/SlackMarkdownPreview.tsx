@@ -142,6 +142,20 @@ export const SlackMarkdownPreview: FC<SlackMarkdownPreviewProps> = ({
                             <span>{replyCount}件の返信</span>
                           </>
                         )}
+                        {permalinkMaps[thread.parent.ts] && (
+                          <>
+                            <span>•</span>
+                            <a
+                              href={permalinkMaps[thread.parent.ts]}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-docbase-primary hover:underline"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              Slackで開く
+                            </a>
+                          </>
+                        )}
                       </div>
                     </div>
                     <div className="ml-4 flex-shrink-0">
