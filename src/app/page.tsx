@@ -25,8 +25,8 @@ export default function HomePage() {
                 <Image 
                   src="/docbase-icon.jpeg" 
                   alt="Docbase" 
-                  width={48} 
-                  height={48}
+                  width={36} 
+                  height={36}
                   className="rounded object-contain"
                 />
               </div>
@@ -48,8 +48,8 @@ export default function HomePage() {
                 <Image 
                   src="/slack-icon.svg" 
                   alt="Slack" 
-                  width={48} 
-                  height={48}
+                  width={64} 
+                  height={64}
                   className="rounded object-contain"
                 />
               </div>
