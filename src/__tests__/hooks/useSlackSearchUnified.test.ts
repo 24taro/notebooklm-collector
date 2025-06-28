@@ -145,7 +145,7 @@ describe("useSlackSearchUnified", () => {
 
       expect(mockAdapter.searchMessages).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: "test query",
+          query: "\"test query\"",
         })
       );
     });
@@ -183,7 +183,7 @@ describe("useSlackSearchUnified", () => {
       expect(mockAdapter.searchMessages).toHaveBeenCalledWith(
         expect.objectContaining({
           query:
-            "meeting in:general from:john after:2023-01-01 before:2023-12-31",
+            "\"meeting\" in:general from:john after:2023-01-01 before:2023-12-31",
         })
       );
     });
@@ -217,7 +217,7 @@ describe("useSlackSearchUnified", () => {
 
       expect(mockAdapter.searchMessages).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: "test in:#general",
+          query: "\"test\" in:#general",
         })
       );
     });
@@ -251,7 +251,7 @@ describe("useSlackSearchUnified", () => {
 
       expect(mockAdapter.searchMessages).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: "test from:@john",
+          query: "\"test\" from:@john",
         })
       );
     });
@@ -279,7 +279,7 @@ describe("useSlackSearchUnified", () => {
 
       expect(mockAdapter.searchMessages).toHaveBeenCalledWith({
         token: "",
-        query: "test",
+        query: "\"test\"",
         count: 100,
         page: 1,
       });
@@ -312,7 +312,7 @@ describe("useSlackSearchUnified", () => {
 
       expect(mockAdapter.searchMessages).toHaveBeenCalledWith({
         token: "xoxp-test",
-        query: "",
+        query: "\"\"",
         count: 100,
         page: 1,
       });
@@ -452,46 +452,75 @@ describe("useSlackSearchUnified", () => {
 
   describe("ページネーション", () => {
     it("複数ページの検索結果を取得する", async () => {
-      const page1Messages = Array(100)
-        .fill(null)
-        .map((_, i) => ({
-          ts: `1234567890.12345${i}`,
-          user: "U123456",
-          text: `メッセージ${i}`,
-          channel: { id: "C123456" },
-        }));
+      // 5ページ分のメッセージを作成
+      const createPageMessages = (pageNum: number, count: number) =>
+        Array(count)
+          .fill(null)
+          .map((_, i) => ({
+            ts: `123456789${pageNum}.${String(i).padStart(6, "0")}`,
+            user: "U123456",
+            text: `メッセージ${(pageNum - 1) * 100 + i}`,
+            channel: { id: "C123456" },
+          }));
 
-      const page2Messages = Array(50)
-        .fill(null)
-        .map((_, i) => ({
-          ts: `1234567900.12345${i}`,
-          user: "U123456",
-          text: `メッセージ${100 + i}`,
-          channel: { id: "C123456" },
-        }));
+      // 5ページ分のモックレスポンスを設定（合計500件）
       (mockAdapter.searchMessages as Mock)
         .mockResolvedValueOnce(
           ok({
-            messages: page1Messages,
+            messages: createPageMessages(1, 100),
             pagination: {
               currentPage: 1,
-              totalPages: 2,
-              totalResults: 150,
+              totalPages: 5,
+              totalResults: 500,
               perPage: 100,
             },
           })
         )
         .mockResolvedValueOnce(
           ok({
-            messages: page2Messages,
+            messages: createPageMessages(2, 100),
             pagination: {
               currentPage: 2,
-              totalPages: 2,
-              totalResults: 150,
+              totalPages: 5,
+              totalResults: 500,
+              perPage: 100,
+            },
+          })
+        )
+        .mockResolvedValueOnce(
+          ok({
+            messages: createPageMessages(3, 100),
+            pagination: {
+              currentPage: 3,
+              totalPages: 5,
+              totalResults: 500,
+              perPage: 100,
+            },
+          })
+        )
+        .mockResolvedValueOnce(
+          ok({
+            messages: createPageMessages(4, 100),
+            pagination: {
+              currentPage: 4,
+              totalPages: 5,
+              totalResults: 500,
+              perPage: 100,
+            },
+          })
+        )
+        .mockResolvedValueOnce(
+          ok({
+            messages: createPageMessages(5, 100),
+            pagination: {
+              currentPage: 5,
+              totalPages: 5,
+              totalResults: 500,
               perPage: 100,
             },
           })
         );
+      
       (mockAdapter.buildThreadsFromMessages as Mock).mockResolvedValue(
         ok([mockThread])
       );
@@ -517,8 +546,8 @@ describe("useSlackSearchUnified", () => {
       });
 
       await waitFor(() => {
-        expect(mockAdapter.searchMessages).toHaveBeenCalledTimes(2);
-        expect(result.current.messages).toHaveLength(150);
+        expect(mockAdapter.searchMessages).toHaveBeenCalledTimes(5);
+        expect(result.current.messages).toHaveLength(500);
       });
     });
   });

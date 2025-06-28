@@ -119,9 +119,9 @@ export function useSlackSearchUnified(
           query += ` before:${params.endDate}`;
         }
 
-        // 最大300件まで取得（100件×3ページ）
+        // 最大500件まで取得（100件×5ページ）
         const allMessages: SlackMessage[] = [];
-        const maxPages = 3;
+        const maxPages = 5;
         const perPage = 100;
 
         for (let page = 1; page <= maxPages; page++) {
@@ -146,17 +146,17 @@ export function useSlackSearchUnified(
           const { messages, pagination } = searchResult.value;
           allMessages.push(...messages);
 
-          // 最後のページまたは300件に達したら終了
+          // 最後のページまたは500件に達したら終了
           if (
             messages.length < perPage ||
-            allMessages.length >= 300 ||
+            allMessages.length >= 500 ||
             page >= pagination.totalPages
           ) {
             break;
           }
         }
 
-        const messages = allMessages.slice(0, 300); // 最大300件に制限
+        const messages = allMessages.slice(0, 500); // 最大500件に制限
         if (messages.length === 0) {
           setState((prev) => ({
             ...prev,
