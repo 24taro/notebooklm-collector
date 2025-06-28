@@ -18,7 +18,7 @@ export function SlackSearchInput({
         htmlFor="searchQuery"
         className="block text-base font-medium text-gray-700 mb-1"
       >
-        検索キーワード
+        検索キーワード（オプション）
       </label>
       <input
         id="searchQuery"
@@ -28,7 +28,6 @@ export function SlackSearchInput({
         placeholder="Slackの検索演算子も利用可"
         className="block w-full px-4 py-3 border border-gray-400 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
         disabled={disabled}
-        required
       />
     </div>
   );

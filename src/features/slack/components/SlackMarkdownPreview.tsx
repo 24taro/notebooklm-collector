@@ -2,9 +2,8 @@
 
 import type { FC } from "react";
 import { useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import type { SlackThread } from "../types/slack";
+import { generateSlackMarkdown } from "../utils/slackMarkdownGenerator";
 
 interface SlackMarkdownPreviewProps {
   threads: SlackThread[];
@@ -182,44 +181,9 @@ export const SlackMarkdownPreview: FC<SlackMarkdownPreviewProps> = ({
                     id={`thread-content-${index}`}
                     className="px-4 pb-4 border-t border-gray-50"
                   >
-                    <div className="prose max-w-none prose-neutral prose-sm slack-preview mt-4">
-                      <ReactMarkdown
-                        remarkPlugins={[remarkGfm]}
-                        components={{
-                          // biome-ignore lint/suspicious/noExplicitAny: カスタムコンポーネントの型解決が複雑なため一時的にanyを使用
-                          blockquote: ({ node, children, ...props }: any) => (
-                            <blockquote
-                              className="my-4 pl-4 border-l-4 border-blue-300 text-slate-700 bg-blue-50 py-3 rounded-r-lg italic"
-                              {...props}
-                            >
-                              {children}
-                            </blockquote>
-                          ),
-                          // biome-ignore lint/suspicious/noExplicitAny: カスタムコンポーネントの型解決が複雑なため一時的にanyを使用
-                          a: ({ node, children, ...props }: any) => (
-                            <a
-                              className="text-blue-600 hover:underline hover:text-blue-800"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              {...props}
-                            >
-                              {children}
-                            </a>
-                          ),
-                          // biome-ignore lint/suspicious/noExplicitAny: カスタムコンポーネントの型解決が複雑なため一時的にanyを使用
-                          strong: ({ node, children, ...props }: any) => (
-                            <strong
-                              className="font-semibold text-slate-800"
-                              {...props}
-                            >
-                              {children}
-                            </strong>
-                          ),
-                        }}
-                      >
-                        {generateThreadMarkdown(thread)}
-                      </ReactMarkdown>
-                    </div>
+                    <pre className="mt-4 p-4 bg-gray-50 rounded-lg text-sm text-gray-700 whitespace-pre-wrap font-mono overflow-x-auto">
+                      {generateThreadMarkdown(thread)}
+                    </pre>
                   </div>
                 )}
               </div>
