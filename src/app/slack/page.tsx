@@ -69,22 +69,95 @@ export default function SlackPage() {
 
               {/* 右側: プレビューエリア */}
               <div className="space-y-6">
-                <SlackMarkdownPreview
-                  threads={slackForm.slackThreads}
-                  userMaps={slackForm.userMaps}
-                  permalinkMaps={slackForm.permalinkMaps}
-                  searchQuery={slackForm.searchQuery}
-                  title="検索結果プレビュー"
-                  onDownload={() =>
-                    slackForm.onDownload(
-                      "",
-                      slackForm.searchQuery,
-                      slackForm.slackThreads.length > 0
-                    )
-                  }
-                  emptyMessage="Slackスレッドの検索結果がここに表示されます。"
-                  className=""
-                />
+                {!slackForm.isLoading && (
+                  <SlackMarkdownPreview
+                    threads={slackForm.slackThreads}
+                    userMaps={slackForm.userMaps}
+                    permalinkMaps={slackForm.permalinkMaps}
+                    searchQuery={slackForm.searchQuery}
+                    title="検索結果プレビュー"
+                    onDownload={() =>
+                      slackForm.onDownload(
+                        "",
+                        slackForm.searchQuery,
+                        slackForm.slackThreads.length > 0
+                      )
+                    }
+                    emptyMessage="Slackスレッドの検索結果がここに表示されます。"
+                    className=""
+                  />
+                )}
+                {slackForm.isLoading && (
+                  <div className="bg-white shadow-md rounded-lg p-6 border border-gray-200">
+                    <h3 className="text-lg font-semibold text-gray-800 mb-4">
+                      検索結果プレビュー
+                    </h3>
+                    <div className="flex items-center justify-center py-12">
+                      <div className="text-center space-y-4">
+                        <svg
+                          className="animate-spin h-8 w-8 text-docbase-primary mx-auto"
+                          xmlns="http://www.w3.org/2000/svg"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                        >
+                          <title>検索処理ローディング</title>
+                          <circle
+                            className="opacity-25"
+                            cx="12"
+                            cy="12"
+                            r="10"
+                            stroke="currentColor"
+                            strokeWidth="4"
+                          />
+                          <path
+                            className="opacity-75"
+                            fill="currentColor"
+                            d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                          />
+                        </svg>
+                        <div className="space-y-2">
+                          <p className="text-gray-800 font-medium">
+                            {slackForm.progressStatus?.message || "検索中..."}
+                          </p>
+                          {slackForm.progressStatus?.current &&
+                            slackForm.progressStatus?.total && (
+                              <p className="text-sm text-gray-600">
+                                {slackForm.progressStatus.current} /{" "}
+                                {slackForm.progressStatus.total}
+                              </p>
+                            )}
+                        </div>
+                        {/* プログレスバー */}
+                        <div className="w-64 mx-auto">
+                          <div className="w-full bg-gray-200 rounded-full h-2">
+                            <div
+                              className="bg-docbase-primary h-2 rounded-full transition-all duration-300"
+                              style={{
+                                width:
+                                  slackForm.progressStatus?.phase ===
+                                  "searching"
+                                    ? "25%"
+                                    : slackForm.progressStatus?.phase ===
+                                        "fetching_threads"
+                                      ? "50%"
+                                      : slackForm.progressStatus?.phase ===
+                                          "fetching_users"
+                                        ? "75%"
+                                        : slackForm.progressStatus?.phase ===
+                                            "generating_permalinks"
+                                          ? "90%"
+                                          : slackForm.progressStatus?.phase ===
+                                              "completed"
+                                            ? "100%"
+                                            : "10%",
+                              }}
+                            />
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>

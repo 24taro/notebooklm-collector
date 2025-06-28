@@ -76,15 +76,26 @@ export function useSlackForm() {
     }
   };
 
-  const handleFullDownload = (
+  const handleFullDownload = async (
     markdownContent: string,
     searchQuery: string,
     hasContent: boolean
   ) => {
-    if (hasContent && threadMarkdowns.length > 0) {
-      // TODO: Issue #39で統一フックによるMarkdown生成実装
-      // const fullMarkdown = generateSlackThreadsMarkdown(slackThreads, userMaps, permalinkMaps, searchQuery)
-      handleDownload(markdownContent, searchQuery, hasContent, "slack");
+    if (hasContent && slackThreads.length > 0) {
+      // 全スレッドのMarkdownを生成
+      const { generateSlackThreadsMarkdown } = await import(
+        "../utils/slackMarkdownGenerator"
+      );
+      const fullMarkdown = generateSlackThreadsMarkdown(
+        slackThreads,
+        userMaps,
+        permalinkMaps,
+        searchQuery
+      );
+      handleDownload(fullMarkdown, searchQuery, true, "slack");
+    } else if (currentPreviewMarkdown) {
+      // プレビューのMarkdownをダウンロード
+      handleDownload(currentPreviewMarkdown, searchQuery, true, "slack");
     } else {
       handleDownload(markdownContent, searchQuery, hasContent, "slack");
     }
