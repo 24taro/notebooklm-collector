@@ -7,19 +7,34 @@
 
 import { useDownload } from "@/hooks/useDownload";
 import useLocalStorage from "@/hooks/useLocalStorage";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import type React from "react";
 import { useSlackSearchUnified } from "./useSlackSearchUnified";
 
 export function useSlackForm() {
   // フォーム状態
-  const [token, setToken] = useLocalStorage<string>("slackApiToken", "");
+  const [tokenFromStorage, setTokenFromStorage] = useLocalStorage<string>(
+    "slackApiToken",
+    ""
+  );
+  const [token, setToken] = useState<string>("");
   const [searchQuery, setSearchQuery] = useState<string>("");
   const [startDate, setStartDate] = useState<string>("");
   const [endDate, setEndDate] = useState<string>("");
   const [channel, setChannel] = useState<string>("");
   const [author, setAuthor] = useState<string>("");
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
+
+  // クライアント側でのみトークンを初期化
+  useEffect(() => {
+    setToken(tokenFromStorage);
+  }, [tokenFromStorage]);
+
+  // トークンの更新時にlocalStorageも更新
+  const handleTokenChange = (newToken: string) => {
+    setToken(newToken);
+    setTokenFromStorage(newToken);
+  };
 
   // フック統合
   const { isDownloading, handleDownload } = useDownload();
@@ -82,7 +97,7 @@ export function useSlackForm() {
     searchQuery,
     onSearchQueryChange: setSearchQuery,
     token,
-    onTokenChange: setToken,
+    onTokenChange: handleTokenChange,
 
     // 詳細フィルター
     showAdvanced,

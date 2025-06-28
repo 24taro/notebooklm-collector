@@ -28,12 +28,12 @@ export function SlackAdvancedFilters({
       <button
         type="button"
         onClick={onToggleAdvanced}
-        className="text-sm text-blue-600 hover:text-blue-800 focus:outline-none"
+        className="text-sm text-docbase-primary hover:text-docbase-primary-dark focus:outline-none"
       >
         {showAdvanced ? "詳細な条件を閉じる ▲" : "もっと詳細な条件を追加する ▼"}
       </button>
       {showAdvanced && (
-        <div className="space-y-4 p-4 border border-gray-300 rounded-md bg-gray-50">
+        <div className="space-y-4 p-4 border border-gray-300 rounded-md">
           {children ? (
             children
           ) : (
@@ -51,7 +51,7 @@ export function SlackAdvancedFilters({
                   value={channel}
                   onChange={(e) => onChannelChange(e.target.value)}
                   placeholder="#general"
-                  className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+                  className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm placeholder-docbase-text-sub focus:outline-none focus:ring-1 focus:ring-docbase-primary focus:border-docbase-primary disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
                   disabled={disabled}
                 />
               </div>
@@ -68,7 +68,7 @@ export function SlackAdvancedFilters({
                   value={author}
                   onChange={(e) => onAuthorChange(e.target.value)}
                   placeholder="@user"
-                  className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+                  className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm placeholder-docbase-text-sub focus:outline-none focus:ring-1 focus:ring-docbase-primary focus:border-docbase-primary disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
                   disabled={disabled}
                 />
               </div>
@@ -85,7 +85,7 @@ export function SlackAdvancedFilters({
                     type="date"
                     value={startDate}
                     onChange={(e) => onStartDateChange(e.target.value)}
-                    className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+                    className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm placeholder-docbase-text-sub focus:outline-none focus:ring-1 focus:ring-docbase-primary focus:border-docbase-primary disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
                     disabled={disabled}
                   />
                 </div>
@@ -101,7 +101,7 @@ export function SlackAdvancedFilters({
                     type="date"
                     value={endDate}
                     onChange={(e) => onEndDateChange(e.target.value)}
-                    className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 focus:ring-blue-400 focus:border-blue-400 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+                    className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm placeholder-docbase-text-sub focus:outline-none focus:ring-1 focus:ring-docbase-primary focus:border-docbase-primary disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
                     disabled={disabled}
                   />
                 </div>

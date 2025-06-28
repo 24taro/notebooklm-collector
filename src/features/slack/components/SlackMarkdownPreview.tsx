@@ -2,9 +2,8 @@
 
 import type { FC } from "react";
 import { useState } from "react";
-import ReactMarkdown from "react-markdown";
-import remarkGfm from "remark-gfm";
 import type { SlackThread } from "../types/slack";
+import { generateSlackThreadsMarkdown } from "../utils/slackMarkdownGenerator";
 
 interface SlackMarkdownPreviewProps {
   threads: SlackThread[];
@@ -54,6 +53,11 @@ export const SlackMarkdownPreview: FC<SlackMarkdownPreviewProps> = ({
   if (!threads || threads.length === 0) {
     return (
       <div className={`max-w-3xl mx-auto ${className}`}>
+        {title && (
+          <div className="mb-1">
+            <h2 className="text-base font-medium text-gray-800">{title}</h2>
+          </div>
+        )}
         <div className="p-6 bg-white rounded-lg shadow border border-gray-200 min-h-[200px] flex items-center justify-center">
           <p className="text-gray-500">{emptyMessage}</p>
         </div>
@@ -96,17 +100,8 @@ export const SlackMarkdownPreview: FC<SlackMarkdownPreviewProps> = ({
   return (
     <div className={`max-w-3xl mx-auto ${className}`}>
       {title && (
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
-          {onDownload && (
-            <button
-              type="button"
-              onClick={onDownload}
-              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-            >
-              ダウンロード
-            </button>
-          )}
+        <div className="mb-1">
+          <h2 className="text-base font-medium text-gray-800">{title}</h2>
         </div>
       )}
 
@@ -152,6 +147,20 @@ export const SlackMarkdownPreview: FC<SlackMarkdownPreviewProps> = ({
                             <span>{replyCount}件の返信</span>
                           </>
                         )}
+                        {permalinkMaps[thread.parent.ts] && (
+                          <>
+                            <span>•</span>
+                            <a
+                              href={permalinkMaps[thread.parent.ts]}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-docbase-primary hover:underline"
+                              onClick={(e) => e.stopPropagation()}
+                            >
+                              Slackで開く
+                            </a>
+                          </>
+                        )}
                       </div>
                     </div>
                     <div className="ml-4 flex-shrink-0">
@@ -182,44 +191,9 @@ export const SlackMarkdownPreview: FC<SlackMarkdownPreviewProps> = ({
                     id={`thread-content-${index}`}
                     className="px-4 pb-4 border-t border-gray-50"
                   >
-                    <div className="prose max-w-none prose-neutral prose-sm slack-preview mt-4">
-                      <ReactMarkdown
-                        remarkPlugins={[remarkGfm]}
-                        components={{
-                          // biome-ignore lint/suspicious/noExplicitAny: カスタムコンポーネントの型解決が複雑なため一時的にanyを使用
-                          blockquote: ({ node, children, ...props }: any) => (
-                            <blockquote
-                              className="my-4 pl-4 border-l-4 border-blue-300 text-slate-700 bg-blue-50 py-3 rounded-r-lg italic"
-                              {...props}
-                            >
-                              {children}
-                            </blockquote>
-                          ),
-                          // biome-ignore lint/suspicious/noExplicitAny: カスタムコンポーネントの型解決が複雑なため一時的にanyを使用
-                          a: ({ node, children, ...props }: any) => (
-                            <a
-                              className="text-blue-600 hover:underline hover:text-blue-800"
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              {...props}
-                            >
-                              {children}
-                            </a>
-                          ),
-                          // biome-ignore lint/suspicious/noExplicitAny: カスタムコンポーネントの型解決が複雑なため一時的にanyを使用
-                          strong: ({ node, children, ...props }: any) => (
-                            <strong
-                              className="font-semibold text-slate-800"
-                              {...props}
-                            >
-                              {children}
-                            </strong>
-                          ),
-                        }}
-                      >
-                        {generateThreadMarkdown(thread)}
-                      </ReactMarkdown>
-                    </div>
+                    <pre className="mt-4 p-4 bg-gray-50 rounded-lg text-sm text-gray-700 whitespace-pre-wrap font-mono overflow-x-auto">
+                      {generateThreadMarkdown(thread)}
+                    </pre>
                   </div>
                 )}
               </div>

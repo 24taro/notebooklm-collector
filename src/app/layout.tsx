@@ -2,8 +2,6 @@ import type { Metadata } from "next";
 import { Geist_Mono, Noto_Sans_JP } from "next/font/google";
 import "./globals.css";
 import { ErrorBoundaryProvider } from "@/components/ErrorBoundaryProvider";
-// import Header from '@/components/Header'
-// import Footer from '@/components/Footer'
 
 const notoSansJP = Noto_Sans_JP({
   variable: "--font-noto-sans-jp",
@@ -32,9 +30,7 @@ export default function RootLayout({
         className={`${notoSansJP.variable} ${geistMono.variable} antialiased flex flex-col min-h-screen`}
       >
         <ErrorBoundaryProvider>
-          {/* <Header /> */}
           <main className="flex-grow">{children}</main>
-          {/* <Footer /> */}
         </ErrorBoundaryProvider>
       </body>
     </html>
