@@ -12,7 +12,7 @@ import {
 } from "../utils/docbaseMarkdownGenerator";
 import { DocbaseDomainInput } from "./DocbaseDomainInput";
 import { DocbaseMarkdownPreview } from "./DocbaseMarkdownPreview";
-import { DocbaseTokenInput } from "./DocbaseTokenInput";
+import { DocbaseTokenInput, type DocbaseTokenInputRef } from "./DocbaseTokenInput";
 
 const LOCAL_STORAGE_DOMAIN_KEY = "docbaseDomain";
 const LOCAL_STORAGE_TOKEN_KEY = "docbaseToken";
@@ -53,7 +53,7 @@ export const DocbaseSearchForm = ({
     useDocbaseSearch();
   const { isDownloading, handleDownload } = useDownload();
 
-  const tokenInputRef = useRef<HTMLInputElement>(null);
+  const tokenInputRef = useRef<DocbaseTokenInputRef>(null);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -128,6 +128,7 @@ export const DocbaseSearchForm = ({
             disabled={isLoading || isDownloading}
           />
           <DocbaseTokenInput
+            ref={tokenInputRef}
             token={token}
             onTokenChange={setToken}
             disabled={isLoading || isDownloading}
