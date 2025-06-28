@@ -54,12 +54,12 @@ export default function SlackPage() {
                   slackForm.slackThreads.length > 0 &&
                   !slackForm.isLoading &&
                   !slackForm.error && (
-                    <div className="p-4 bg-gray-50 border border-gray-200 rounded-lg">
-                      <p className="text-sm text-gray-600">
+                    <div className="p-4 bg-docbase-primary/5 border border-docbase-primary/20 rounded-lg">
+                      <p className="text-sm text-docbase-text-sub">
                         取得スレッド数: {slackForm.slackThreads.length}件
                       </p>
                       {slackForm.slackThreads.length > 10 && (
-                        <p className="text-sm text-gray-600 mt-1">
+                        <p className="text-sm text-docbase-text-sub mt-1">
                           プレビューには最初の10件が表示されます。すべての内容を確認するには、ダウンロードボタンをご利用ください。
                         </p>
                       )}
