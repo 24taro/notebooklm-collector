@@ -36,46 +36,43 @@ export function SlackSearchForm({ form }: SlackSearchFormProps) {
         showAdvanced={form.showAdvanced}
         onToggleAdvanced={form.onToggleAdvanced}
       >
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <SlackChannelInput
-            channel={form.channel}
-            onChannelChange={form.onChannelChange}
-          />
-          <SlackAuthorInput
-            author={form.author}
-            onAuthorChange={form.onAuthorChange}
-          />
-        </div>
-
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <SlackChannelInput
+          channel={form.channel}
+          onChannelChange={form.onChannelChange}
+        />
+        <SlackAuthorInput
+          author={form.author}
+          onAuthorChange={form.onAuthorChange}
+        />
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
             <label
               htmlFor="startDate"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-gray-700 mb-1"
             >
-              開始日
+              投稿期間 (開始日)
             </label>
             <input
               type="date"
               id="startDate"
               value={form.startDate}
               onChange={(e) => form.onStartDateChange(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-docbase-primary focus:border-docbase-primary disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
             />
           </div>
           <div>
             <label
               htmlFor="endDate"
-              className="block text-sm font-medium text-gray-700 mb-2"
+              className="block text-sm font-medium text-gray-700 mb-1"
             >
-              終了日
+              投稿期間 (終了日)
             </label>
             <input
               type="date"
               id="endDate"
               value={form.endDate}
               onChange={(e) => form.onEndDateChange(e.target.value)}
-              className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-docbase-primary focus:border-docbase-primary disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
             />
           </div>
         </div>
@@ -85,7 +82,7 @@ export function SlackSearchForm({ form }: SlackSearchFormProps) {
       <button
         type="submit"
         disabled={form.isLoading || !form.token.trim()}
-        className="w-full bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed font-medium transition-colors"
+        className="w-full inline-flex items-center justify-center py-2.5 px-4 border border-transparent shadow-sm text-sm font-medium rounded-sm text-white bg-docbase-primary hover:bg-docbase-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-docbase-primary disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors duration-150 ease-in-out"
       >
         {form.isLoading ? "検索中..." : "Slackを検索"}
       </button>

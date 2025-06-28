@@ -95,25 +95,25 @@ export const SlackMarkdownPreview: FC<SlackMarkdownPreviewProps> = ({
   return (
     <div className={`max-w-3xl mx-auto ${className}`}>
       {title && (
-        <div className="flex items-center justify-between mb-4">
-          <h2 className="text-xl font-semibold text-gray-800">{title}</h2>
-          {onDownload && (
-            <button
-              type="button"
-              onClick={onDownload}
-              className="px-4 py-2 bg-blue-600 text-white text-sm font-medium rounded hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors"
-            >
-              ダウンロード
-            </button>
-          )}
+        <div className="mb-1">
+          <h2 className="text-base font-medium text-gray-800">{title}</h2>
         </div>
       )}
 
       <div className="border border-gray-200 rounded-xl bg-white shadow-sm">
-        <div className="p-4 border-b border-gray-100">
+        <div className="p-4 border-b border-gray-100 flex items-center justify-between">
           <p className="text-sm text-gray-600">
             検索結果: {threads.length}件のスレッド（最大10件まで表示）
           </p>
+          {onDownload && (
+            <button
+              type="button"
+              onClick={onDownload}
+              className="px-4 py-1.5 bg-docbase-primary text-white text-sm font-medium rounded hover:bg-docbase-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-docbase-primary transition-colors"
+            >
+              ダウンロード
+            </button>
+          )}
         </div>
 
         <div className="divide-y divide-gray-100">
