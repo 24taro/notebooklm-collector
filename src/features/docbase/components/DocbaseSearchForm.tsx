@@ -12,7 +12,10 @@ import {
 } from "../utils/docbaseMarkdownGenerator";
 import { DocbaseDomainInput } from "./DocbaseDomainInput";
 import { DocbaseMarkdownPreview } from "./DocbaseMarkdownPreview";
-import { DocbaseTokenInput, type DocbaseTokenInputRef } from "./DocbaseTokenInput";
+import {
+  DocbaseTokenInput,
+  type DocbaseTokenInputRef,
+} from "./DocbaseTokenInput";
 
 const LOCAL_STORAGE_DOMAIN_KEY = "docbaseDomain";
 const LOCAL_STORAGE_TOKEN_KEY = "docbaseToken";
