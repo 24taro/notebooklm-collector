@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import Footer from "../components/Footer";
 import Header from "../components/Header";
@@ -15,29 +16,47 @@ export default function HomePage() {
             情報ソースからデータを収集し、NotebookLM用Markdownを生成
           </p>
           
-          <div className="space-y-8">
-            <div>
-              <Link 
-                href="/docbase" 
-                className="text-lg text-gray-900 underline hover:text-gray-600"
-              >
-                Docbase連携
-              </Link>
-              <p className="text-gray-600 mt-2">
-                Docbaseの記事を検索・収集（最大500件）
-              </p>
+          <div className="grid md:grid-cols-2 gap-8">
+            <div className="flex items-start space-x-4">
+              <Image 
+                src="/docbase-icon.jpeg" 
+                alt="Docbase" 
+                width={48} 
+                height={48}
+                className="rounded"
+              />
+              <div>
+                <Link 
+                  href="/docbase" 
+                  className="text-lg text-gray-900 underline hover:text-gray-600"
+                >
+                  Docbase連携
+                </Link>
+                <p className="text-gray-600 mt-2">
+                  Docbaseの記事を検索・収集（最大500件）
+                </p>
+              </div>
             </div>
             
-            <div>
-              <Link 
-                href="/slack" 
-                className="text-lg text-gray-900 underline hover:text-gray-600"
-              >
-                Slack連携
-              </Link>
-              <p className="text-gray-600 mt-2">
-                Slackのスレッドを検索・収集（最大300件）
-              </p>
+            <div className="flex items-start space-x-4">
+              <Image 
+                src="/slack-icon.svg" 
+                alt="Slack" 
+                width={48} 
+                height={48}
+                className="rounded"
+              />
+              <div>
+                <Link 
+                  href="/slack" 
+                  className="text-lg text-gray-900 underline hover:text-gray-600"
+                >
+                  Slack連携
+                </Link>
+                <p className="text-gray-600 mt-2">
+                  Slackのスレッドを検索・収集（最大300件）
+                </p>
+              </div>
             </div>
           </div>
         </div>
