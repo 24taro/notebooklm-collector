@@ -278,8 +278,8 @@ describe("SlackAdapter", () => {
 
       const mockHttpClient = createMockHttpClient([
         {
-          url: "https://slack.com/api/chat.getPermalink?channel=C123456&message_ts=1234567890.123456",
-          method: "GET",
+          url: "https://slack.com/api/chat.getPermalink",
+          method: "POST",
           status: 200,
           data: mockResponse,
         },
@@ -306,8 +306,8 @@ describe("SlackAdapter", () => {
 
       const mockHttpClient = createMockHttpClient([
         {
-          url: "https://slack.com/api/chat.getPermalink?channel=C123456&message_ts=invalid-ts",
-          method: "GET",
+          url: "https://slack.com/api/chat.getPermalink",
+          method: "POST",
           status: 200,
           data: mockResponse,
         },
