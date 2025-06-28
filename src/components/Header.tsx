@@ -10,7 +10,7 @@ interface HeaderProps {
 const Header: React.FC<HeaderProps> = ({ title }) => {
   return (
     <header className="w-full py-8">
-      <div className="max-w-3xl mx-auto">
+      <div className="max-w-3xl mx-auto px-4 md:px-0">
         <Link href="/" className="text-xl font-normal text-gray-900 hover:text-gray-700">
           {title}
         </Link>
