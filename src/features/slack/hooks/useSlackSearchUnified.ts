@@ -102,7 +102,7 @@ export function useSlackSearchUnified(
 
         updateProgress("searching", "Slackメッセージを検索中...");
 
-        // 1. メッセージ検索
+        // 1. メッセージ検索（ページネーションで最大300件まで取得）
         // SlackSearchParamsを適切にアダプターのSlackSearchParamsに変換
         let query = params.searchQuery;
         if (params.channel) {
@@ -118,17 +118,44 @@ export function useSlackSearchUnified(
           query += ` before:${params.endDate}`;
         }
 
-        const searchResult = await adapter.searchMessages({
-          token: params.token,
-          query,
-        });
-        if (searchResult.isErr()) {
-          setError(searchResult.error);
-          toast.error(getUserFriendlyErrorMessage(searchResult.error));
-          return;
+        // 最大300件まで取得（100件×3ページ）
+        const allMessages: SlackMessage[] = [];
+        const maxPages = 3;
+        const perPage = 100;
+
+        for (let page = 1; page <= maxPages; page++) {
+          updateProgress(
+            "searching",
+            `Slackメッセージを検索中... (${(page - 1) * perPage + 1}-${page * perPage}件目)`
+          );
+
+          const searchResult = await adapter.searchMessages({
+            token: params.token,
+            query,
+            count: perPage,
+            page,
+          });
+
+          if (searchResult.isErr()) {
+            setError(searchResult.error);
+            toast.error(getUserFriendlyErrorMessage(searchResult.error));
+            return;
+          }
+
+          const { messages, pagination } = searchResult.value;
+          allMessages.push(...messages);
+
+          // 最後のページまたは300件に達したら終了
+          if (
+            messages.length < perPage ||
+            allMessages.length >= 300 ||
+            page >= pagination.totalPages
+          ) {
+            break;
+          }
         }
 
-        const { messages } = searchResult.value;
+        const messages = allMessages.slice(0, 300); // 最大300件に制限
         if (messages.length === 0) {
           setState((prev) => ({
             ...prev,

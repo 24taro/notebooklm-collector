@@ -280,6 +280,8 @@ describe("useSlackSearchUnified", () => {
       expect(mockAdapter.searchMessages).toHaveBeenCalledWith({
         token: "",
         query: "test",
+        count: 100,
+        page: 1,
       });
       expect(result.current.error?.type).toBe("unauthorized");
     });
@@ -311,6 +313,8 @@ describe("useSlackSearchUnified", () => {
       expect(mockAdapter.searchMessages).toHaveBeenCalledWith({
         token: "xoxp-test",
         query: "",
+        count: 100,
+        page: 1,
       });
     });
   });
@@ -513,8 +517,8 @@ describe("useSlackSearchUnified", () => {
       });
 
       await waitFor(() => {
-        expect(mockAdapter.searchMessages).toHaveBeenCalledTimes(1);
-        expect(result.current.messages).toHaveLength(100);
+        expect(mockAdapter.searchMessages).toHaveBeenCalledTimes(2);
+        expect(result.current.messages).toHaveLength(150);
       });
     });
   });
