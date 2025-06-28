@@ -12,7 +12,10 @@ import {
 } from "../utils/docbaseMarkdownGenerator";
 import { DocbaseDomainInput } from "./DocbaseDomainInput";
 import { DocbaseMarkdownPreview } from "./DocbaseMarkdownPreview";
-import { DocbaseTokenInput } from "./DocbaseTokenInput";
+import {
+  DocbaseTokenInput,
+  type DocbaseTokenInputRef,
+} from "./DocbaseTokenInput";
 
 const LOCAL_STORAGE_DOMAIN_KEY = "docbaseDomain";
 const LOCAL_STORAGE_TOKEN_KEY = "docbaseToken";
@@ -53,7 +56,7 @@ export const DocbaseSearchForm = ({
     useDocbaseSearch();
   const { isDownloading, handleDownload } = useDownload();
 
-  const tokenInputRef = useRef<HTMLInputElement>(null);
+  const tokenInputRef = useRef<DocbaseTokenInputRef>(null);
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -122,6 +125,17 @@ export const DocbaseSearchForm = ({
     <div className="max-w-3xl mx-auto">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
+          <DocbaseDomainInput
+            domain={domain}
+            onDomainChange={setDomain}
+            disabled={isLoading || isDownloading}
+          />
+          <DocbaseTokenInput
+            ref={tokenInputRef}
+            token={token}
+            onTokenChange={setToken}
+            disabled={isLoading || isDownloading}
+          />
           <div>
             <label
               htmlFor="keyword"
@@ -139,16 +153,6 @@ export const DocbaseSearchForm = ({
               disabled={isLoading || isDownloading}
             />
           </div>
-          <DocbaseDomainInput
-            domain={domain}
-            onDomainChange={setDomain}
-            disabled={isLoading || isDownloading}
-          />
-          <DocbaseTokenInput
-            token={token}
-            onTokenChange={setToken}
-            disabled={isLoading || isDownloading}
-          />
         </div>
 
         {/* 詳細検索の開閉ボタンと入力フィールドを追加 */}
