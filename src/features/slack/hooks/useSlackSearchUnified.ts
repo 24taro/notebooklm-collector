@@ -104,7 +104,8 @@ export function useSlackSearchUnified(
 
         // 1. メッセージ検索（ページネーションで最大300件まで取得）
         // SlackSearchParamsを適切にアダプターのSlackSearchParamsに変換
-        let query = params.searchQuery;
+        // メインの検索キーワードを完全一致にするためダブルクォートで囲む
+        let query = `"${params.searchQuery}"`;
         if (params.channel) {
           query += ` in:${params.channel}`;
         }
