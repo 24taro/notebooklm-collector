@@ -79,7 +79,7 @@ export const useDocbaseSearch = (
 
       if (result.isOk()) {
         setPosts(result.value);
-        if (result.value.length === 0 && keyword.trim() !== "") {
+        if (result.value.length === 0) {
           toast.success("検索結果が見つかりませんでした。");
         }
       } else {

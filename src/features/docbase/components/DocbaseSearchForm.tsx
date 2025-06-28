@@ -137,7 +137,6 @@ export const DocbaseSearchForm = ({
               placeholder="キーワードを入力してください"
               className="block w-full px-4 py-3 border border-gray-400 rounded-md shadow-sm placeholder-docbase-text-sub focus:outline-none focus:ring-1 focus:ring-docbase-primary focus:border-docbase-primary disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
               disabled={isLoading || isDownloading}
-              required
             />
           </div>
           <DocbaseDomainInput
@@ -165,7 +164,7 @@ export const DocbaseSearchForm = ({
           </button>
 
           {showAdvancedSearch && (
-            <div className="space-y-4 p-4 border border-gray-300 rounded-md bg-gray-50">
+            <div className="space-y-4 p-4 border border-gray-300 rounded-md">
               <div>
                 <label
                   htmlFor="tags"
@@ -260,7 +259,16 @@ export const DocbaseSearchForm = ({
             type="submit"
             className="w-full inline-flex items-center justify-center py-2.5 px-4 border border-transparent shadow-sm text-sm font-medium rounded-sm text-white bg-docbase-primary hover:bg-docbase-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-docbase-primary disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors duration-150 ease-in-out"
             disabled={
-              isLoading || isDownloading || !domain || !token || !keyword
+              isLoading ||
+              isDownloading ||
+              !domain ||
+              !token ||
+              (!keyword &&
+                !tags &&
+                !author &&
+                !titleFilter &&
+                !startDate &&
+                !endDate)
             }
           >
             {isLoading ? (
