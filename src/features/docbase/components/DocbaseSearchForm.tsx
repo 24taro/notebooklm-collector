@@ -122,6 +122,16 @@ export const DocbaseSearchForm = ({
     <div className="max-w-3xl mx-auto">
       <form onSubmit={handleSubmit} className="space-y-6">
         <div className="space-y-4">
+          <DocbaseDomainInput
+            domain={domain}
+            onDomainChange={setDomain}
+            disabled={isLoading || isDownloading}
+          />
+          <DocbaseTokenInput
+            token={token}
+            onTokenChange={setToken}
+            disabled={isLoading || isDownloading}
+          />
           <div>
             <label
               htmlFor="keyword"
@@ -139,16 +149,6 @@ export const DocbaseSearchForm = ({
               disabled={isLoading || isDownloading}
             />
           </div>
-          <DocbaseDomainInput
-            domain={domain}
-            onDomainChange={setDomain}
-            disabled={isLoading || isDownloading}
-          />
-          <DocbaseTokenInput
-            token={token}
-            onTokenChange={setToken}
-            disabled={isLoading || isDownloading}
-          />
         </div>
 
         {/* 詳細検索の開閉ボタンと入力フィールドを追加 */}
