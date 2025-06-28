@@ -251,16 +251,22 @@ export function createSlackAdapter(httpClient: HttpClient): SlackAdapter {
     ): Promise<Result<string, ApiError>> {
       const { token, channel, messageTs } = params;
 
-      const url = `${API_BASE_URL}/chat.getPermalink?channel=${encodeURIComponent(
-        channel
-      )}&message_ts=${encodeURIComponent(messageTs)}`;
-
-      const result = await httpClient.fetch<SlackApiResponse>(url, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-          "Content-Type": "application/x-www-form-urlencoded",
-        },
+      const formParams = new URLSearchParams({
+        token,
+        channel,
+        message_ts: messageTs,
       });
+
+      const result = await httpClient.fetch<SlackApiResponse>(
+        `${API_BASE_URL}/chat.getPermalink`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/x-www-form-urlencoded",
+          },
+          body: formParams.toString(),
+        }
+      );
 
       if (result.isErr()) {
         return err(result.error);
