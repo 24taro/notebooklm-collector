@@ -3,7 +3,7 @@
 import type { FC } from "react";
 import { useState } from "react";
 import type { SlackThread } from "../types/slack";
-import { generateSlackMarkdown } from "../utils/slackMarkdownGenerator";
+import { generateSlackThreadsMarkdown } from "../utils/slackMarkdownGenerator";
 
 interface SlackMarkdownPreviewProps {
   threads: SlackThread[];
