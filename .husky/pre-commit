@@ -3,22 +3,30 @@
 # 機密情報のパターンをチェック
 echo "🔍 Checking for sensitive data patterns..."
 
-# APIトークンやシークレットのパターンを検索（.huskyディレクトリを除外）
-if git diff --cached --name-only | grep -v "^\.husky/" | xargs grep -E "(xoxp-[0-9a-zA-Z]{10,}|xoxb-[0-9a-zA-Z]{10,}|sk-[0-9a-zA-Z]{20,}|pk_[0-9a-zA-Z]{20,}|api_key.*=.*['\"][^'\"]{20,}|password.*=.*['\"][^'\"]+['\"])" 2>/dev/null; then
-  echo "❌ Error: Potential secrets detected in staged files!"
+# APIトークンやシークレットのパターンを検索（ファイル名のみ表示）
+SECRET_FILES=$(git diff --cached --name-only | grep -v "^\.husky/" | xargs grep -lE "(xoxp-[0-9a-zA-Z]{10,}|xoxb-[0-9a-zA-Z]{10,}|sk-[0-9a-zA-Z]{20,}|pk_[0-9a-zA-Z]{20,}|api_key.*=.*['\"][^'\"]{20,}|password.*=.*['\"][^'\"]+['\"])" 2>/dev/null || true)
+
+if [ -n "$SECRET_FILES" ]; then
+  echo "❌ Error: Potential secrets detected in the following files:"
+  echo "$SECRET_FILES"
+  echo ""
   echo "Please remove sensitive data before committing."
   exit 1
 fi
 
 # 環境変数ファイルのチェック
-if git diff --cached --name-only | grep -E "^\.env($|\.)" | grep -v -E "\.example$|\.sample$"; then
-  echo "❌ Error: Attempting to commit .env file!"
+ENV_FILES=$(git diff --cached --name-only | grep -E "^\.env($|\.)" | grep -v -E "\.example$|\.sample$" || true)
+
+if [ -n "$ENV_FILES" ]; then
+  echo "❌ Error: Attempting to commit environment files:"
+  echo "$ENV_FILES"
+  echo ""
   echo "Environment files should never be committed."
   exit 1
 fi
 
-# Biomeによるlintとformat
-echo "🧹 Running Biome lint and format..."
-npx biome check --write --no-errors-on-unmatched ./src
+# lint-stagedを実行（ステージングされたファイルのみ処理）
+echo "🧹 Running lint-staged..."
+npx lint-staged
 
 echo "✅ Pre-commit checks passed!"
