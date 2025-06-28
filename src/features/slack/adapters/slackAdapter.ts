@@ -368,12 +368,27 @@ export function createSlackAdapter(httpClient: HttpClient): SlackAdapter {
               threadMap.set(threadTs, parentResult.value);
             }
           } else {
-            // これは親メッセージ（または独立したメッセージ）
-            threadMap.set(threadTs, {
+            // これは親メッセージの可能性がある
+            // conversations.repliesを呼んでスレッド全体を取得
+            processedThreads.add(threadTs);
+
+            const threadResult = await this.getThreadMessages({
+              token,
               channel: message.channel.id,
-              parent: message,
-              replies: [],
+              threadTs: message.ts, // 親メッセージのtsを使用
             });
+
+            if (threadResult.isOk()) {
+              // スレッドに返信がある場合
+              threadMap.set(threadTs, threadResult.value);
+            } else {
+              // エラーの場合、または返信がない場合は単独メッセージとして扱う
+              threadMap.set(threadTs, {
+                channel: message.channel.id,
+                parent: message,
+                replies: [],
+              });
+            }
           }
         }
       }

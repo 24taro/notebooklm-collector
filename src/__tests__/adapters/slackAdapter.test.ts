@@ -639,7 +639,42 @@ describe("SlackAdapter", () => {
         },
       ];
 
-      const mockHttpClient = createMockHttpClient([]);
+      // スレッド取得のモックレスポンス（返信あり）
+      const threadResponse = {
+        ok: true,
+        messages: [
+          {
+            ts: "1234567890.123456",
+            user: "U123456",
+            text: "親メッセージ",
+            channel: { id: "C123456" },
+          },
+          {
+            ts: "1234567891.234567",
+            user: "U234567",
+            text: "返信1",
+            thread_ts: "1234567890.123456",
+            channel: { id: "C123456" },
+          },
+          {
+            ts: "1234567892.345678",
+            user: "U345678",
+            text: "返信2",
+            thread_ts: "1234567890.123456",
+            channel: { id: "C123456" },
+          },
+        ],
+      };
+
+      const mockHttpClient = createMockHttpClient([
+        {
+          url: "https://slack.com/api/conversations.replies",
+          method: "POST",
+          status: 200,
+          data: threadResponse,
+        },
+      ]);
+
       const adapter = createSlackAdapter(mockHttpClient);
       const result = await adapter.buildThreadsFromMessages(
         messages,
@@ -651,7 +686,7 @@ describe("SlackAdapter", () => {
         const threads = result.value;
         expect(threads).toHaveLength(1);
         expect(threads[0].parent.ts).toBe("1234567890.123456");
-        expect(threads[0].replies).toHaveLength(0); // 返信なし
+        expect(threads[0].replies).toHaveLength(2); // 2つの返信を取得
       }
     });
   });
