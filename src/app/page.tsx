@@ -17,7 +17,10 @@ export default function HomePage() {
           </p>
           
           <div className="grid md:grid-cols-2 gap-8">
-            <div className="flex items-start space-x-4">
+            <Link 
+              href="/docbase" 
+              className="flex items-start space-x-4 p-6 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+            >
               <Image 
                 src="/docbase-icon.jpeg" 
                 alt="Docbase" 
@@ -26,19 +29,19 @@ export default function HomePage() {
                 className="rounded"
               />
               <div>
-                <Link 
-                  href="/docbase" 
-                  className="text-lg text-gray-900 underline hover:text-gray-600"
-                >
+                <h2 className="text-lg text-gray-900">
                   Docbase連携
-                </Link>
+                </h2>
                 <p className="text-gray-600 mt-2">
-                  Docbaseの記事を検索・収集（最大500件）
+                  Docbaseの記事を検索・収集
                 </p>
               </div>
-            </div>
+            </Link>
             
-            <div className="flex items-start space-x-4">
+            <Link 
+              href="/slack" 
+              className="flex items-start space-x-4 p-6 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+            >
               <Image 
                 src="/slack-icon.svg" 
                 alt="Slack" 
@@ -47,17 +50,14 @@ export default function HomePage() {
                 className="rounded"
               />
               <div>
-                <Link 
-                  href="/slack" 
-                  className="text-lg text-gray-900 underline hover:text-gray-600"
-                >
+                <h2 className="text-lg text-gray-900">
                   Slack連携
-                </Link>
+                </h2>
                 <p className="text-gray-600 mt-2">
-                  Slackのスレッドを検索・収集（最大300件）
+                  Slackのスレッドを検索・収集
                 </p>
               </div>
-            </div>
+            </Link>
           </div>
         </div>
       </div>
