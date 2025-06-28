@@ -81,9 +81,28 @@ describe("useSlackSearchUnified", () => {
       getThreadMessages: vi.fn(),
       getPermalink: vi.fn(),
       getUserInfo: vi.fn(),
-      buildThreadsFromMessages: vi.fn(),
-      fetchUserMaps: vi.fn(),
-      generatePermalinkMaps: vi.fn(),
+      buildThreadsFromMessages: vi.fn((messages, token, onProgress) => {
+        // プログレスコールバックのシミュレーション
+        if (onProgress) {
+          setTimeout(() => onProgress(1, 2), 10);
+          setTimeout(() => onProgress(2, 2), 20);
+        }
+        return Promise.resolve(ok([mockThread]));
+      }),
+      fetchUserMaps: vi.fn((threads, token, onProgress) => {
+        // プログレスコールバックのシミュレーション
+        if (onProgress) {
+          setTimeout(() => onProgress(1, 1), 10);
+        }
+        return Promise.resolve(ok({ U123456: "Test User" }));
+      }),
+      generatePermalinkMaps: vi.fn((threads, token, onProgress) => {
+        // プログレスコールバックのシミュレーション
+        if (onProgress) {
+          setTimeout(() => onProgress(1, 1), 10);
+        }
+        return Promise.resolve(ok({ "1234567890.123456": "https://slack.com/permalink" }));
+      }),
       generateMarkdown: vi.fn(),
     };
   });

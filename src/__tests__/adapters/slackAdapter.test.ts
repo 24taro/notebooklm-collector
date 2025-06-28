@@ -613,9 +613,11 @@ describe("SlackAdapter", () => {
       ]);
 
       const adapter = createSlackAdapter(mockHttpClient);
+      const progressCallback = vi.fn();
       const result = await adapter.buildThreadsFromMessages(
         messages,
-        "xoxp-test-token"
+        "xoxp-test-token",
+        progressCallback
       );
 
       expect(result.isOk()).toBe(true);
@@ -641,9 +643,11 @@ describe("SlackAdapter", () => {
 
       const mockHttpClient = createMockHttpClient([]);
       const adapter = createSlackAdapter(mockHttpClient);
+      const progressCallback = vi.fn();
       const result = await adapter.buildThreadsFromMessages(
         messages,
-        "xoxp-test-token"
+        "xoxp-test-token",
+        progressCallback
       );
 
       expect(result.isOk()).toBe(true);

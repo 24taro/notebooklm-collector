@@ -92,36 +92,42 @@ export interface SlackAdapter {
   getUserInfo(params: SlackUserParams): Promise<Result<SlackUser, ApiError>>;
 
   /**
-   * メッセージリストからスレッドを構築する
+   * メッセージリストからスレッドを構築する（プログレスコールバック付き）
    * @param messages メッセージリスト
    * @param token APIトークン
+   * @param onProgress プログレスコールバック
    * @returns Promise<Result<SlackThread[], ApiError>>
    */
   buildThreadsFromMessages(
     messages: SlackMessage[],
-    token: string
+    token: string,
+    onProgress?: (current: number, total: number) => void
   ): Promise<Result<SlackThread[], ApiError>>;
 
   /**
-   * スレッドリストからユーザーマップを取得する
+   * スレッドリストからユーザーマップを取得する（プログレスコールバック付き）
    * @param threads スレッドリスト
    * @param token APIトークン
+   * @param onProgress プログレスコールバック
    * @returns Promise<Result<Record<string, string>, ApiError>>
    */
   fetchUserMaps(
     threads: SlackThread[],
-    token: string
+    token: string,
+    onProgress?: (current: number, total: number) => void
   ): Promise<Result<Record<string, string>, ApiError>>;
 
   /**
-   * スレッドリストからパーマリンクマップを生成する
+   * スレッドリストからパーマリンクマップを生成する（プログレスコールバック付き）
    * @param threads スレッドリスト
    * @param token APIトークン
+   * @param onProgress プログレスコールバック
    * @returns Promise<Result<Record<string, string>, ApiError>>
    */
   generatePermalinkMaps(
     threads: SlackThread[],
-    token: string
+    token: string,
+    onProgress?: (current: number, total: number) => void
   ): Promise<Result<Record<string, string>, ApiError>>;
 
   /**
@@ -325,50 +331,45 @@ export function createSlackAdapter(httpClient: HttpClient): SlackAdapter {
 
     async buildThreadsFromMessages(
       messages: SlackMessage[],
-      token: string
+      token: string,
+      onProgress?: (current: number, total: number) => void
     ): Promise<Result<SlackThread[], ApiError>> {
       const threadMap = new Map<string, SlackThread>();
       const processedThreads = new Set<string>(); // 重複処理を防ぐ
-
+      
+      // スレッド取得が必要なメッセージを収集
+      const threadsToFetch: { channel: string; threadTs: string }[] = [];
+      
+      // まず、すべてのメッセージを分析してスレッド構造を理解
       for (const message of messages) {
-        // permalinkからthread_tsを抽出して正しいスレッドIDを取得
         const threadTsFromPermalink = extractThreadTsFromPermalink(
           message.permalink
         );
         const threadTs =
           message.thread_ts || threadTsFromPermalink || message.ts;
 
-        // 既に処理済みのスレッドはスキップ
         if (processedThreads.has(threadTs)) {
           continue;
         }
 
         if (threadMap.has(threadTs)) {
-          // 既存スレッドに返信を追加
           const thread = threadMap.get(threadTs);
           if (thread && (message.thread_ts || threadTsFromPermalink)) {
             thread.replies.push(message);
           }
         } else {
-          // 新しいスレッドを作成
           if (
             message.thread_ts ||
             (threadTsFromPermalink && threadTsFromPermalink !== message.ts)
           ) {
-            // これは返信メッセージなので、スレッド全体を取得
+            // スレッド取得が必要
             processedThreads.add(threadTs);
-
-            const parentResult = await this.getThreadMessages({
-              token,
+            threadsToFetch.push({
               channel: message.channel.id,
-              threadTs: threadTs, // 親のタイムスタンプを使用
+              threadTs: threadTs,
             });
-
-            if (parentResult.isOk()) {
-              threadMap.set(threadTs, parentResult.value);
-            }
           } else {
-            // これは親メッセージ（または独立したメッセージ）
+            // 親メッセージ
             threadMap.set(threadTs, {
               channel: message.channel.id,
               parent: message,
@@ -378,12 +379,38 @@ export function createSlackAdapter(httpClient: HttpClient): SlackAdapter {
         }
       }
 
+      // スレッドを1件ずつ取得（conversations.repliesのレート制限が厳しいため）
+      const totalThreads = threadsToFetch.length;
+      let processedCount = 0;
+      
+      for (const { channel, threadTs } of threadsToFetch) {
+        // スレッドを取得
+        const threadResult = await this.getThreadMessages({ token, channel, threadTs });
+        
+        if (threadResult.isOk()) {
+          threadMap.set(threadTs, threadResult.value);
+        }
+        
+        processedCount++;
+        
+        // プログレス更新
+        if (onProgress) {
+          onProgress(processedCount, totalThreads);
+        }
+        
+        // レート制限を考慮して少し待機（必要に応じて調整）
+        if (processedCount < totalThreads) {
+          await new Promise(resolve => setTimeout(resolve, 100)); // 100ms待機
+        }
+      }
+
       return ok(Array.from(threadMap.values()));
     },
 
     async fetchUserMaps(
       threads: SlackThread[],
-      token: string
+      token: string,
+      onProgress?: (current: number, total: number) => void
     ): Promise<Result<Record<string, string>, ApiError>> {
       const userMaps: Record<string, string> = {};
       const userIds = new Set<string>();
@@ -396,14 +423,34 @@ export function createSlackAdapter(httpClient: HttpClient): SlackAdapter {
         }
       }
 
-      // 各ユーザー情報を取得
-      for (const userId of userIds) {
-        const userResult = await this.getUserInfo({ token, userId });
-        if (userResult.isOk()) {
-          const user = userResult.value;
-          userMaps[userId] = user.real_name || user.name || userId;
-        } else {
-          userMaps[userId] = userId;
+      // ユーザーIDの配列に変換
+      const userIdArray = Array.from(userIds);
+      const totalUsers = userIdArray.length;
+      const batchSize = 10;
+
+      // バッチ処理でユーザー情報を取得（10件ずつ）
+      for (let i = 0; i < totalUsers; i += batchSize) {
+        const batch = userIdArray.slice(i, Math.min(i + batchSize, totalUsers));
+        
+        // バッチ内のユーザー情報を並列で取得
+        const batchResults = await Promise.all(
+          batch.map((userId) => this.getUserInfo({ token, userId }))
+        );
+
+        // 結果を処理
+        batchResults.forEach((result, index) => {
+          const userId = batch[index];
+          if (result.isOk()) {
+            const user = result.value;
+            userMaps[userId] = user.real_name || user.name || userId;
+          } else {
+            userMaps[userId] = userId;
+          }
+        });
+
+        // プログレス更新
+        if (onProgress) {
+          onProgress(Math.min(i + batchSize, totalUsers), totalUsers);
         }
       }
 
@@ -412,23 +459,40 @@ export function createSlackAdapter(httpClient: HttpClient): SlackAdapter {
 
     async generatePermalinkMaps(
       threads: SlackThread[],
-      token: string
+      token: string,
+      onProgress?: (current: number, total: number) => void
     ): Promise<Result<Record<string, string>, ApiError>> {
       const permalinkMaps: Record<string, string> = {};
+      const totalThreads = threads.length;
+      const batchSize = 10;
 
-      for (const thread of threads) {
-        // 親メッセージのパーマリンクのみ取得（スレッドリンクとして使用）
-        const parentPermalinkResult = await this.getPermalink({
-          token,
-          channel: thread.channel,
-          messageTs: thread.parent.ts,
+      // バッチ処理でパーマリンクを取得（10件ずつ）
+      for (let i = 0; i < totalThreads; i += batchSize) {
+        const batch = threads.slice(i, Math.min(i + batchSize, totalThreads));
+        
+        // バッチ内のパーマリンクを並列で取得
+        const batchResults = await Promise.all(
+          batch.map((thread) =>
+            this.getPermalink({
+              token,
+              channel: thread.channel,
+              messageTs: thread.parent.ts,
+            })
+          )
+        );
+
+        // 結果を処理
+        batchResults.forEach((result, index) => {
+          if (result.isOk()) {
+            const thread = batch[index];
+            permalinkMaps[thread.parent.ts] = result.value;
+          }
         });
 
-        if (parentPermalinkResult.isOk()) {
-          permalinkMaps[thread.parent.ts] = parentPermalinkResult.value;
+        // プログレス更新
+        if (onProgress) {
+          onProgress(Math.min(i + batchSize, totalThreads), totalThreads);
         }
-
-        // 返信メッセージのパーマリンクは取得しない（API呼び出し削減）
       }
 
       return ok(permalinkMaps);
