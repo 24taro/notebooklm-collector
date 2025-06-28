@@ -101,7 +101,9 @@ describe("useSlackSearchUnified", () => {
         if (onProgress) {
           setTimeout(() => onProgress(1, 1), 10);
         }
-        return Promise.resolve(ok({ "1234567890.123456": "https://slack.com/permalink" }));
+        return Promise.resolve(
+          ok({ "1234567890.123456": "https://slack.com/permalink" })
+        );
       }),
       generateMarkdown: vi.fn(),
     };
@@ -164,7 +166,7 @@ describe("useSlackSearchUnified", () => {
 
       expect(mockAdapter.searchMessages).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: "\"test query\"",
+          query: '"test query"',
         })
       );
     });
@@ -202,7 +204,7 @@ describe("useSlackSearchUnified", () => {
       expect(mockAdapter.searchMessages).toHaveBeenCalledWith(
         expect.objectContaining({
           query:
-            "\"meeting\" in:general from:john after:2023-01-01 before:2023-12-31",
+            '"meeting" in:general from:john after:2023-01-01 before:2023-12-31',
         })
       );
     });
@@ -236,7 +238,7 @@ describe("useSlackSearchUnified", () => {
 
       expect(mockAdapter.searchMessages).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: "\"test\" in:#general",
+          query: '"test" in:#general',
         })
       );
     });
@@ -270,7 +272,7 @@ describe("useSlackSearchUnified", () => {
 
       expect(mockAdapter.searchMessages).toHaveBeenCalledWith(
         expect.objectContaining({
-          query: "\"test\" from:@john",
+          query: '"test" from:@john',
         })
       );
     });
@@ -298,7 +300,7 @@ describe("useSlackSearchUnified", () => {
 
       expect(mockAdapter.searchMessages).toHaveBeenCalledWith({
         token: "",
-        query: "\"test\"",
+        query: '"test"',
         count: 100,
         page: 1,
       });
@@ -331,7 +333,7 @@ describe("useSlackSearchUnified", () => {
 
       expect(mockAdapter.searchMessages).toHaveBeenCalledWith({
         token: "xoxp-test",
-        query: "\"\"",
+        query: '""',
         count: 100,
         page: 1,
       });
@@ -539,7 +541,7 @@ describe("useSlackSearchUnified", () => {
             },
           })
         );
-      
+
       (mockAdapter.buildThreadsFromMessages as Mock).mockResolvedValue(
         ok([mockThread])
       );

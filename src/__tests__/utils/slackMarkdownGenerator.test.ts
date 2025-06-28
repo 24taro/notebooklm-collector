@@ -168,7 +168,7 @@ describe("slackMarkdownGenerator", () => {
         mockPermalinkMap
       );
 
-      expect(result).toContain('channels: ["C123456", "C789012"]');
+      expect(result).toContain('channels: ["#C123456", "#C789012"]');
     });
 
     it("参加者が10人以下の場合は全員リストアップする", () => {
@@ -338,10 +338,10 @@ describe("slackMarkdownGenerator", () => {
 
       expect(result).toContain("## Threads Index");
       expect(result).toContain(
-        "1. [Thread 1](#thread-1) - 田中太郎 in C123456"
+        "1. [Thread 1](#thread-1) - 田中太郎 in #C123456"
       );
       expect(result).toContain(
-        "2. [Thread 2](#thread-2) - 鈴木一郎 in C123456"
+        "2. [Thread 2](#thread-2) - 鈴木一郎 in #C123456"
       );
     });
 
@@ -464,7 +464,7 @@ describe("slackMarkdownGenerator", () => {
       expect(result).toContain("total_threads: 2");
       expect(result).toContain("total_messages: 5"); // 親2 + 返信3
       expect(result).toContain('search_keyword: "テストキーワード"');
-      expect(result).toContain('channels: ["C123456"]');
+      expect(result).toContain('channels: ["#C123456"]');
       expect(result).toContain("date_range:");
       expect(result).toContain("generated_at:");
     });

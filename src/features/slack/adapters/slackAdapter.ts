@@ -336,10 +336,10 @@ export function createSlackAdapter(httpClient: HttpClient): SlackAdapter {
     ): Promise<Result<SlackThread[], ApiError>> {
       const threadMap = new Map<string, SlackThread>();
       const processedThreads = new Set<string>(); // 重複処理を防ぐ
-      
+
       // スレッド取得が必要なメッセージを収集
       const threadsToFetch: { channel: string; threadTs: string }[] = [];
-      
+
       // まず、すべてのメッセージを分析してスレッド構造を理解
       for (const message of messages) {
         const threadTsFromPermalink = extractThreadTsFromPermalink(
@@ -382,25 +382,29 @@ export function createSlackAdapter(httpClient: HttpClient): SlackAdapter {
       // スレッドを1件ずつ取得（conversations.repliesのレート制限が厳しいため）
       const totalThreads = threadsToFetch.length;
       let processedCount = 0;
-      
+
       for (const { channel, threadTs } of threadsToFetch) {
         // スレッドを取得
-        const threadResult = await this.getThreadMessages({ token, channel, threadTs });
-        
+        const threadResult = await this.getThreadMessages({
+          token,
+          channel,
+          threadTs,
+        });
+
         if (threadResult.isOk()) {
           threadMap.set(threadTs, threadResult.value);
         }
-        
+
         processedCount++;
-        
+
         // プログレス更新
         if (onProgress) {
           onProgress(processedCount, totalThreads);
         }
-        
+
         // レート制限を考慮して少し待機（必要に応じて調整）
         if (processedCount < totalThreads) {
-          await new Promise(resolve => setTimeout(resolve, 100)); // 100ms待機
+          await new Promise((resolve) => setTimeout(resolve, 100)); // 100ms待機
         }
       }
 
@@ -431,7 +435,7 @@ export function createSlackAdapter(httpClient: HttpClient): SlackAdapter {
       // バッチ処理でユーザー情報を取得（10件ずつ）
       for (let i = 0; i < totalUsers; i += batchSize) {
         const batch = userIdArray.slice(i, Math.min(i + batchSize, totalUsers));
-        
+
         // バッチ内のユーザー情報を並列で取得
         const batchResults = await Promise.all(
           batch.map((userId) => this.getUserInfo({ token, userId }))
@@ -469,7 +473,7 @@ export function createSlackAdapter(httpClient: HttpClient): SlackAdapter {
       // バッチ処理でパーマリンクを取得（10件ずつ）
       for (let i = 0; i < totalThreads; i += batchSize) {
         const batch = threads.slice(i, Math.min(i + batchSize, totalThreads));
-        
+
         // バッチ内のパーマリンクを並列で取得
         const batchResults = await Promise.all(
           batch.map((thread) =>

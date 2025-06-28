@@ -173,18 +173,25 @@ export function useSlackSearchUnified(
         }
 
         setState((prev) => ({ ...prev, messages }));
-        
+
         // スレッド取得が必要なメッセージ数を事前に計算
-        const threadMessages = messages.filter(msg => {
-          const threadTsFromPermalink = msg.permalink?.match(/thread_ts=(\d+\.\d+)/)?.[1];
-          return msg.thread_ts || (threadTsFromPermalink && threadTsFromPermalink !== msg.ts);
+        const threadMessages = messages.filter((msg) => {
+          const threadTsFromPermalink =
+            msg.permalink?.match(/thread_ts=(\d+\.\d+)/)?.[1];
+          return (
+            msg.thread_ts ||
+            (threadTsFromPermalink && threadTsFromPermalink !== msg.ts)
+          );
         });
-        const uniqueThreadIds = new Set(threadMessages.map(msg => {
-          const threadTsFromPermalink = msg.permalink?.match(/thread_ts=(\d+\.\d+)/)?.[1];
-          return msg.thread_ts || threadTsFromPermalink || msg.ts;
-        }));
+        const uniqueThreadIds = new Set(
+          threadMessages.map((msg) => {
+            const threadTsFromPermalink =
+              msg.permalink?.match(/thread_ts=(\d+\.\d+)/)?.[1];
+            return msg.thread_ts || threadTsFromPermalink || msg.ts;
+          })
+        );
         const threadsToFetchCount = uniqueThreadIds.size;
-        
+
         updateProgress(
           "fetching_threads",
           `${messages.length}件のメッセージからスレッドを構築中... (約${threadsToFetchCount}個のスレッドを取得予定)`,
@@ -213,15 +220,17 @@ export function useSlackSearchUnified(
 
         const threads = threadsResult.value;
         setState((prev) => ({ ...prev, slackThreads: threads }));
-        
+
         // ユーザー数を計算
         const userIds = new Set<string>();
-        threads.forEach(thread => {
+        for (const thread of threads) {
           userIds.add(thread.parent.user);
-          thread.replies.forEach(reply => userIds.add(reply.user));
-        });
+          for (const reply of thread.replies) {
+            userIds.add(reply.user);
+          }
+        }
         const totalUsers = userIds.size;
-        
+
         updateProgress(
           "fetching_users",
           `${totalUsers}人のユーザー情報を取得中...`,
@@ -250,9 +259,9 @@ export function useSlackSearchUnified(
 
         const userMaps = userMapsResult.value;
         setState((prev) => ({ ...prev, userMaps }));
-        
+
         updateProgress(
-          "generating_permalinks", 
+          "generating_permalinks",
           `${threads.length}個のパーマリンクを生成中...`,
           0,
           threads.length
