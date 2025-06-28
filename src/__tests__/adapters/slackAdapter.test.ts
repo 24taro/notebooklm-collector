@@ -5,8 +5,12 @@ import {
   type SlackAdapter,
   createSlackAdapter,
 } from "../../features/slack/adapters/slackAdapter";
+import type {
+  SlackMessage,
+  SlackThread,
+  SlackUser,
+} from "../../features/slack/types/slack";
 import type { ApiError } from "../../types/error";
-import type { SlackMessage, SlackThread, SlackUser } from "../../types/slack";
 
 describe("SlackAdapter", () => {
   describe("searchMessages", () => {
@@ -490,6 +494,164 @@ describe("SlackAdapter", () => {
       expect(result.isErr()).toBe(true);
       if (result.isErr()) {
         expect(result.error.type).toBe("network");
+      }
+    });
+  });
+
+  describe("thread_ts抽出とスレッド構築", () => {
+    it("permalinkからthread_tsを正しく抽出して返信メッセージを識別する", async () => {
+      const mockResponse = {
+        ok: true,
+        messages: {
+          matches: [
+            {
+              ts: "1750030926.904449",
+              user: "U02R8RD0X4M",
+              text: "これは返信メッセージです",
+              channel: { id: "C08EW1KPJ8K", name: "general" },
+              permalink:
+                "https://slack.com/archives/C08EW1KPJ8K/p1750030926904449?thread_ts=1749775390.384189",
+            },
+          ],
+          pagination: {
+            page: 1,
+            page_count: 1,
+            total_count: 1,
+            per_page: 20,
+          },
+        },
+      };
+
+      const mockHttpClient = createMockHttpClient([
+        {
+          url: "https://slack.com/api/search.messages",
+          method: "POST",
+          status: 200,
+          data: mockResponse,
+        },
+      ]);
+
+      const adapter = createSlackAdapter(mockHttpClient);
+      const result = await adapter.searchMessages({
+        token: "xoxp-test-token",
+        query: "返信メッセージ",
+      });
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const messages = result.value.messages;
+        expect(messages).toHaveLength(1);
+        expect(messages[0].thread_ts).toBe("1749775390.384189");
+        expect(messages[0].ts).toBe("1750030926.904449");
+      }
+    });
+
+    it("buildThreadsFromMessagesで重複スレッドを除去する", async () => {
+      const messages: SlackMessage[] = [
+        {
+          ts: "1234567890.123456",
+          user: "U123456",
+          text: "親メッセージ",
+          thread_ts: undefined,
+          channel: { id: "C123456", name: "general" },
+          permalink: "https://slack.com/archives/C123456/p1234567890123456",
+        },
+        {
+          ts: "1234567891.234567",
+          user: "U234567",
+          text: "返信1",
+          thread_ts: undefined, // APIレスポンスではthread_tsが含まれない
+          channel: { id: "C123456", name: "general" },
+          permalink:
+            "https://slack.com/archives/C123456/p1234567891234567?thread_ts=1234567890.123456",
+        },
+        {
+          ts: "1234567892.345678",
+          user: "U345678",
+          text: "返信2",
+          thread_ts: undefined, // APIレスポンスではthread_tsが含まれない
+          channel: { id: "C123456", name: "general" },
+          permalink:
+            "https://slack.com/archives/C123456/p1234567892345678?thread_ts=1234567890.123456",
+        },
+      ];
+
+      // スレッド取得のモックレスポンス
+      const threadResponse = {
+        ok: true,
+        messages: [
+          {
+            ts: "1234567890.123456",
+            user: "U123456",
+            text: "親メッセージ",
+            channel: { id: "C123456" },
+          },
+          {
+            ts: "1234567891.234567",
+            user: "U234567",
+            text: "返信1",
+            thread_ts: "1234567890.123456",
+            channel: { id: "C123456" },
+          },
+          {
+            ts: "1234567892.345678",
+            user: "U345678",
+            text: "返信2",
+            thread_ts: "1234567890.123456",
+            channel: { id: "C123456" },
+          },
+        ],
+      };
+
+      const mockHttpClient = createMockHttpClient([
+        {
+          url: "https://slack.com/api/conversations.replies",
+          method: "POST",
+          status: 200,
+          data: threadResponse,
+        },
+      ]);
+
+      const adapter = createSlackAdapter(mockHttpClient);
+      const result = await adapter.buildThreadsFromMessages(
+        messages,
+        "xoxp-test-token"
+      );
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const threads = result.value;
+        expect(threads).toHaveLength(1); // 1つのスレッドのみ
+        expect(threads[0].parent.ts).toBe("1234567890.123456");
+        expect(threads[0].replies).toHaveLength(2);
+      }
+    });
+
+    it("親メッセージがヒットした場合もスレッド全体を構築する", async () => {
+      const messages: SlackMessage[] = [
+        {
+          ts: "1234567890.123456",
+          user: "U123456",
+          text: "親メッセージ",
+          thread_ts: undefined,
+          channel: { id: "C123456", name: "general" },
+          permalink: "https://slack.com/archives/C123456/p1234567890123456",
+        },
+      ];
+
+      const mockHttpClient = createMockHttpClient([]);
+      const adapter = createSlackAdapter(mockHttpClient);
+      const result = await adapter.buildThreadsFromMessages(
+        messages,
+        "xoxp-test-token"
+      );
+
+      expect(result.isOk()).toBe(true);
+      if (result.isOk()) {
+        const threads = result.value;
+        expect(threads).toHaveLength(1);
+        expect(threads[0].parent.ts).toBe("1234567890.123456");
+        expect(threads[0].replies).toHaveLength(0); // 返信なし
       }
     });
   });

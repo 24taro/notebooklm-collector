@@ -328,31 +328,47 @@ export function createSlackAdapter(httpClient: HttpClient): SlackAdapter {
       token: string
     ): Promise<Result<SlackThread[], ApiError>> {
       const threadMap = new Map<string, SlackThread>();
+      const processedThreads = new Set<string>(); // 重複処理を防ぐ
 
       for (const message of messages) {
-        const threadTs = message.thread_ts || message.ts;
+        // permalinkからthread_tsを抽出して正しいスレッドIDを取得
+        const threadTsFromPermalink = extractThreadTsFromPermalink(
+          message.permalink
+        );
+        const threadTs =
+          message.thread_ts || threadTsFromPermalink || message.ts;
+
+        // 既に処理済みのスレッドはスキップ
+        if (processedThreads.has(threadTs)) {
+          continue;
+        }
 
         if (threadMap.has(threadTs)) {
           // 既存スレッドに返信を追加
           const thread = threadMap.get(threadTs);
-          if (thread && message.thread_ts) {
+          if (thread && (message.thread_ts || threadTsFromPermalink)) {
             thread.replies.push(message);
           }
         } else {
           // 新しいスレッドを作成
-          if (message.thread_ts) {
-            // これは返信メッセージなので、親を取得
+          if (
+            message.thread_ts ||
+            (threadTsFromPermalink && threadTsFromPermalink !== message.ts)
+          ) {
+            // これは返信メッセージなので、スレッド全体を取得
+            processedThreads.add(threadTs);
+
             const parentResult = await this.getThreadMessages({
               token,
               channel: message.channel.id,
-              threadTs: message.thread_ts,
+              threadTs: threadTs, // 親のタイムスタンプを使用
             });
 
             if (parentResult.isOk()) {
               threadMap.set(threadTs, parentResult.value);
             }
           } else {
-            // これは親メッセージ
+            // これは親メッセージ（または独立したメッセージ）
             threadMap.set(threadTs, {
               channel: message.channel.id,
               parent: message,
@@ -533,6 +549,11 @@ function mapSlackErrorToApiError(errorCode: string): ApiError {
       };
     case "channel_not_found":
     case "thread_not_found":
+      return {
+        type: "notFound",
+        message:
+          "指定されたスレッドが見つかりません。削除されたか、アクセス権限がない可能性があります。",
+      };
     case "message_not_found":
     case "user_not_found":
       return {
@@ -553,6 +574,35 @@ function mapSlackErrorToApiError(errorCode: string): ApiError {
 }
 
 /**
+ * permalinkからthread_tsを抽出する
+ * @param permalink Slackメッセージのpermalink
+ * @returns thread_tsまたはundefined
+ */
+function extractThreadTsFromPermalink(
+  permalink: string | undefined
+): string | undefined {
+  if (!permalink) return undefined;
+
+  // URLパラメータからthread_tsを抽出
+  const match = permalink.match(/thread_ts=(\d+\.\d+)/);
+  return match ? match[1] : undefined;
+}
+
+/**
+ * メッセージが返信かどうかを判定
+ * @param messageTs メッセージのタイムスタンプ
+ * @param permalink メッセージのpermalink
+ * @returns 返信メッセージの場合true
+ */
+function isReplyMessage(
+  messageTs: string,
+  permalink: string | undefined
+): boolean {
+  const threadTs = extractThreadTsFromPermalink(permalink);
+  return threadTs !== undefined && threadTs !== messageTs;
+}
+
+/**
  * 検索レスポンスからメッセージを抽出
  */
 function extractMessagesFromResponse(data: SlackApiResponse): SlackMessage[] {
@@ -567,24 +617,37 @@ function extractMessagesFromResponse(data: SlackApiResponse): SlackMessage[] {
     if ("matches" in msgObj && Array.isArray(msgObj.matches)) {
       return msgObj.matches.map((m: unknown) => {
         const msg = m as Record<string, unknown>;
+        const messageTs = typeof msg.ts === "string" ? msg.ts : "";
+        const permalink =
+          typeof msg.permalink === "string" ? msg.permalink : undefined;
+
+        // permalinkからthread_tsを抽出
+        const threadTs = extractThreadTsFromPermalink(permalink);
+        const isReply = threadTs && threadTs !== messageTs;
+
+        // チャンネル情報の正しい抽出
+        const channel =
+          msg.channel &&
+          typeof msg.channel === "object" &&
+          msg.channel !== null &&
+          "id" in msg.channel
+            ? (msg.channel as {
+                id: string;
+                name?: string;
+                [key: string]: unknown;
+              })
+            : { id: "", name: undefined };
+
         return {
-          ts: typeof msg.ts === "string" ? msg.ts : "",
+          ts: messageTs,
           user: typeof msg.user === "string" ? msg.user : "",
           text: typeof msg.text === "string" ? msg.text : "",
-          thread_ts:
-            typeof msg.thread_ts === "string" ? msg.thread_ts : undefined,
-          channel:
-            msg.channel &&
-            typeof msg.channel === "object" &&
-            msg.channel !== null &&
-            "id" in msg.channel
-              ? {
-                  id: (msg.channel as { id: string }).id,
-                  name: (msg.channel as { name?: string }).name,
-                }
-              : { id: "", name: undefined },
-          permalink:
-            typeof msg.permalink === "string" ? msg.permalink : undefined,
+          thread_ts: isReply ? threadTs : undefined,
+          channel: {
+            id: channel.id,
+            name: channel.name,
+          },
+          permalink,
         };
       });
     }
