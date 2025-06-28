@@ -197,6 +197,9 @@ docs/.vitepress/dist/
 # Claude AI
 .claude/
 
+# Cursor AI
+.cursor/
+
 # Local environment overrides
 local.settings.json
 *.local
