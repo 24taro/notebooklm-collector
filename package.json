@@ -19,7 +19,8 @@
     "test:e2e:debug": "playwright test --debug",
     "storybook": "storybook dev -p 6006",
     "build-storybook": "storybook build",
-    "storybook:test": "npm run build-storybook && npm run test:e2e"
+    "storybook:test": "npm run build-storybook && npm run test:e2e",
+    "prepare": "husky"
   },
   "dependencies": {
     "@tailwindcss/line-clamp": "^0.4.4",
@@ -51,10 +52,17 @@
     "@vitest/ui": "^3.1.4",
     "autoprefixer": "^10.4.21",
     "happy-dom": "^17.5.6",
+    "husky": "^9.1.7",
     "jsdom": "^26.1.0",
+    "lint-staged": "^16.1.2",
     "storybook": "^8.6.14",
     "tailwindcss": "^4.1.7",
     "typescript": "^5",
     "vitest": "^3.1.4"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,css,md}": [
+      "biome check --write --no-errors-on-unmatched"
+    ]
   }
 }
