@@ -101,19 +101,10 @@ export const SlackMarkdownPreview: FC<SlackMarkdownPreviewProps> = ({
       )}
 
       <div className="border border-gray-200 rounded-xl bg-white shadow-sm">
-        <div className="p-4 border-b border-gray-100 flex items-center justify-between">
+        <div className="p-4 border-b border-gray-100">
           <p className="text-sm text-gray-600">
             検索結果: {threads.length}件のスレッド（最大10件まで表示）
           </p>
-          {onDownload && (
-            <button
-              type="button"
-              onClick={onDownload}
-              className="px-4 py-1.5 bg-docbase-primary text-white text-sm font-medium rounded hover:bg-docbase-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-docbase-primary transition-colors"
-            >
-              ダウンロード
-            </button>
-          )}
         </div>
 
         <div className="divide-y divide-gray-100">
