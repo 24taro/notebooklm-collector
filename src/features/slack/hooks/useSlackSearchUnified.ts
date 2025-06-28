@@ -102,9 +102,10 @@ export function useSlackSearchUnified(
 
         updateProgress("searching", "Slackメッセージを検索中...");
 
-        // 1. メッセージ検索
+        // 1. メッセージ検索（ページネーションで最大300件まで取得）
         // SlackSearchParamsを適切にアダプターのSlackSearchParamsに変換
-        let query = params.searchQuery;
+        // メインの検索キーワードを完全一致にするためダブルクォートで囲む
+        let query = `"${params.searchQuery}"`;
         if (params.channel) {
           query += ` in:${params.channel}`;
         }
@@ -118,17 +119,44 @@ export function useSlackSearchUnified(
           query += ` before:${params.endDate}`;
         }
 
-        const searchResult = await adapter.searchMessages({
-          token: params.token,
-          query,
-        });
-        if (searchResult.isErr()) {
-          setError(searchResult.error);
-          toast.error(getUserFriendlyErrorMessage(searchResult.error));
-          return;
+        // 最大500件まで取得（100件×5ページ）
+        const allMessages: SlackMessage[] = [];
+        const maxPages = 5;
+        const perPage = 100;
+
+        for (let page = 1; page <= maxPages; page++) {
+          updateProgress(
+            "searching",
+            `Slackメッセージを検索中... (${(page - 1) * perPage + 1}-${page * perPage}件目)`
+          );
+
+          const searchResult = await adapter.searchMessages({
+            token: params.token,
+            query,
+            count: perPage,
+            page,
+          });
+
+          if (searchResult.isErr()) {
+            setError(searchResult.error);
+            toast.error(getUserFriendlyErrorMessage(searchResult.error));
+            return;
+          }
+
+          const { messages, pagination } = searchResult.value;
+          allMessages.push(...messages);
+
+          // 最後のページまたは500件に達したら終了
+          if (
+            messages.length < perPage ||
+            allMessages.length >= 500 ||
+            page >= pagination.totalPages
+          ) {
+            break;
+          }
         }
 
-        const { messages } = searchResult.value;
+        const messages = allMessages.slice(0, 500); // 最大500件に制限
         if (messages.length === 0) {
           setState((prev) => ({
             ...prev,
@@ -145,15 +173,44 @@ export function useSlackSearchUnified(
         }
 
         setState((prev) => ({ ...prev, messages }));
+
+        // スレッド取得が必要なメッセージ数を事前に計算
+        const threadMessages = messages.filter((msg) => {
+          const threadTsFromPermalink =
+            msg.permalink?.match(/thread_ts=(\d+\.\d+)/)?.[1];
+          return (
+            msg.thread_ts ||
+            (threadTsFromPermalink && threadTsFromPermalink !== msg.ts)
+          );
+        });
+        const uniqueThreadIds = new Set(
+          threadMessages.map((msg) => {
+            const threadTsFromPermalink =
+              msg.permalink?.match(/thread_ts=(\d+\.\d+)/)?.[1];
+            return msg.thread_ts || threadTsFromPermalink || msg.ts;
+          })
+        );
+        const threadsToFetchCount = uniqueThreadIds.size;
+
         updateProgress(
           "fetching_threads",
-          `${messages.length}件のメッセージからスレッドを構築中...`
+          `${messages.length}件のメッセージからスレッドを構築中... (約${threadsToFetchCount}個のスレッドを取得予定)`,
+          0,
+          threadsToFetchCount
         );
 
-        // 2. スレッド構築
+        // 2. スレッド構築（プログレスコールバック付き）
         const threadsResult = await adapter.buildThreadsFromMessages(
           messages,
-          params.token
+          params.token,
+          (current, total) => {
+            updateProgress(
+              "fetching_threads",
+              `スレッドを取得中... (${current}/${total}個完了)`,
+              current,
+              total
+            );
+          }
         );
         if (threadsResult.isErr()) {
           setError(threadsResult.error);
@@ -163,15 +220,36 @@ export function useSlackSearchUnified(
 
         const threads = threadsResult.value;
         setState((prev) => ({ ...prev, slackThreads: threads }));
+
+        // ユーザー数を計算
+        const userIds = new Set<string>();
+        for (const thread of threads) {
+          userIds.add(thread.parent.user);
+          for (const reply of thread.replies) {
+            userIds.add(reply.user);
+          }
+        }
+        const totalUsers = userIds.size;
+
         updateProgress(
           "fetching_users",
-          `${threads.length}個のスレッドからユーザー情報を取得中...`
+          `${totalUsers}人のユーザー情報を取得中...`,
+          0,
+          totalUsers
         );
 
-        // 3. ユーザー情報取得
+        // 3. ユーザー情報取得（プログレスコールバック付き）
         const userMapsResult = await adapter.fetchUserMaps(
           threads,
-          params.token
+          params.token,
+          (current, total) => {
+            updateProgress(
+              "fetching_users",
+              `ユーザー情報を取得中... (${current}/${total}人完了)`,
+              current,
+              total
+            );
+          }
         );
         if (userMapsResult.isErr()) {
           setError(userMapsResult.error);
@@ -181,12 +259,26 @@ export function useSlackSearchUnified(
 
         const userMaps = userMapsResult.value;
         setState((prev) => ({ ...prev, userMaps }));
-        updateProgress("generating_permalinks", "パーマリンクを生成中...");
 
-        // 4. パーマリンク生成
+        updateProgress(
+          "generating_permalinks",
+          `${threads.length}個のパーマリンクを生成中...`,
+          0,
+          threads.length
+        );
+
+        // 4. パーマリンク生成（プログレスコールバック付き）
         const permalinkMapsResult = await adapter.generatePermalinkMaps(
           threads,
-          params.token
+          params.token,
+          (current, total) => {
+            updateProgress(
+              "generating_permalinks",
+              `パーマリンクを生成中... (${current}/${total}個完了)`,
+              current,
+              total
+            );
+          }
         );
         if (permalinkMapsResult.isErr()) {
           // パーマリンクの生成に失敗しても処理を続行

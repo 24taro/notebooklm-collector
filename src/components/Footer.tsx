@@ -17,9 +17,6 @@ const Footer = () => {
         <p className="text-xs text-gray-500">
           データはすべてブラウザ内で処理され、外部送信されません
         </p>
-        <p className="text-xs text-gray-500">
-          &copy; {new Date().getFullYear()} NotebookLM Collector
-        </p>
       </div>
     </footer>
   );

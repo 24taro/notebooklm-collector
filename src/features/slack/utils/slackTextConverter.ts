@@ -96,7 +96,7 @@ export function convertToSlackThreadMarkdown(
   md += `# Slack Thread: ${parentDisplayDate}\n\n`;
 
   md += "## Thread Context\n";
-  md += `- **Channel**: ${thread.channel}\n`;
+  md += `- **Channel**: #${thread.parent.channel.name || thread.channel}\n`;
   md += `- **Started by**: ${parentUser}\n`;
   md += `- **Replies**: ${thread.replies.length} messages\n`;
   md += `- **Participants**: ${participants.join(", ")}\n`;
@@ -113,8 +113,7 @@ export function convertToSlackThreadMarkdown(
   // 親メッセージ
   md += "### Message 1 (Parent)\n";
   md += `**Author**: ${parentUser}\n`;
-  md += `**Time**: ${parentDate.toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })}\n`;
-  md += `**Link**: [Permalink](${parentPermalink})\n\n`;
+  md += `**Time**: ${parentDate.toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })}\n\n`;
   md += `${parent.text}\n\n`;
 
   // 返信メッセージ
@@ -122,15 +121,11 @@ export function convertToSlackThreadMarkdown(
     thread.replies.forEach((reply, index) => {
       const replyUser = getUserName(reply.user);
       const replyDate = new Date(Number.parseFloat(reply.ts) * 1000);
-      const replyPermalink = getPermalink(reply.ts);
 
       md += `### Message ${index + 2} (Reply)\n`;
       md += `**Author**: ${replyUser}\n`;
-      md += `**Time**: ${replyDate.toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })}\n`;
-      if (replyPermalink) {
-        md += `**Link**: [Permalink](${replyPermalink})\n`;
-      }
-      md += `\n${reply.text}\n\n`;
+      md += `**Time**: ${replyDate.toLocaleString("ja-JP", { timeZone: "Asia/Tokyo" })}\n\n`;
+      md += `${reply.text}\n\n`;
     });
   }
 

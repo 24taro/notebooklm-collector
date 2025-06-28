@@ -31,7 +31,11 @@ export const generateSlackThreadsMarkdown = (
   const maxDate = new Date(Math.max(...dates.map((d) => d.getTime())));
 
   // チャンネル・参加者情報
-  const channels = [...new Set(threads.map((thread) => thread.channel))];
+  const channelNames = [
+    ...new Set(
+      threads.map((thread) => thread.parent.channel.name || thread.channel)
+    ),
+  ];
   const allParticipants = [
     ...new Set(allMessages.map((msg) => userMap[msg.user] || msg.user)),
   ];
@@ -45,7 +49,7 @@ export const generateSlackThreadsMarkdown = (
   if (searchKeyword) {
     markdown += `search_keyword: "${searchKeyword}"\n`;
   }
-  markdown += `channels: [${channels.map((c) => `"${c}"`).join(", ")}]\n`;
+  markdown += `channels: [${channelNames.map((c) => `"#${c}"`).join(", ")}]\n`;
   markdown += `participants: [${allParticipants
     .slice(0, 10)
     .map((p) => `"${p}"`)
@@ -71,7 +75,7 @@ export const generateSlackThreadsMarkdown = (
   if (searchKeyword) {
     markdown += `- **Search Keyword**: "${searchKeyword}"\n`;
   }
-  markdown += `- **Channels**: ${channels.join(", ")}\n`;
+  markdown += `- **Channels**: ${channelNames.map((c) => `#${c}`).join(", ")}\n`;
   markdown += `- **Date Range**: ${dateRange}\n`;
   markdown += `- **Participants**: ${allParticipants.length} unique users\n`;
   markdown += "- **Source**: Slack Workspace\n\n";
@@ -88,7 +92,7 @@ export const generateSlackThreadsMarkdown = (
         : thread.parent.text;
     markdown += `${index + 1}. [Thread ${index + 1}](#thread-${
       index + 1
-    }) - ${userName} in ${thread.channel} (${formattedDate})\n`;
+    }) - ${userName} in #${thread.parent.channel.name || thread.channel} (${formattedDate})\n`;
     markdown += `   "${truncatedText}"\n`;
   });
   markdown += "\n---\n\n";
