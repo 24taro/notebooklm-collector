@@ -2,7 +2,7 @@
 
 [![Deploy to GitHub Pages](https://github.com/sotaroNishioka/notebooklm-collector/actions/workflows/deploy.yml/badge.svg)](https://github.com/sotaroNishioka/notebooklm-collector/actions/workflows/deploy.yml)
 
-DocbaseとSlackから情報を収集し、NotebookLM向けに最適化されたMarkdownファイルを生成するWebアプリケーションです。
+Docbase、Slack、Zennから情報を収集し、NotebookLM向けに最適化されたMarkdownファイルを生成するWebアプリケーションです。
 
 ## 🎯 概要
 
@@ -11,7 +11,8 @@ NotebookLM Collectorは、**ブラウザ完結型**でセキュアな情報収�
 ### 主要機能
 
 - **Docbase連携**: 記事検索・取得（最大500件）
-- **Slack連携**: スレッド検索・収集（最大500件のメッセージ）  
+- **Slack連携**: スレッド検索・収集（最大300件のスレッド）  
+- **Zenn連携**: 技術記事・アイデア記事検索・取得（フィルタリング機能付き）
 - **NotebookLM最適化**: YAML Front Matter付きMarkdown生成
 - **セキュア処理**: ブラウザ内完結、外部送信なし
 - **LocalStorage対応**: APIトークンの自動保存・復元
@@ -19,12 +20,13 @@ NotebookLM Collectorは、**ブラウザ完結型**でセキュアな情報収�
 
 ### 機能比較
 
-| 機能 | Docbase | Slack |
-|------|---------|-------|
-| 検索方式 | 記事単位 | スレッド単位 |
-| 最大取得件数 | 500件 | 500件 |
-| 詳細検索 | タグ、投稿者、期間、グループ | チャンネル、投稿者、期間 |
-| 認証方式 | API Token | User Token (xoxp-) |
+| 機能 | Docbase | Slack | Zenn |
+|------|---------|-------|------|
+| 検索方式 | 記事単位 | スレッド単位 | 記事単位 |
+| 最大取得件数 | 500件 | 300件 | フィルタリング機能付き |
+| 詳細検索 | タグ、投稿者、期間、グループ | チャンネル、投稿者、期間 | ユーザー名、記事タイプ、いいね数、期間 |
+| 認証方式 | API Token | User Token (xoxp-) | 認証不要 |
+| 記事本文 | 全文取得 | 全文取得 | メタデータのみ |
 
 ## 🚀 セットアップ
 

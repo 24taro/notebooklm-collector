@@ -5,13 +5,14 @@
 ## プロジェクト概要
 
 **リポジトリ**: https://github.com/24taro/notebooklm-collector  
-**プロジェクト名**: Docbase/Slack 連携 NotebookLM 用ドキュメント生成アプリ  
-**バージョン**: v2.0
+**プロジェクト名**: Docbase/Slack/Zenn 連携 NotebookLM 用ドキュメント生成アプリ  
+**バージョン**: v2.1
 
 ### 主要機能
 
 - Docbase API からの記事検索・取得（最大 500 件）
-- Slack API からのメッセージ・スレッド検索・取得（最大 500 件）
+- Slack API からのメッセージ・スレッド検索・取得（最大 300 件）
+- Zenn API からの技術記事・アイデア記事検索・取得（フィルタリング機能付き）
 - 検索結果の Markdown 形式での出力（YAML Front Matter 付き LLM 最適化）
 - NotebookLM 向けドキュメント生成
 - ブラウザ完結型でセキュアな処理
@@ -284,6 +285,47 @@ type SlackUser = {
 };
 ```
 
+### Zenn 関連型
+
+```ts
+// Zennユーザー情報の型
+type ZennUser = {
+  id: number;
+  username: string;
+  name: string;
+  avatar_small_url: string;
+};
+
+// Zenn出版物情報の型
+type ZennPublication = {
+  id: number;
+  name: string;
+  display_name: string;
+  beta: boolean;
+  avatar_small_url: string;
+};
+
+// Zenn記事の型
+type ZennArticle = {
+  id: number;
+  post_type: "Article";
+  title: string;
+  slug: string;
+  published: boolean;
+  comments_count: number;
+  liked_count: number;
+  body_letters_count: number;
+  article_type: "tech" | "idea";
+  emoji: string;
+  is_suspending_private: boolean;
+  published_at: string; // ISO-8601
+  body_updated_at: string; // ISO-8601
+  source_repo_updated_at: string; // ISO-8601
+  user: ZennUser;
+  publication?: ZennPublication;
+};
+```
+
 ## Git 運用ルール
 
 ### 作業フロー
@@ -483,9 +525,10 @@ await supabase.auth.signInWithOtp({ email });
 ## セキュリティ考慮事項
 
 ### データ処理とプライバシー
-- **データ処理の範囲**: 入力された Docbase/Slack API トークンおよび取得された記事・メッセージ内容は、外部サーバーに送信されることなく、すべてユーザーのブラウザ内で処理が完結する
+- **データ処理の範囲**: 入力された Docbase/Slack API トークンおよび取得された記事・メッセージ・Zenn記事内容は、外部サーバーに送信されることなく、すべてユーザーのブラウザ内で処理が完結する
 - **情報漏洩リスクの低減**: データがブラウザ外に出ないため、機密情報が意図せず外部に漏洩するリスクを最小限に抑える
-- **トークンの保存**: API トークンは、利便性のためにブラウザの LocalStorage に保存されるが、これもユーザーのローカル環境に限定された保存
+- **トークンの保存**: Docbase/Slack API トークンは、利便性のためにブラウザの LocalStorage に保存されるが、これもユーザーのローカル環境に限定された保存
+- **Zenn連携**: 認証不要の公開API を使用するため、認証情報の保存や管理は不要
 
 ### 開発セキュリティ
 
@@ -698,19 +741,20 @@ function extractThreadTsFromPermalink(
 
 ### 機能比較
 
-| 機能           | Slack                    | Docbase                      |
-| -------------- | ------------------------ | ---------------------------- |
-| 検索方式       | スレッド単位でまとめて表示 | 記事単位で表示               |
-| 最大取得件数   | 500件（メッセージ）       | 500件（記事）                |
-| 詳細検索条件   | チャンネル、投稿者、期間  | タグ、投稿者、タイトル、期間、グループ |
-| プレビュー     | 最初の10スレッドのみ      | 最初の10記事のみ（150文字切り詰め） |
-| 認証方式       | User Token (xoxp-)       | API Token                    |
-| ローカルストレージ | slackApiToken           | docbaseApiToken, docbaseDomain |
-| API呼び出し複雑度 | 高（4つのAPI組み合わせ）    | 低（1つのAPI）               |
-| プログレス表示 | 詳細表示（4段階・件数付き） | シンプル表示                 |
-| YAML Front Matter | あり                    | あり                         |
-| マークダウン最適化 | LLM用構造化             | LLM用構造化                  |
-| チャンネル表示 | チャンネル名（#付き）      | N/A                          |
+| 機能           | Slack                    | Docbase                      | Zenn                        |
+| -------------- | ------------------------ | ---------------------------- | --------------------------- |
+| 検索方式       | スレッド単位でまとめて表示 | 記事単位で表示               | 記事単位で表示               |
+| 最大取得件数   | 300件（スレッド）         | 500件（記事）                | フィルタリング機能付き       |
+| 詳細検索条件   | チャンネル、投稿者、期間  | タグ、投稿者、タイトル、期間、グループ | ユーザー名、記事タイプ、いいね数、期間 |
+| プレビュー     | 最初の10スレッドのみ      | 最初の10記事のみ（150文字切り詰め） | 最初の10記事のみ（アコーディオン表示） |
+| 認証方式       | User Token (xoxp-)       | API Token                    | 認証不要（非公式API）        |
+| ローカルストレージ | slackApiToken           | docbaseApiToken, docbaseDomain | なし                        |
+| API呼び出し複雑度 | 高（4つのAPI組み合わせ）    | 低（1つのAPI）               | 低（1つのAPI）               |
+| プログレス表示 | 詳細表示（4段階・件数付き） | シンプル表示                 | シンプル表示                 |
+| YAML Front Matter | あり                    | あり                         | あり                        |
+| マークダウン最適化 | LLM用構造化             | LLM用構造化                  | LLM用構造化                  |
+| 記事本文取得   | 全文取得                 | 全文取得                     | メタデータのみ（本文なし）    |
+| 制限事項       | なし                     | なし                         | 記事本文取得不可、非公式API   |
 
 ## 実装アーキテクチャ詳細
 
@@ -722,6 +766,7 @@ function extractThreadTsFromPermalink(
 ### カスタムフック実装
 * **useDocbaseSearch**: Docbase検索の状態管理とビジネスロジック
 * **useSlackSearchUnified**: Slack検索の複雑なフロー管理
+* **useZennSearch**: Zenn検索の状態管理とクライアントサイドフィルタリング
 * **useLocalStorage**: 型安全なLocalStorage操作
 * **useErrorRecovery**: エラー状態からの復旧支援
 
