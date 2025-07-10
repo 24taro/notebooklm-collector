@@ -5,13 +5,13 @@
  * @param markdownContent ダウンロードするMarkdown文字列
  * @param keyword ファイル名に使用するキーワード
  * @param postsExist 投稿があったかどうか
- * @param sourceType ソースタイプ（'docbase' | 'slack'）
+ * @param sourceType ソースタイプ（'docbase' | 'slack' | 'github'）
  */
 export const downloadMarkdownFile = (
   markdownContent: string,
   keyword: string,
   postsExist: boolean,
-  sourceType: "docbase" | "slack" = "docbase"
+  sourceType: "docbase" | "slack" | "github" = "docbase"
 ): { success: boolean; message?: string } => {
   // 投稿が存在しない、またはMarkdownコンテントが空の場合はダウンロードしない
   if (!postsExist || !markdownContent.trim()) {
@@ -46,7 +46,12 @@ export const downloadMarkdownFile = (
       : "search";
 
     // ソースタイプ別のファイル名
-    const contentType = sourceType === "slack" ? "threads" : "articles";
+    const contentType =
+      sourceType === "slack"
+        ? "threads"
+        : sourceType === "github"
+          ? "issues_discussions"
+          : "articles";
     a.download = `${sourceType}_${dateStr}_${safeKeyword}_${contentType}.md`;
     document.body.appendChild(a);
     a.click();

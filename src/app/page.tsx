@@ -16,7 +16,7 @@ export default function HomePage() {
             情報ソースからデータを収集し、NotebookLM用Markdownを生成
           </p>
 
-          <div className="grid md:grid-cols-2 gap-4 md:gap-8">
+          <div className="grid md:grid-cols-3 gap-4 md:gap-6">
             <Link
               href="/docbase"
               className="flex items-center space-x-4 p-6 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
@@ -53,6 +53,27 @@ export default function HomePage() {
                 <h2 className="text-lg text-gray-900">Slack連携</h2>
                 <p className="text-gray-600 mt-2">
                   Slackのスレッドを検索・収集
+                </p>
+              </div>
+            </Link>
+
+            <Link
+              href="/github"
+              className="flex items-center space-x-4 p-6 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+            >
+              <div className="flex-shrink-0 w-16 h-16 flex items-center justify-center text-gray-700">
+                <Image
+                  src="/github-icon.svg"
+                  alt="GitHub"
+                  width={40}
+                  height={40}
+                  className="rounded object-contain"
+                />
+              </div>
+              <div>
+                <h2 className="text-lg text-gray-900">GitHub連携</h2>
+                <p className="text-gray-600 mt-2">
+                  Issues/Discussionsを検索・収集
                 </p>
               </div>
             </Link>
