@@ -1,21 +1,29 @@
-import { useState } from "react";
+import React, {
+  type FC,
+  forwardRef,
+  useImperativeHandle,
+  useRef,
+  useState,
+} from "react";
 import useLocalStorage from "../../../hooks/useLocalStorage";
-
-interface QiitaTokenInputProps {
-  token: string;
-  onTokenChange: (token: string) => void;
-  className?: string;
-}
+import type { QiitaTokenInputProps, QiitaTokenInputRef } from "../types/forms";
 
 /**
  * Qiitaアクセストークン入力コンポーネント
  * LocalStorageとの連携機能を含む
  */
-export const QiitaTokenInput: React.FC<QiitaTokenInputProps> = ({
-  token,
-  onTokenChange,
-  className = "",
-}) => {
+export const QiitaTokenInput = forwardRef<
+  QiitaTokenInputRef,
+  QiitaTokenInputProps
+>(({ token, onTokenChange, error, disabled, className = "" }, ref) => {
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // 親コンポーネントから呼び出せるメソッドを定義
+  useImperativeHandle(ref, () => ({
+    focus: () => {
+      inputRef.current?.focus();
+    },
+  }));
   const [savedToken, setSavedToken] = useLocalStorage<string>(
     "qiitaApiToken",
     ""
@@ -72,13 +80,16 @@ export const QiitaTokenInput: React.FC<QiitaTokenInputProps> = ({
           <input
             type={isTokenVisible ? "text" : "password"}
             id="qiita-token"
+            ref={inputRef}
             value={token}
             onChange={handleInputChange}
             placeholder="40文字の16進数トークンを入力してください"
+            disabled={disabled}
             className={`w-full px-3 py-2 pr-24 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors ${
-              !hasValidFormat ? "border-red-500 bg-red-50" : ""
-            }`}
+              !hasValidFormat || error ? "border-red-500 bg-red-50" : ""
+            } ${disabled ? "bg-gray-100 cursor-not-allowed" : ""}`}
             maxLength={40}
+            aria-describedby={error || !hasValidFormat ? "qiita-token-error" : undefined}
           />
 
           {/* 表示/非表示切り替えボタン */}
@@ -188,6 +199,17 @@ export const QiitaTokenInput: React.FC<QiitaTokenInputProps> = ({
         </div>
       </div>
 
+      {/* エラーメッセージ */}
+      {(error || !hasValidFormat) && (
+        <p
+          id="qiita-token-error"
+          className="text-sm text-red-600"
+          role="alert"
+        >
+          {error || "トークンは40文字の16進数である必要があります"}
+        </p>
+      )}
+
       {/* ヘルプテキスト */}
       <div className="text-xs text-gray-500 space-y-1">
         <p>
@@ -207,4 +229,6 @@ export const QiitaTokenInput: React.FC<QiitaTokenInputProps> = ({
       </div>
     </div>
   );
-};
+});
+
+QiitaTokenInput.displayName = "QiitaTokenInput";

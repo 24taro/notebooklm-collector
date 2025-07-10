@@ -45,6 +45,24 @@ export type QiitaValidationError = {
 };
 
 /**
+ * QiitaTokenInput コンポーネントのProps
+ */
+export type QiitaTokenInputProps = {
+  token: string;
+  onTokenChange: (token: string) => void;
+  error?: string;
+  disabled?: boolean;
+  className?: string;
+};
+
+/**
+ * QiitaTokenInput コンポーネントのRef
+ */
+export type QiitaTokenInputRef = {
+  focus: () => void;
+};
+
+/**
  * Qiita検索結果の状態
  */
 export type QiitaSearchState = {

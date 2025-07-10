@@ -41,7 +41,7 @@ export const QiitaSearchForm: React.FC = () => {
     const markdown = generateQiitaMarkdown(items, searchQuery);
     const keyword = searchQuery || "search";
 
-    handleDownload(markdown, keyword, items.length > 0, "docbase"); // 4番目の引数を追加（qiitaは未対応のためdocbaseを使用）
+    handleDownload(markdown, keyword, items.length > 0, "qiita");
   };
 
   // 検索条件が設定されているかチェック
