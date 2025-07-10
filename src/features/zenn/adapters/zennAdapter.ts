@@ -1,12 +1,12 @@
 // Zenn APIアダプター実装
 // HTTPクライアントアダプターを使用してZenn APIにアクセスし、Result型で結果を返す
 
+import type { HttpClient } from "@/adapters/types";
+import type { ApiError } from "@/types/error";
 import { type Result, err, ok } from "neverthrow";
-import type { HttpClient } from "../../../adapters/types";
-import type { ApiError } from "../../../types/error";
 import type {
-  ZennArticle,
   ZennApiResponse,
+  ZennArticle,
   ZennSearchParams,
 } from "../types/zenn";
 
@@ -64,7 +64,7 @@ export function createZennAdapter(httpClient: HttpClient): ZennAdapter {
           const publishedArticles = data.articles.filter(
             (article) => article.published
           );
-          
+
           allArticles.push(...publishedArticles);
 
           // 取得した件数がページあたりの件数未満なら最終ページ
@@ -77,7 +77,7 @@ export function createZennAdapter(httpClient: HttpClient): ZennAdapter {
         }
 
         currentPage++;
-        
+
         // 指定されたページ数のみ取得する場合（params.pageが指定されている場合）
         if (params.page && currentPage > params.page) {
           break;
@@ -103,7 +103,7 @@ function buildApiParams(
 
   // 基本パラメータ
   searchParams.append("page", page.toString());
-  
+
   if (params.count) {
     searchParams.append("count", params.count.toString());
   }
@@ -150,19 +150,19 @@ function applyClientSideFilters(
   if (params.dateFrom || params.dateTo) {
     filteredArticles = filteredArticles.filter((article) => {
       const publishedDate = new Date(article.published_at);
-      
+
       if (params.dateFrom) {
         const fromDate = new Date(params.dateFrom);
         if (publishedDate < fromDate) return false;
       }
-      
+
       if (params.dateTo) {
         const toDate = new Date(params.dateTo);
         // 終了日は23:59:59まで含める
         toDate.setHours(23, 59, 59, 999);
         if (publishedDate > toDate) return false;
       }
-      
+
       return true;
     });
   }
@@ -194,7 +194,9 @@ export function mapZennErrorToApiError(
     case 429:
       return {
         type: "rate_limit",
-        message: message || "Zenn APIのレート制限に達しました。しばらく待ってから再試行してください",
+        message:
+          message ||
+          "Zenn APIのレート制限に達しました。しばらく待ってから再試行してください",
       };
     case 500:
     case 502:
@@ -206,7 +208,8 @@ export function mapZennErrorToApiError(
     default:
       return {
         type: "network",
-        message: message || `Zenn API呼び出しでエラーが発生しました (HTTP ${status})`,
+        message:
+          message || `Zenn API呼び出しでエラーが発生しました (HTTP ${status})`,
       };
   }
 }

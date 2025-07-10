@@ -46,3 +46,72 @@ export type DocbasePostsResponse = {
     total: number;
   };
 };
+
+/**
+ * Docbase検索パラメータの型
+ * - useDocbaseSearch フックで使用
+ */
+export type DocbaseSearchParams = {
+  domain: string;
+  token: string;
+  keyword: string;
+  advancedFilters?: {
+    tags: string;
+    author: string;
+    titleFilter: string;
+    startDate: string;
+    endDate: string;
+  };
+};
+
+/**
+ * 進捗ステータスの型定義
+ */
+export type DocbaseProgressStatus = {
+  phase:
+    | "idle"
+    | "searching"
+    | "fetching_posts"
+    | "generating_markdown"
+    | "completed";
+  message: string;
+  current?: number;
+  total?: number;
+};
+
+/**
+ * Docbase検索結果の状態
+ */
+export type UseDocbaseSearchState = {
+  posts: DocbasePostListItem[];
+  markdownContent: string;
+  currentPreviewMarkdown: string;
+  paginationInfo: {
+    currentPage: number;
+    totalPages: number;
+    totalResults: number;
+    perPage: number;
+  };
+  isLoading: boolean;
+  progressStatus: DocbaseProgressStatus;
+  hasSearched: boolean;
+  error: import("@/types/error").ApiError | null;
+};
+
+/**
+ * useDocbaseSearch フック戻り値の型
+ */
+export type UseDocbaseSearchResult = UseDocbaseSearchState & {
+  searchPosts: (params: DocbaseSearchParams) => Promise<void>;
+  canRetry: boolean;
+  retrySearch: () => void;
+  getUserFriendlyError: () => string | null;
+  getErrorSuggestion: () => string | null;
+};
+
+/**
+ * useDocbaseSearch フックオプション（アダプター注入用）
+ */
+export type UseDocbaseSearchOptions = {
+  adapter?: import("../adapters/docbaseAdapter").DocbaseAdapter;
+};

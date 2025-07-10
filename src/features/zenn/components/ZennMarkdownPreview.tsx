@@ -2,8 +2,8 @@
 
 import type { FC } from "react";
 import { useState } from "react";
-import type { ZennArticle } from "../types/zenn";
 import type { ZennMarkdownPreviewProps } from "../types/forms";
+import type { ZennArticle } from "../types/zenn";
 
 /**
  * Zenn用Markdownプレビューコンポーネント
@@ -51,6 +51,7 @@ export const ZennMarkdownPreview: FC<ZennMarkdownPreviewProps> = ({
         {onDownload && (
           <div className="mt-4 flex justify-center">
             <button
+              type="button"
               onClick={onDownload}
               disabled={true}
               className="px-6 py-3 bg-gray-400 text-white font-semibold rounded-md cursor-not-allowed"
@@ -83,9 +84,13 @@ export const ZennMarkdownPreview: FC<ZennMarkdownPreviewProps> = ({
           <div className="divide-y divide-gray-100">
             {articles.slice(0, 10).map((article, index) => {
               const isOpen = openItems.includes(index);
-              const publishedAt = new Date(article.published_at).toLocaleString("ja-JP");
-              const articleTypeIcon = article.article_type === "tech" ? "🔧" : "💡";
-              const articleTypeText = article.article_type === "tech" ? "技術記事" : "アイデア記事";
+              const publishedAt = new Date(article.published_at).toLocaleString(
+                "ja-JP"
+              );
+              const articleTypeIcon =
+                article.article_type === "tech" ? "🔧" : "💡";
+              const articleTypeText =
+                article.article_type === "tech" ? "技術記事" : "アイデア記事";
 
               return (
                 <div key={article.id} className="relative">
@@ -119,12 +124,18 @@ export const ZennMarkdownPreview: FC<ZennMarkdownPreviewProps> = ({
                           </span>
                         </div>
                         <div className="flex items-center gap-2 mb-2 text-sm">
-                          <span className="text-gray-600">著者: {article.user.name}</span>
-                          <span className="text-gray-400">(@{article.user.username})</span>
+                          <span className="text-gray-600">
+                            著者: {article.user.name}
+                          </span>
+                          <span className="text-gray-400">
+                            (@{article.user.username})
+                          </span>
                           {article.publication && (
                             <>
                               <span className="text-gray-400">•</span>
-                              <span className="text-green-600">{article.publication.display_name}</span>
+                              <span className="text-green-600">
+                                {article.publication.display_name}
+                              </span>
                             </>
                           )}
                         </div>
@@ -148,7 +159,9 @@ export const ZennMarkdownPreview: FC<ZennMarkdownPreviewProps> = ({
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
-                          aria-label={isOpen ? "記事詳細を閉じる" : "記事詳細を開く"}
+                          aria-label={
+                            isOpen ? "記事詳細を閉じる" : "記事詳細を開く"
+                          }
                         >
                           <title>
                             {isOpen ? "記事詳細を閉じる" : "記事詳細を開く"}
@@ -170,30 +183,52 @@ export const ZennMarkdownPreview: FC<ZennMarkdownPreviewProps> = ({
                       className="px-4 pb-4 border-t border-gray-50"
                     >
                       <div className="mt-4 space-y-3">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm">
                           <div className="space-y-2">
-                            <p><strong>記事ID:</strong> {article.id}</p>
-                            <p><strong>文字数:</strong> {article.body_letters_count.toLocaleString()} 文字</p>
-                            <p><strong>公開状態:</strong> {article.published ? "公開済み" : "下書き"}</p>
+                            <p>
+                              <strong>記事ID:</strong> {article.id}
+                            </p>
+                            <p>
+                              <strong>文字数:</strong>{" "}
+                              {article.body_letters_count.toLocaleString()} 文字
+                            </p>
+                            <p>
+                              <strong>公開状態:</strong>{" "}
+                              {article.published ? "公開済み" : "下書き"}
+                            </p>
                           </div>
                           <div className="space-y-2">
-                            <p><strong>最終更新:</strong> {new Date(article.body_updated_at).toLocaleString("ja-JP")}</p>
-                            <p><strong>リポジトリ更新:</strong> {new Date(article.source_repo_updated_at).toLocaleString("ja-JP")}</p>
+                            <p>
+                              <strong>最終更新:</strong>{" "}
+                              {new Date(article.body_updated_at).toLocaleString(
+                                "ja-JP"
+                              )}
+                            </p>
+                            <p>
+                              <strong>リポジトリ更新:</strong>{" "}
+                              {new Date(
+                                article.source_repo_updated_at
+                              ).toLocaleString("ja-JP")}
+                            </p>
                           </div>
                         </div>
-                        
+
                         <div className="p-3 bg-blue-50 border border-blue-200 rounded-md">
                           <p className="text-sm text-blue-800">
-                            <strong>注意:</strong> Zenn APIでは記事本文を取得できません。
+                            <strong>注意:</strong> Zenn
+                            APIでは記事本文を取得できません。
                             記事の詳細な内容については、上記のリンクから直接Zennでご確認ください。
                           </p>
                         </div>
 
-                        {(article.liked_count > 0 || article.comments_count > 0) && (
+                        {(article.liked_count > 0 ||
+                          article.comments_count > 0) && (
                           <div className="p-3 bg-green-50 border border-green-200 rounded-md">
                             <p className="text-sm text-green-800">
-                              <strong>エンゲージメント:</strong> この記事は{article.liked_count}件のいいねと
-                              {article.comments_count}件のコメントを獲得している人気記事です。
+                              <strong>エンゲージメント:</strong> この記事は
+                              {article.liked_count}件のいいねと
+                              {article.comments_count}
+                              件のコメントを獲得している人気記事です。
                             </p>
                           </div>
                         )}
@@ -210,6 +245,7 @@ export const ZennMarkdownPreview: FC<ZennMarkdownPreviewProps> = ({
         {onDownload && (
           <div className="mt-4 flex justify-center">
             <button
+              type="button"
               onClick={onDownload}
               className="px-6 py-3 bg-green-600 text-white font-semibold rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
             >
@@ -236,6 +272,7 @@ export const ZennMarkdownPreview: FC<ZennMarkdownPreviewProps> = ({
         {onDownload && (
           <div className="mt-4 flex justify-center">
             <button
+              type="button"
               onClick={onDownload}
               disabled={true}
               className="px-6 py-3 bg-gray-400 text-white font-semibold rounded-md cursor-not-allowed"
@@ -265,6 +302,7 @@ export const ZennMarkdownPreview: FC<ZennMarkdownPreviewProps> = ({
       {onDownload && (
         <div className="mt-4 flex justify-center">
           <button
+            type="button"
             onClick={onDownload}
             className="px-6 py-3 bg-green-600 text-white font-semibold rounded-md shadow-sm hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2 transition-colors"
           >

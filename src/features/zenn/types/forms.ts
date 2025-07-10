@@ -2,32 +2,32 @@
  * Zenn検索フォーム関連の型定義
  */
 
-import type { ApiError } from "../../../types/error";
+import type { ApiError } from "@/types/error";
 import type { ZennArticle } from "./zenn";
 
 /**
  * Zenn詳細フィルター条件の型定義
  */
-export interface ZennAdvancedFilters {
+export type ZennAdvancedFilters = {
   articleType: "all" | "tech" | "idea";
   minLikes?: number;
   dateFrom?: string;
   dateTo?: string;
-}
+};
 
 /**
  * Zennフォーム入力値の型定義
  */
-export interface ZennFormValues {
+export type ZennFormValues = {
   searchKeyword: string;
   searchUsername: string;
   advancedFilters: ZennAdvancedFilters;
-}
+};
 
 /**
  * Zenn検索結果の型定義
  */
-export interface ZennSearchResults {
+export type ZennSearchResults = {
   articles: ZennArticle[];
   filteredArticles: ZennArticle[];
   markdownContent: string;
@@ -35,29 +35,29 @@ export interface ZennSearchResults {
   error: ApiError | null;
   searchKeyword?: string;
   searchUsername?: string;
-}
+};
 
 /**
  * ZennSearchFormコンポーネントのProps型
  */
-export interface ZennSearchFormProps {
+export type ZennSearchFormProps = {
   onSearchResults?: (results: ZennSearchResults) => void;
-}
+};
 
 /**
  * ZennUsernameInputコンポーネントのProps型
  */
-export interface ZennUsernameInputProps {
+export type ZennUsernameInputProps = {
   username: string;
   onUsernameChange: (username: string) => void;
   disabled?: boolean;
   error?: string;
-}
+};
 
 /**
  * ZennMarkdownPreviewコンポーネントのProps型
  */
-export interface ZennMarkdownPreviewProps {
+export type ZennMarkdownPreviewProps = {
   markdown?: string;
   articles?: ZennArticle[];
   title?: string;
@@ -66,12 +66,12 @@ export interface ZennMarkdownPreviewProps {
   className?: string;
   emptyMessage?: string;
   useAccordion?: boolean;
-}
+};
 
 /**
  * Zenn詳細検索フィルターのProps型
  */
-export interface ZennAdvancedFiltersProps {
+export type ZennAdvancedFiltersProps = {
   showAdvanced: boolean;
   onToggleAdvanced: () => void;
   articleType: "all" | "tech" | "idea";
@@ -83,4 +83,4 @@ export interface ZennAdvancedFiltersProps {
   dateTo?: string;
   onDateToChange: (date: string) => void;
   disabled?: boolean;
-}
+};

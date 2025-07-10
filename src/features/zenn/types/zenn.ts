@@ -78,7 +78,12 @@ export type ZennSearchParams = {
  * 進捗ステータスの型定義
  */
 export type ZennProgressStatus = {
-  phase: "idle" | "searching" | "fetching_articles" | "generating_markdown" | "completed";
+  phase:
+    | "idle"
+    | "searching"
+    | "fetching_articles"
+    | "generating_markdown"
+    | "completed";
   message: string;
   current?: number;
   total?: number;

@@ -3,26 +3,23 @@
 
 "use client";
 
-import { createFetchHttpClient } from "../../../adapters/fetchHttpClient";
-import {
-  type ZennAdapter,
-  createZennAdapter,
-} from "../adapters/zennAdapter";
-import type {
-  ZennArticle,
-  ZennProgressStatus,
-  ZennSearchParams,
-  UseZennSearchResult,
-  UseZennSearchState,
-  UseZennSearchOptions,
-} from "../types/zenn";
-import type { ApiError } from "../../../types/error";
+import { createFetchHttpClient } from "@/adapters/fetchHttpClient";
+import type { ApiError } from "@/types/error";
 import {
   getErrorActionSuggestion,
   getUserFriendlyErrorMessage,
-} from "../../../utils/errorMessage";
+} from "@/utils/errorMessage";
 import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
+import { type ZennAdapter, createZennAdapter } from "../adapters/zennAdapter";
+import type {
+  UseZennSearchOptions,
+  UseZennSearchResult,
+  UseZennSearchState,
+  ZennArticle,
+  ZennProgressStatus,
+  ZennSearchParams,
+} from "../types/zenn";
 
 /**
  * Zenn検索機能のカスタムフック（アダプターパターン使用）
@@ -81,19 +78,25 @@ export function useZennSearch(
   }, []);
 
   // フィルター適用
-  const applyFilters = useCallback((filterParams: Partial<ZennSearchParams>) => {
-    setState((prev) => {
-      const filteredArticles = applyClientSideFilters(prev.articles, filterParams);
-      return {
-        ...prev,
-        filteredArticles,
-        paginationInfo: {
-          ...prev.paginationInfo,
-          totalResults: filteredArticles.length,
-        },
-      };
-    });
-  }, []);
+  const applyFilters = useCallback(
+    (filterParams: Partial<ZennSearchParams>) => {
+      setState((prev) => {
+        const filteredArticles = applyClientSideFilters(
+          prev.articles,
+          filterParams
+        );
+        return {
+          ...prev,
+          filteredArticles,
+          paginationInfo: {
+            ...prev.paginationInfo,
+            totalResults: filteredArticles.length,
+          },
+        };
+      });
+    },
+    []
+  );
 
   // 検索処理のメイン関数
   const handleSearch = useCallback(
@@ -248,19 +251,19 @@ function applyClientSideFilters(
   if (filterParams.dateFrom || filterParams.dateTo) {
     filteredArticles = filteredArticles.filter((article) => {
       const publishedDate = new Date(article.published_at);
-      
+
       if (filterParams.dateFrom) {
         const fromDate = new Date(filterParams.dateFrom);
         if (publishedDate < fromDate) return false;
       }
-      
+
       if (filterParams.dateTo) {
         const toDate = new Date(filterParams.dateTo);
         // 終了日は23:59:59まで含める
         toDate.setHours(23, 59, 59, 999);
         if (publishedDate > toDate) return false;
       }
-      
+
       return true;
     });
   }

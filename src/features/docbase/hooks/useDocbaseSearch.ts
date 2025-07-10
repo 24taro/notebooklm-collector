@@ -14,8 +14,8 @@ import {
 import type { DocbasePostListItem } from "../types/docbase";
 
 // 詳細検索条件の型定義（forms.tsからインポートして再エクスポート）
-import type { AdvancedFilters } from "../types/forms";
-export type { AdvancedFilters };
+import type { DocbaseAdvancedFilters } from "../types/forms";
+export type { DocbaseAdvancedFilters as AdvancedFilters };
 
 interface UseDocbaseSearchResult {
   posts: DocbasePostListItem[];
@@ -25,7 +25,7 @@ interface UseDocbaseSearchResult {
     domain: string,
     token: string,
     keyword: string,
-    advancedFilters?: AdvancedFilters // advancedFilters をオプションで追加
+    advancedFilters?: DocbaseAdvancedFilters // advancedFilters をオプションで追加
   ) => Promise<void>;
   canRetry: boolean; // 再試行可能かどうかのフラグ
   retrySearch: () => void; // 再試行用の関数
@@ -53,7 +53,7 @@ export const useDocbaseSearch = (
     domain: string;
     token: string;
     keyword: string;
-    advancedFilters?: AdvancedFilters; // advancedFilters を追加
+    advancedFilters?: DocbaseAdvancedFilters; // advancedFilters を追加
   } | null>(null);
   const [canRetry, setCanRetry] = useState<boolean>(false);
 
@@ -62,7 +62,7 @@ export const useDocbaseSearch = (
       domain: string,
       token: string,
       keyword: string,
-      advancedFilters?: AdvancedFilters
+      advancedFilters?: DocbaseAdvancedFilters
     ) => {
       setIsLoading(true);
       setError(null);
@@ -109,7 +109,7 @@ export const useDocbaseSearch = (
       domain: string,
       token: string,
       keyword: string,
-      advancedFilters?: AdvancedFilters
+      advancedFilters?: DocbaseAdvancedFilters
     ) => {
       if (!keyword.trim() && !domain.trim() && !token.trim()) {
         // 全て空なら何もしない

@@ -16,6 +16,18 @@ export default {
           text: "#1F2937",
           "text-sub": "#6B7280",
         },
+        slack: {
+          primary: "#4A154B", // Slack purple
+          "primary-dark": "#350d36",
+          text: "#1F2937",
+          "text-sub": "#6B7280",
+        },
+        zenn: {
+          primary: "#3EA8FF", // Zenn blue
+          "primary-dark": "#2B7CE6",
+          text: "#1F2937",
+          "text-sub": "#6B7280",
+        },
       },
       lineClamp: {
         2: "2",

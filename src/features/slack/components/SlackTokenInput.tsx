@@ -40,7 +40,7 @@ export const SlackTokenInput = forwardRef<
           onChange={(e) => onTokenChange(e.target.value)}
           placeholder="xoxp-..."
           disabled={disabled}
-          className={`block w-full px-4 py-3 pr-12 border ${error ? "border-red-500" : "border-gray-400"} rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 ${error ? "focus:ring-red-500 focus:border-red-500" : "focus:ring-docbase-primary focus:border-docbase-primary"} disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors`}
+          className={`block w-full px-4 py-3 pr-12 border ${error ? "border-red-500" : "border-gray-400"} rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-1 ${error ? "focus:ring-red-500 focus:border-red-500" : "focus:ring-slack-primary focus:border-slack-primary"} disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors`}
           aria-describedby={error ? "slack-token-error" : undefined}
         />
         <button

@@ -22,10 +22,17 @@ export const generateZennMarkdown = (
 
   // 記事タイプの集計
   const articleTypes = [...new Set(articles.map((a) => a.article_type))];
-  
+
   // チャンネル情報（ユーザー別、Publication別）
   const authors = [...new Set(articles.map((a) => a.user.username))];
-  const publications = [...new Set(articles.filter((a) => a.publication).map((a) => a.publication!.display_name))];
+  const publications = [
+    ...new Set(
+      articles
+        .filter((a) => a.publication)
+        .map((a) => a.publication?.display_name)
+        .filter(Boolean)
+    ),
+  ];
 
   // YAML Front Matter形式で全体メタデータ
   let markdown = "---\n";
@@ -37,15 +44,18 @@ export const generateZennMarkdown = (
   if (options?.searchUsername) {
     markdown += `search_username: "${options.searchUsername}"\n`;
   }
-  markdown += `article_types: [${articleTypes.map(t => `"${t}"`).join(", ")}]\n`;
+  markdown += `article_types: [${articleTypes.map((t) => `"${t}"`).join(", ")}]\n`;
   if (authors.length <= 10) {
-    markdown += `authors: [${authors.map(a => `"${a}"`).join(", ")}]\n`;
+    markdown += `authors: [${authors.map((a) => `"${a}"`).join(", ")}]\n`;
   } else {
     markdown += `total_authors: ${authors.length}\n`;
-    markdown += `authors_sample: [${authors.slice(0, 10).map(a => `"${a}"`).join(", ")}]\n`;
+    markdown += `authors_sample: [${authors
+      .slice(0, 10)
+      .map((a) => `"${a}"`)
+      .join(", ")}]\n`;
   }
   if (publications.length > 0) {
-    markdown += `publications: [${publications.map(p => `"${p}"`).join(", ")}]\n`;
+    markdown += `publications: [${publications.map((p) => `"${p}"`).join(", ")}]\n`;
   }
   markdown += `date_range: "${minDate.toISOString().split("T")[0]} - ${
     maxDate.toISOString().split("T")[0]
@@ -88,10 +98,16 @@ export const generateZennMarkdown = (
   // フィルター情報の表示
   if (options?.filterCriteria) {
     const filters = [];
-    if (options.filterCriteria.articleType && options.filterCriteria.articleType !== "all") {
+    if (
+      options.filterCriteria.articleType &&
+      options.filterCriteria.articleType !== "all"
+    ) {
       filters.push(`記事タイプ: ${options.filterCriteria.articleType}`);
     }
-    if (options.filterCriteria.minLikes && options.filterCriteria.minLikes > 0) {
+    if (
+      options.filterCriteria.minLikes &&
+      options.filterCriteria.minLikes > 0
+    ) {
       filters.push(`最小いいね数: ${options.filterCriteria.minLikes}以上`);
     }
     if (options.filterCriteria.dateFrom || options.filterCriteria.dateTo) {
@@ -102,12 +118,12 @@ export const generateZennMarkdown = (
     if (options.filterCriteria.username) {
       filters.push(`ユーザー: @${options.filterCriteria.username}`);
     }
-    
+
     if (filters.length > 0) {
       markdown += "### 適用されたフィルター\n";
-      filters.forEach(filter => {
+      for (const filter of filters) {
         markdown += `- ${filter}\n`;
-      });
+      }
       markdown += "\n";
     }
   }
@@ -141,7 +157,7 @@ export const generateZennMarkdown = (
 
         // 記事のメタデータをYAML形式で表示
         let articleMd = `### Article ${index + 1} {#article-${index + 1}}\n\n`;
-        
+
         // YAML メタデータブロック
         articleMd += "```yaml\n";
         articleMd += `zenn_id: ${article.id}\n`;
@@ -180,8 +196,10 @@ export const generateZennMarkdown = (
 
         // Content 説明
         articleMd += "## Content\n";
-        articleMd += "*記事本文は Zenn の API では取得できないため、記事の概要情報のみを提供します。*\n";
-        articleMd += "*詳細な内容については、上記のソースリンクから直接記事をご確認ください。*\n\n";
+        articleMd +=
+          "*記事本文は Zenn の API では取得できないため、記事の概要情報のみを提供します。*\n";
+        articleMd +=
+          "*詳細な内容については、上記のソースリンクから直接記事をご確認ください。*\n\n";
 
         // 統計情報
         if (article.liked_count > 0 || article.comments_count > 0) {
@@ -223,7 +241,7 @@ export const generateZennMarkdownForPreview = (
   } else {
     markdown += "# Zenn記事プレビュー\n\n";
   }
-  
+
   markdown += `**表示件数**: ${articles.length} 件（プレビューのため一部のみ表示）\n\n`;
 
   // 各記事のプレビュー表示

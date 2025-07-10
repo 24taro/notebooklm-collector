@@ -1,9 +1,15 @@
 "use client";
 
-import React, { useState, type FormEvent, useEffect } from "react";
-import { useDownload } from "../../../hooks/useDownload";
+import { useDownload } from "@/hooks/useDownload";
+import type { ApiError } from "@/types/error";
+import React, {
+  useState,
+  type FormEvent,
+  useEffect,
+  useCallback,
+  type FC,
+} from "react";
 import { useZennSearch } from "../hooks/useZennSearch";
-import type { ApiError } from "../../../types/error";
 import type { ZennArticle } from "../types/zenn";
 import {
   generateZennMarkdown,
@@ -11,19 +17,43 @@ import {
 } from "../utils/zennMarkdownGenerator";
 import { ZennUsernameInput } from "./ZennUsernameInput";
 
-import type { ZennSearchFormProps } from "../types/forms";
+/**
+ * Zenn検索結果の型定義
+ */
+interface ZennSearchResults {
+  articles: ZennArticle[];
+  filteredArticles: ZennArticle[];
+  markdownContent: string;
+  isLoading: boolean;
+  error: ApiError | null;
+  searchKeyword?: string;
+  searchUsername?: string;
+}
+
+/**
+ * ZennSearchFormコンポーネントのProps型
+ */
+interface ZennSearchFormProps {
+  onSearchResults?: (results: ZennSearchResults) => void;
+}
 
 /**
  * Zenn検索フォームコンポーネント
+ * Zennの記事検索とフィルタリング機能を提供する
+ * @param onSearchResults 検索結果変更時のコールバック関数
  */
-export const ZennSearchForm = ({ onSearchResults }: ZennSearchFormProps) => {
+export const ZennSearchForm: FC<ZennSearchFormProps> = ({
+  onSearchResults,
+}) => {
   const [searchKeyword, setSearchKeyword] = useState("");
   const [searchUsername, setSearchUsername] = useState("");
   const [markdownContent, setMarkdownContent] = useState("");
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
-  
+
   // フィルター状態
-  const [articleType, setArticleType] = useState<"all" | "tech" | "idea">("all");
+  const [articleType, setArticleType] = useState<"all" | "tech" | "idea">(
+    "all"
+  );
   const [minLikes, setMinLikes] = useState<number | undefined>(undefined);
   const [dateFrom, setDateFrom] = useState("");
   const [dateTo, setDateTo] = useState("");
@@ -38,13 +68,13 @@ export const ZennSearchForm = ({ onSearchResults }: ZennSearchFormProps) => {
     retrySearch,
     applyFilters,
   } = useZennSearch();
-  
+
   const { isDownloading, handleDownload } = useDownload();
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setMarkdownContent("");
-    
+
     // 基本検索パラメータ
     const searchParams = {
       searchKeyword: searchKeyword.trim() || undefined,
@@ -57,7 +87,7 @@ export const ZennSearchForm = ({ onSearchResults }: ZennSearchFormProps) => {
   };
 
   // フィルター適用
-  const handleFilterChange = () => {
+  const handleFilterChange = useCallback(() => {
     const filterParams = {
       articleType,
       minLikes: minLikes && minLikes > 0 ? minLikes : undefined,
@@ -65,16 +95,16 @@ export const ZennSearchForm = ({ onSearchResults }: ZennSearchFormProps) => {
       dateTo: dateTo || undefined,
       searchKeyword: searchKeyword.trim() || undefined,
     };
-    
+
     applyFilters(filterParams);
-  };
+  }, [articleType, minLikes, dateFrom, dateTo, searchKeyword, applyFilters]);
 
   // フィルター状態変更時に自動適用
   useEffect(() => {
     if (articles.length > 0) {
       handleFilterChange();
     }
-  }, [articleType, minLikes, dateFrom, dateTo, searchKeyword, articles]);
+  }, [articles, handleFilterChange]);
 
   // 検索結果・フィルター結果の変化を監視してプレビュー更新
   useEffect(() => {
@@ -151,7 +181,7 @@ export const ZennSearchForm = ({ onSearchResults }: ZennSearchFormProps) => {
             onUsernameChange={setSearchUsername}
             disabled={isLoading || isDownloading}
           />
-          
+
           <div>
             <label
               htmlFor="search-keyword"
@@ -189,8 +219,11 @@ export const ZennSearchForm = ({ onSearchResults }: ZennSearchFormProps) => {
           </button>
 
           {showAdvancedSearch && (
-            <div id="zenn-advanced-search-section" className="space-y-4 p-4 border border-gray-300 rounded-md bg-gray-50">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div
+              id="zenn-advanced-search-section"
+              className="space-y-4 p-4 border border-gray-300 rounded-md bg-gray-50"
+            >
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label
                     htmlFor="article-type"
@@ -201,7 +234,9 @@ export const ZennSearchForm = ({ onSearchResults }: ZennSearchFormProps) => {
                   <select
                     id="article-type"
                     value={articleType}
-                    onChange={(e) => setArticleType(e.target.value as "all" | "tech" | "idea")}
+                    onChange={(e) =>
+                      setArticleType(e.target.value as "all" | "tech" | "idea")
+                    }
                     className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
                     disabled={isLoading || isDownloading}
                   >
@@ -223,7 +258,11 @@ export const ZennSearchForm = ({ onSearchResults }: ZennSearchFormProps) => {
                     type="number"
                     min="0"
                     value={minLikes || ""}
-                    onChange={(e) => setMinLikes(e.target.value ? Number(e.target.value) : undefined)}
+                    onChange={(e) =>
+                      setMinLikes(
+                        e.target.value ? Number(e.target.value) : undefined
+                      )
+                    }
                     placeholder="例: 10"
                     className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm placeholder-gray-500 focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500 disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
                     disabled={isLoading || isDownloading}
@@ -231,7 +270,7 @@ export const ZennSearchForm = ({ onSearchResults }: ZennSearchFormProps) => {
                 </div>
               </div>
 
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                   <label
                     htmlFor="date-from"

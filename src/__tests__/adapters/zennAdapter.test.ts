@@ -8,7 +8,10 @@ import {
   createSuccessResponse,
 } from "../../adapters/mockHttpClient";
 import { createZennAdapter } from "../../features/zenn/adapters/zennAdapter";
-import type { ZennApiResponse, ZennArticle } from "../../features/zenn/types/zenn";
+import type {
+  ZennApiResponse,
+  ZennArticle,
+} from "../../features/zenn/types/zenn";
 import type { ApiError } from "../../types/error";
 
 describe("ZennAdapter", () => {

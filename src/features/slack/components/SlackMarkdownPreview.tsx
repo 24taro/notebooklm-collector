@@ -154,7 +154,7 @@ export const SlackMarkdownPreview: FC<SlackMarkdownPreviewProps> = ({
                               href={permalinkMaps[thread.parent.ts]}
                               target="_blank"
                               rel="noopener noreferrer"
-                              className="text-docbase-primary hover:underline"
+                              className="text-slack-primary hover:underline"
                               onClick={(e) => e.stopPropagation()}
                             >
                               Slackで開く

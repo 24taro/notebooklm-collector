@@ -1,15 +1,15 @@
 "use client"; // クライアントコンポーネントとしてマーク
 
+import Footer from "@/components/Footer";
+import Header from "@/components/Header";
+import { ZennMarkdownPreview } from "@/features/zenn/components/ZennMarkdownPreview";
+import { ZennSearchForm } from "@/features/zenn/components/ZennSearchForm";
+import type { ZennArticle } from "@/features/zenn/types/zenn";
+import { generateZennMarkdown } from "@/features/zenn/utils/zennMarkdownGenerator";
+import { useDownload } from "@/hooks/useDownload";
+import type { ApiError } from "@/types/error";
 import { useState } from "react";
 import { Toaster } from "react-hot-toast";
-import Footer from "../../components/Footer";
-import Header from "../../components/Header";
-import { ZennMarkdownPreview } from "../../features/zenn/components/ZennMarkdownPreview";
-import { ZennSearchForm } from "../../features/zenn/components/ZennSearchForm";
-import type { ZennArticle } from "../../features/zenn/types/zenn";
-import { generateZennMarkdown } from "../../features/zenn/utils/zennMarkdownGenerator";
-import { useDownload } from "../../hooks/useDownload";
-import type { ApiError } from "../../types/error";
 
 export default function ZennPage() {
   const [searchResults, setSearchResults] = useState<{
@@ -31,7 +31,9 @@ export default function ZennPage() {
   const { isDownloading, handleDownload } = useDownload();
 
   const handleDownloadClick = () => {
-    const articlesExist = searchResults.filteredArticles && searchResults.filteredArticles.length > 0;
+    const articlesExist =
+      searchResults.filteredArticles &&
+      searchResults.filteredArticles.length > 0;
     if (articlesExist) {
       // ダウンロード時は全件のMarkdownを生成
       const fullMarkdown = generateZennMarkdown(
@@ -42,10 +44,16 @@ export default function ZennPage() {
           totalOriginalCount: searchResults.articles.length,
         }
       );
-      const filename = searchResults.searchKeyword || searchResults.searchUsername || "zenn-articles";
+      const filename =
+        searchResults.searchKeyword ||
+        searchResults.searchUsername ||
+        "zenn-articles";
       handleDownload(fullMarkdown, filename, articlesExist, "zenn");
     } else {
-      const filename = searchResults.searchKeyword || searchResults.searchUsername || "zenn-articles";
+      const filename =
+        searchResults.searchKeyword ||
+        searchResults.searchUsername ||
+        "zenn-articles";
       handleDownload(
         searchResults.markdownContent,
         filename,
@@ -65,7 +73,7 @@ export default function ZennPage() {
             "!border !border-gray-200 !bg-white !text-gray-700 !shadow-lg !rounded-md",
           success: {
             iconTheme: {
-              primary: "#10B981", // Zenn風グリーン
+              primary: "#3EA8FF", // Zenn primary blue
               secondary: "#FFFFFF",
             },
           },
@@ -94,15 +102,15 @@ export default function ZennPage() {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center items-center text-sm text-gray-500">
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <div className="w-2 h-2 bg-green-500 rounded-full" />
                 <span>認証不要</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <div className="w-2 h-2 bg-green-500 rounded-full" />
                 <span>リアルタイム検索</span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="w-2 h-2 bg-green-500 rounded-full"></div>
+                <div className="w-2 h-2 bg-green-500 rounded-full" />
                 <span>LLM最適化出力</span>
               </div>
             </div>
@@ -120,7 +128,9 @@ export default function ZennPage() {
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <span className="text-2xl">🔍</span>
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">1. 検索条件設定</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">
+                  1. 検索条件設定
+                </h3>
                 <p className="text-sm text-gray-600">
                   キーワードやユーザー名、記事タイプなどの条件を指定
                 </p>
@@ -129,7 +139,9 @@ export default function ZennPage() {
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <span className="text-2xl">📝</span>
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">2. プレビュー確認</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">
+                  2. プレビュー確認
+                </h3>
                 <p className="text-sm text-gray-600">
                   検索結果をプレビューで確認し、フィルターで絞り込み
                 </p>
@@ -138,7 +150,9 @@ export default function ZennPage() {
                 <div className="w-12 h-12 bg-green-100 rounded-lg flex items-center justify-center mx-auto mb-4">
                   <span className="text-2xl">💾</span>
                 </div>
-                <h3 className="font-semibold text-gray-900 mb-2">3. ダウンロード</h3>
+                <h3 className="font-semibold text-gray-900 mb-2">
+                  3. ダウンロード
+                </h3>
                 <p className="text-sm text-gray-600">
                   LLM最適化されたMarkdown形式でダウンロード
                 </p>
@@ -171,9 +185,11 @@ export default function ZennPage() {
                     <div className="p-4 bg-green-50 border border-green-200 rounded-lg">
                       <p className="text-sm text-gray-700">
                         取得件数: {searchResults.filteredArticles.length}件
-                        {searchResults.articles.length !== searchResults.filteredArticles.length && (
+                        {searchResults.articles.length !==
+                          searchResults.filteredArticles.length && (
                           <span className="text-gray-500">
-                            {" "}(フィルター前: {searchResults.articles.length}件)
+                            {" "}
+                            (フィルター前: {searchResults.articles.length}件)
                           </span>
                         )}
                       </p>
@@ -243,7 +259,8 @@ export default function ZennPage() {
             </div>
             <div className="mt-8 p-4 bg-blue-50 border border-blue-200 rounded-lg">
               <p className="text-sm text-blue-800">
-                <strong>セキュリティ:</strong> すべての処理はお客様のブラウザ内で完結し、
+                <strong>セキュリティ:</strong>{" "}
+                すべての処理はお客様のブラウザ内で完結し、
                 入力された情報や検索結果が外部サーバーに送信されることはありません。
               </p>
             </div>

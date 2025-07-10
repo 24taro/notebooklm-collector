@@ -1,6 +1,12 @@
 "use client";
 
-import React, { useState, type FormEvent, useEffect, useRef } from "react";
+import React, {
+  useState,
+  type FormEvent,
+  useEffect,
+  useRef,
+  type FC,
+} from "react";
 import { useDownload } from "../../../hooks/useDownload";
 import useLocalStorage from "../../../hooks/useLocalStorage";
 import type { ApiError } from "../../../types/error";
@@ -30,11 +36,13 @@ interface DocbaseSearchFormProps {
 }
 
 /**
- * 検索フォームコンポーネント
+ * Docbase検索フォームコンポーネント
+ * Docbaseの記事検索と詳細フィルタリング機能を提供する
+ * @param onSearchResults 検索結果変更時のコールバック関数
  */
-export const DocbaseSearchForm = ({
+export const DocbaseSearchForm: FC<DocbaseSearchFormProps> = ({
   onSearchResults,
-}: DocbaseSearchFormProps) => {
+}) => {
   const [keyword, setKeyword] = useState("");
   const [domain, setDomain] = useLocalStorage<string>(
     LOCAL_STORAGE_DOMAIN_KEY,

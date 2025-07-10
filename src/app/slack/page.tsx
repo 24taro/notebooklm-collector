@@ -1,11 +1,11 @@
 "use client";
 
+import Footer from "@/components/Footer";
+import Header from "@/components/Header";
+import { SlackMarkdownPreview } from "@/features/slack/components/SlackMarkdownPreview";
+import { SlackSearchForm } from "@/features/slack/components/SlackSearchForm";
 import { useSlackForm } from "@/features/slack/hooks/useSlackForm";
 import { Toaster } from "react-hot-toast";
-import Footer from "../../components/Footer";
-import Header from "../../components/Header";
-import { SlackMarkdownPreview } from "../../features/slack/components/SlackMarkdownPreview";
-import { SlackSearchForm } from "../../features/slack/components/SlackSearchForm";
 
 export default function SlackPage() {
   const slackForm = useSlackForm();
@@ -20,7 +20,7 @@ export default function SlackPage() {
             "!border !border-gray-200 !bg-white !text-gray-700 !shadow-lg !rounded-md",
           success: {
             iconTheme: {
-              primary: "#5692ce", // グレー系ブルー
+              primary: "#4A154B", // Slack purple
               secondary: "#FFFFFF",
             },
           },
@@ -54,12 +54,12 @@ export default function SlackPage() {
                   slackForm.slackThreads.length > 0 &&
                   !slackForm.isLoading &&
                   !slackForm.error && (
-                    <div className="p-4 bg-docbase-primary/5 border border-docbase-primary/20 rounded-lg">
-                      <p className="text-sm text-docbase-text-sub">
+                    <div className="p-4 bg-slack-primary/5 border border-slack-primary/20 rounded-lg">
+                      <p className="text-sm text-slack-text-sub">
                         取得スレッド数: {slackForm.slackThreads.length}件
                       </p>
                       {slackForm.slackThreads.length > 10 && (
-                        <p className="text-sm text-docbase-text-sub mt-1">
+                        <p className="text-sm text-slack-text-sub mt-1">
                           プレビューには最初の10件が表示されます。すべての内容を確認するには、ダウンロードボタンをご利用ください。
                         </p>
                       )}
@@ -95,7 +95,7 @@ export default function SlackPage() {
                     <div className="flex items-center justify-center py-12">
                       <div className="text-center space-y-4">
                         <svg
-                          className="animate-spin h-8 w-8 text-docbase-primary mx-auto"
+                          className="animate-spin h-8 w-8 text-slack-primary mx-auto"
                           xmlns="http://www.w3.org/2000/svg"
                           fill="none"
                           viewBox="0 0 24 24"
@@ -131,7 +131,7 @@ export default function SlackPage() {
                         <div className="w-64 mx-auto">
                           <div className="w-full bg-gray-200 rounded-full h-2">
                             <div
-                              className="bg-docbase-primary h-2 rounded-full transition-all duration-300"
+                              className="bg-slack-primary h-2 rounded-full transition-all duration-300"
                               style={{
                                 width:
                                   slackForm.progressStatus?.phase ===

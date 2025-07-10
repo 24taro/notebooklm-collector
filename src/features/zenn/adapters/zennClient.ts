@@ -1,8 +1,8 @@
+import { createFetchHttpClient } from "@/adapters/fetchHttpClient";
+import type { ApiError } from "@/types/error";
 import type { Result } from "neverthrow";
-import { createFetchHttpClient } from "../../../adapters/fetchHttpClient";
-import { createZennAdapter } from "./zennAdapter";
-import type { ApiError } from "../../../types/error";
 import type { ZennArticle, ZennSearchParams } from "../types/zenn";
+import { createZennAdapter } from "./zennAdapter";
 
 // デフォルトのZennアダプターインスタンス
 const defaultAdapter = createZennAdapter(createFetchHttpClient());
@@ -22,14 +22,14 @@ export const fetchZennArticles = async (
 
 /**
  * ユーザー名を指定してZenn記事を取得する便利関数
- * 
+ *
  * @param username Zennユーザー名
  * @param options 追加の検索オプション
  * @returns 成功時はZennArticleの配列、失敗時はApiErrorを含むResult型
  */
 export const fetchZennArticlesByUser = async (
   username: string,
-  options?: Partial<Omit<ZennSearchParams, 'username'>>
+  options?: Partial<Omit<ZennSearchParams, "username">>
 ): Promise<Result<ZennArticle[], ApiError>> => {
   return defaultAdapter.searchArticles({
     username,
@@ -39,14 +39,14 @@ export const fetchZennArticlesByUser = async (
 
 /**
  * キーワードを指定してZenn記事を検索する便利関数
- * 
+ *
  * @param keyword 検索キーワード
  * @param options 追加の検索オプション
  * @returns 成功時はZennArticleの配列、失敗時はApiErrorを含むResult型
  */
 export const searchZennArticlesByKeyword = async (
   keyword: string,
-  options?: Partial<Omit<ZennSearchParams, 'searchKeyword'>>
+  options?: Partial<Omit<ZennSearchParams, "searchKeyword">>
 ): Promise<Result<ZennArticle[], ApiError>> => {
   return defaultAdapter.searchArticles({
     searchKeyword: keyword,
@@ -56,13 +56,13 @@ export const searchZennArticlesByKeyword = async (
 
 /**
  * 最新のZenn記事を取得する便利関数
- * 
+ *
  * @param count 取得件数（デフォルト: 30）
  * @param articleType 記事タイプフィルター（デフォルト: "all"）
  * @returns 成功時はZennArticleの配列、失敗時はApiErrorを含むResult型
  */
 export const fetchLatestZennArticles = async (
-  count: number = 30,
+  count = 30,
   articleType: "tech" | "idea" | "all" = "all"
 ): Promise<Result<ZennArticle[], ApiError>> => {
   return defaultAdapter.searchArticles({
@@ -74,23 +74,21 @@ export const fetchLatestZennArticles = async (
 
 /**
  * Zenn記事を多様な条件で検索する包括的な関数
- * 
+ *
  * @param params 詳細検索パラメータ
  * @returns 成功時はZennArticleの配列、失敗時はApiErrorを含むResult型
  */
-export const searchZennArticles = async (
-  params: {
-    keyword?: string;
-    username?: string;
-    articleType?: "tech" | "idea" | "all";
-    minLikes?: number;
-    dateFrom?: string;
-    dateTo?: string;
-    count?: number;
-    page?: number;
-    order?: string;
-  }
-): Promise<Result<ZennArticle[], ApiError>> => {
+export const searchZennArticles = async (params: {
+  keyword?: string;
+  username?: string;
+  articleType?: "tech" | "idea" | "all";
+  minLikes?: number;
+  dateFrom?: string;
+  dateTo?: string;
+  count?: number;
+  page?: number;
+  order?: string;
+}): Promise<Result<ZennArticle[], ApiError>> => {
   // パラメータをZennSearchParamsに変換
   const searchParams: ZennSearchParams = {
     searchKeyword: params.keyword,
@@ -110,7 +108,7 @@ export const searchZennArticles = async (
 /**
  * デフォルトのZennアダプターインスタンスを取得
  * テストやカスタム実装で直接アダプターにアクセスしたい場合に使用
- * 
+ *
  * @returns ZennAdapter インスタンス
  */
 export const getDefaultZennAdapter = () => {

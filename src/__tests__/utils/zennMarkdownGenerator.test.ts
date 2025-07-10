@@ -2,11 +2,11 @@
 // 記事データからMarkdown生成の動作を検証
 
 import { describe, expect, it } from "vitest";
+import type { ZennArticle } from "../../features/zenn/types/zenn";
 import {
   generateZennMarkdown,
   generateZennMarkdownForPreview,
 } from "../../features/zenn/utils/zennMarkdownGenerator";
-import type { ZennArticle } from "../../features/zenn/types/zenn";
 
 describe("zennMarkdownGenerator", () => {
   const mockUser = {
@@ -271,7 +271,9 @@ describe("zennMarkdownGenerator", () => {
     it("Zenn記事へのリンクが含まれる", () => {
       const result = generateZennMarkdownForPreview([mockArticle1]);
 
-      expect(result).toContain("[Zenn記事を見る](https://zenn.dev/testuser/articles/react-beginner-guide)");
+      expect(result).toContain(
+        "[Zenn記事を見る](https://zenn.dev/testuser/articles/react-beginner-guide)"
+      );
     });
   });
 });

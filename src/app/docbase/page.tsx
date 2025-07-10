@@ -1,15 +1,15 @@
 "use client"; // クライアントコンポーネントとしてマーク
 
+import Footer from "@/components/Footer";
+import Header from "@/components/Header";
+import { DocbaseMarkdownPreview } from "@/features/docbase/components/DocbaseMarkdownPreview";
+import { DocbaseSearchForm } from "@/features/docbase/components/DocbaseSearchForm";
+import type { DocbasePostListItem } from "@/features/docbase/types/docbase";
+import { generateDocbaseMarkdown } from "@/features/docbase/utils/docbaseMarkdownGenerator";
+import { useDownload } from "@/hooks/useDownload";
+import type { ApiError } from "@/types/error";
 import { useState } from "react";
 import { Toaster } from "react-hot-toast";
-import Footer from "../../components/Footer";
-import Header from "../../components/Header";
-import { DocbaseMarkdownPreview } from "../../features/docbase/components/DocbaseMarkdownPreview";
-import { DocbaseSearchForm } from "../../features/docbase/components/DocbaseSearchForm"; // パスを修正
-import type { DocbasePostListItem } from "../../features/docbase/types/docbase";
-import { generateDocbaseMarkdown } from "../../features/docbase/utils/docbaseMarkdownGenerator";
-import { useDownload } from "../../hooks/useDownload";
-import type { ApiError } from "../../types/error";
 
 export default function DocbasePage() {
   const [searchResults, setSearchResults] = useState<{
@@ -54,7 +54,7 @@ export default function DocbasePage() {
             "!border !border-gray-200 !bg-white !text-gray-700 !shadow-lg !rounded-md",
           success: {
             iconTheme: {
-              primary: "#3B82F6", // Docbase風ブルー
+              primary: "#5692ce", // Docbase primary
               secondary: "#FFFFFF",
             },
           },

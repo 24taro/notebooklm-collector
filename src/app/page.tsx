@@ -68,14 +68,13 @@ export default function HomePage() {
                   viewBox="0 0 24 24"
                   xmlns="http://www.w3.org/2000/svg"
                 >
-                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                  <title>Zenn integration icon</title>
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5" />
                 </svg>
               </div>
               <div>
                 <h2 className="text-lg text-gray-900">Zenn連携</h2>
-                <p className="text-gray-600 mt-2">
-                  Zennの技術記事を検索・収集
-                </p>
+                <p className="text-gray-600 mt-2">Zennの技術記事を検索・収集</p>
               </div>
             </Link>
           </div>

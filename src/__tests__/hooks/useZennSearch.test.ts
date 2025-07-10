@@ -3,8 +3,11 @@ import { err, ok } from "neverthrow";
 import { type Mock, beforeEach, describe, expect, it, vi } from "vitest";
 import type { ZennAdapter } from "../../features/zenn/adapters/zennAdapter";
 import { useZennSearch } from "../../features/zenn/hooks/useZennSearch";
+import type {
+  ZennArticle,
+  ZennSearchParams,
+} from "../../features/zenn/types/zenn";
 import type { ApiError } from "../../types/error";
-import type { ZennArticle, ZennSearchParams } from "../../features/zenn/types/zenn";
 
 // react-hot-toastのモック
 vi.mock("react-hot-toast", () => {
@@ -20,7 +23,9 @@ vi.mock("react-hot-toast", () => {
 
 // errorMessageのモック
 vi.mock("../../utils/errorMessage", () => ({
-  getUserFriendlyErrorMessage: vi.fn((error: ApiError) => "ユーザーフレンドリーエラー"),
+  getUserFriendlyErrorMessage: vi.fn(
+    (error: ApiError) => "ユーザーフレンドリーエラー"
+  ),
   getErrorActionSuggestion: vi.fn((error: ApiError) => "アクション提案"),
 }));
 
@@ -168,7 +173,9 @@ describe("useZennSearch", () => {
     });
 
     it("ユーザー名を指定した検索が実行される", async () => {
-      (mockAdapter.searchArticles as Mock).mockResolvedValue(ok([mockArticles[0]]));
+      (mockAdapter.searchArticles as Mock).mockResolvedValue(
+        ok([mockArticles[0]])
+      );
 
       const { result } = renderHook(() =>
         useZennSearch({ adapter: mockAdapter })
@@ -296,9 +303,11 @@ describe("useZennSearch", () => {
       });
 
       expect(result.current.filteredArticles).toHaveLength(2);
-      expect(result.current.filteredArticles.every(article => 
-        article.article_type === "tech"
-      )).toBe(true);
+      expect(
+        result.current.filteredArticles.every(
+          (article) => article.article_type === "tech"
+        )
+      ).toBe(true);
     });
 
     it("最小いいね数でフィルタリングできる", async () => {
@@ -316,7 +325,9 @@ describe("useZennSearch", () => {
       });
 
       expect(result.current.filteredArticles).toHaveLength(1);
-      expect(result.current.filteredArticles[0].liked_count).toBeGreaterThanOrEqual(30);
+      expect(
+        result.current.filteredArticles[0].liked_count
+      ).toBeGreaterThanOrEqual(30);
     });
 
     it("キーワードでフィルタリングできる", async () => {
@@ -355,7 +366,9 @@ describe("useZennSearch", () => {
       });
 
       expect(result.current.filteredArticles).toHaveLength(1);
-      expect(result.current.filteredArticles[0].published_at.startsWith("2024-01-01")).toBe(true);
+      expect(
+        result.current.filteredArticles[0].published_at.startsWith("2024-01-01")
+      ).toBe(true);
     });
 
     it("複数の条件を組み合わせてフィルタリングできる", async () => {
@@ -376,9 +389,12 @@ describe("useZennSearch", () => {
       });
 
       expect(result.current.filteredArticles).toHaveLength(2);
-      expect(result.current.filteredArticles.every(article => 
-        article.article_type === "tech" && article.liked_count >= 20
-      )).toBe(true);
+      expect(
+        result.current.filteredArticles.every(
+          (article) =>
+            article.article_type === "tech" && article.liked_count >= 20
+        )
+      ).toBe(true);
     });
   });
 
@@ -454,9 +470,10 @@ describe("useZennSearch", () => {
   describe("プログレス状態", () => {
     it("検索中のプログレス状態が更新される", async () => {
       (mockAdapter.searchArticles as Mock).mockImplementation(
-        () => new Promise((resolve) => {
-          setTimeout(() => resolve(ok(mockArticles)), 100);
-        })
+        () =>
+          new Promise((resolve) => {
+            setTimeout(() => resolve(ok(mockArticles)), 100);
+          })
       );
 
       const { result } = renderHook(() =>

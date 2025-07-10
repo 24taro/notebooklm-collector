@@ -2,7 +2,7 @@ import type { Result } from "neverthrow";
 import { createFetchHttpClient } from "../../../adapters/fetchHttpClient";
 import type { ApiError } from "../../../types/error";
 import type { DocbasePostListItem } from "../types/docbase";
-import type { AdvancedFilters } from "../types/forms";
+import type { DocbaseAdvancedFilters } from "../types/forms";
 import {
   type DocbaseSearchParams,
   createDocbaseAdapter,
@@ -25,7 +25,7 @@ export const fetchDocbasePosts = async (
   domain: string,
   token: string,
   keyword: string,
-  advancedFilters?: AdvancedFilters
+  advancedFilters?: DocbaseAdvancedFilters
 ): Promise<Result<DocbasePostListItem[], ApiError>> => {
   return defaultAdapter.searchPosts({
     domain,

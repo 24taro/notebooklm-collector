@@ -3,13 +3,14 @@
 
 import { err, ok } from "neverthrow";
 import { beforeEach, describe, expect, it, vi } from "vitest";
+import type { ZennAdapter } from "../../features/zenn/adapters/zennAdapter";
 import {
+  fetchLatestZennArticles,
   fetchZennArticles,
   fetchZennArticlesByUser,
-  searchZennArticlesByKeyword,
-  fetchLatestZennArticles,
-  searchZennArticles,
   getDefaultZennAdapter,
+  searchZennArticles,
+  searchZennArticlesByKeyword,
 } from "../../features/zenn/adapters/zennClient";
 import type { ZennArticle } from "../../features/zenn/types/zenn";
 import type { ApiError } from "../../types/error";
@@ -29,7 +30,7 @@ vi.mock("../../adapters/fetchHttpClient", () => ({
 }));
 
 describe("zennClient", () => {
-  let mockAdapter: any;
+  let mockAdapter: ZennAdapter;
   let mockArticles: ZennArticle[];
 
   beforeEach(() => {
