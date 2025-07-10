@@ -180,6 +180,8 @@ export const ZennSearchForm = ({ onSearchResults }: ZennSearchFormProps) => {
             type="button"
             onClick={() => setShowAdvancedSearch(!showAdvancedSearch)}
             className="text-sm text-green-600 hover:text-green-700 focus:outline-none"
+            aria-expanded={showAdvancedSearch}
+            aria-controls="zenn-advanced-search-section"
           >
             {showAdvancedSearch
               ? "フィルター条件を閉じる ▲"
@@ -187,7 +189,7 @@ export const ZennSearchForm = ({ onSearchResults }: ZennSearchFormProps) => {
           </button>
 
           {showAdvancedSearch && (
-            <div className="space-y-4 p-4 border border-gray-300 rounded-md bg-gray-50">
+            <div id="zenn-advanced-search-section" className="space-y-4 p-4 border border-gray-300 rounded-md bg-gray-50">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label

@@ -148,6 +148,7 @@ export const ZennMarkdownPreview: FC<ZennMarkdownPreviewProps> = ({
                           fill="none"
                           viewBox="0 0 24 24"
                           stroke="currentColor"
+                          aria-label={isOpen ? "記事詳細を閉じる" : "記事詳細を開く"}
                         >
                           <title>
                             {isOpen ? "記事詳細を閉じる" : "記事詳細を開く"}
