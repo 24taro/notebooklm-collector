@@ -1,7 +1,7 @@
-import { renderHook, waitFor } from "@testing-library/react";
+import { act, renderHook, waitFor } from "@testing-library/react";
 import { err, ok } from "neverthrow";
 import toast from "react-hot-toast";
-import { describe, expect, it, vi } from "vitest";
+import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { QiitaAdapter } from "../../features/qiita/adapters/qiitaAdapter";
 import { useQiitaSearch } from "../../features/qiita/hooks/useQiitaSearch";
 import type { QiitaItem } from "../../features/qiita/types/qiita";
@@ -95,7 +95,9 @@ describe("useQiitaSearch", () => {
 
       const validToken = "0123456789abcdef0123456789abcdef01234567";
 
-      await result.current.searchItems(validToken, "React");
+      await act(async () => {
+        await result.current.searchItems(validToken, "React");
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -118,7 +120,9 @@ describe("useQiitaSearch", () => {
 
       const validToken = "0123456789abcdef0123456789abcdef01234567";
 
-      await result.current.searchItems(validToken, "NotFound");
+      await act(async () => {
+        await result.current.searchItems(validToken, "NotFound");
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -145,7 +149,9 @@ describe("useQiitaSearch", () => {
         minStocks: 50,
       };
 
-      await result.current.searchItems(validToken, "React", advancedFilters);
+      await act(async () => {
+        await result.current.searchItems(validToken, "React", advancedFilters);
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -249,7 +255,9 @@ describe("useQiitaSearch", () => {
 
       const validToken = "0123456789abcdef0123456789abcdef01234567";
 
-      await result.current.searchItems(validToken, "React");
+      await act(async () => {
+        await result.current.searchItems(validToken, "React");
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -274,7 +282,9 @@ describe("useQiitaSearch", () => {
 
       const validToken = "0123456789abcdef0123456789abcdef01234567";
 
-      await result.current.searchItems(validToken, "React");
+      await act(async () => {
+        await result.current.searchItems(validToken, "React");
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -297,7 +307,9 @@ describe("useQiitaSearch", () => {
 
       const validToken = "0123456789abcdef0123456789abcdef01234567";
 
-      await result.current.searchItems(validToken, "React");
+      await act(async () => {
+        await result.current.searchItems(validToken, "React");
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -320,7 +332,9 @@ describe("useQiitaSearch", () => {
 
       const validToken = "0123456789abcdef0123456789abcdef01234567";
 
-      await result.current.searchItems(validToken, "React");
+      await act(async () => {
+        await result.current.searchItems(validToken, "React");
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -356,14 +370,18 @@ describe("useQiitaSearch", () => {
       const advancedFilters = { tags: "React" };
 
       // 最初の検索（失敗）
-      await result.current.searchItems(validToken, "React", advancedFilters);
+      await act(async () => {
+        await result.current.searchItems(validToken, "React", advancedFilters);
+      });
 
       await waitFor(() => {
         expect(result.current.canRetry).toBe(true);
       });
 
       // 再試行
-      await result.current.retrySearch();
+      await act(async () => {
+        await result.current.retrySearch();
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -400,9 +418,11 @@ describe("useQiitaSearch", () => {
   describe("ローディング状態", () => {
     it("検索中はisLoadingがtrueになる", async () => {
       let resolveSearch: (value: Result<QiitaItem[], ApiError>) => void;
-      const searchPromise = new Promise((resolve) => {
-        resolveSearch = resolve;
-      });
+      const searchPromise = new Promise<Result<QiitaItem[], ApiError>>(
+        (resolve) => {
+          resolveSearch = resolve;
+        }
+      );
 
       const mockAdapter: QiitaAdapter = {
         searchItems: vi.fn().mockReturnValue(searchPromise),
@@ -415,17 +435,19 @@ describe("useQiitaSearch", () => {
       const validToken = "0123456789abcdef0123456789abcdef01234567";
 
       // 検索開始
-      const searchPromiseResult = result.current.searchItems(
-        validToken,
-        "React"
-      );
+      act(() => {
+        result.current.searchItems(validToken, "React");
+      });
 
-      // ローディング状態の確認
-      expect(result.current.isLoading).toBe(true);
+      // ローディング状態の確認（状態更新を待つ）
+      await waitFor(() => {
+        expect(result.current.isLoading).toBe(true);
+      });
 
       // 検索完了
-      resolveSearch?.(ok(mockQiitaItems));
-      await searchPromiseResult;
+      act(() => {
+        resolveSearch?.(ok(mockQiitaItems));
+      });
 
       await waitFor(() => {
         expect(result.current.isLoading).toBe(false);
@@ -447,7 +469,9 @@ describe("useQiitaSearch", () => {
 
       const validToken = "0123456789abcdef0123456789abcdef01234567";
 
-      await result.current.searchItems(validToken, "React");
+      await act(async () => {
+        await result.current.searchItems(validToken, "React");
+      });
 
       await waitFor(() => {
         expect(result.current.getUserFriendlyError()).toBeTruthy();
@@ -467,7 +491,9 @@ describe("useQiitaSearch", () => {
 
       const validToken = "0123456789abcdef0123456789abcdef01234567";
 
-      await result.current.searchItems(validToken, "React");
+      await act(async () => {
+        await result.current.searchItems(validToken, "React");
+      });
 
       await waitFor(() => {
         expect(result.current.getErrorSuggestion()).toBeTruthy();

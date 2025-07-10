@@ -1,6 +1,7 @@
 // Qiitaアダプターのテスト
 // モックHTTPクライアントを使用してアダプターの動作を検証
 
+import { ok } from "neverthrow";
 import { describe, expect, it } from "vitest";
 import {
   createErrorResponse,
@@ -296,29 +297,25 @@ describe("QiitaAdapter", () => {
   });
 
   it("Bearer認証ヘッダーが正しく設定される", async () => {
-    let capturedHeaders: Record<string, string> = {};
+    let capturedOptions: RequestInit | undefined;
 
-    const mockHttpClient = createMockHttpClient([
-      {
-        match: (url: string, options?: RequestInit) => {
-          if (options?.headers) {
-            capturedHeaders = options.headers as Record<string, string>;
-          }
-          return url.includes("qiita.com");
-        },
-        response: Promise.resolve({
-          ok: true,
-          status: 200,
-          json: () => Promise.resolve([]),
-        } as Response),
+    // カスタムHttpClientを作成してリクエストオプションをキャプチャ
+    const mockHttpClient: import("../../adapters/types").HttpClient = {
+      async fetch<T>(url: string, options?: RequestInit) {
+        capturedOptions = options;
+        return ok([] as T);
       },
-    ]);
+    };
 
     const adapter = createQiitaAdapter(mockHttpClient);
     await adapter.searchItems(mockSearchParams);
 
-    expect(capturedHeaders.Authorization).toBe(`Bearer ${mockToken}`);
-    expect(capturedHeaders["Content-Type"]).toBe("application/json");
+    expect(capturedOptions).toBeDefined();
+    expect(capturedOptions?.headers).toBeDefined();
+
+    const headers = capturedOptions?.headers as Record<string, string>;
+    expect(headers.Authorization).toBe(`Bearer ${mockToken}`);
+    expect(headers["Content-Type"]).toBe("application/json");
   });
 });
 

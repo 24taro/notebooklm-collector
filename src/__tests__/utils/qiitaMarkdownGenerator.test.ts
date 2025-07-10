@@ -248,8 +248,8 @@ describe("qiitaMarkdownGenerator", () => {
 
         expect(result).toContain('qiita_id: "c686397e4a0f4f11683d"');
         expect(result).toContain('title: "React 18の新機能完全ガイド"');
-        expect(result).toContain('created_at: "2024-01-15T10:30:00+09:00"');
-        expect(result).toContain('updated_at: "2024-01-15T12:00:00+09:00"');
+        expect(result).toContain('created_at: "2024-01-15T01:30:00.000Z"');
+        expect(result).toContain('updated_at: "2024-01-15T03:00:00.000Z"');
         expect(result).toContain(
           'url: "https://qiita.com/example/items/c686397e4a0f4f11683d"'
         );
