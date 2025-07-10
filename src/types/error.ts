@@ -29,6 +29,7 @@ export type NotFoundApiError = { type: "notFound"; message: string };
 export type ValidationApiError = { type: "validation"; message: string };
 export type MissingScopeApiError = { type: "missing_scope"; message: string };
 export type SlackSpecificApiError = { type: "slack_api"; message: string };
+export type ZennSpecificApiError = { type: "zenn_api"; message: string };
 
 /**
  * 統一APIエラー型
@@ -43,7 +44,8 @@ export type ApiError =
   | NotFoundApiError
   | ValidationApiError
   | MissingScopeApiError
-  | SlackSpecificApiError;
+  | SlackSpecificApiError
+  | ZennSpecificApiError;
 
 /**
  * エラーがApiError型であるかを判定する型ガード
@@ -65,6 +67,7 @@ export const isApiError = (error: unknown): error is ApiError => {
       e.type === "notFound" ||
       e.type === "validation" || // 追加
       e.type === "missing_scope" || // 追加
-      e.type === "slack_api") // 追加
+      e.type === "slack_api" || // 追加
+      e.type === "zenn_api") // 追加
   );
 };
