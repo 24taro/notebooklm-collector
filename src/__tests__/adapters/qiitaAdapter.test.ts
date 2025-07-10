@@ -7,7 +7,10 @@ import {
   createMockHttpClient,
   createSuccessResponse,
 } from "../../adapters/mockHttpClient";
-import { createQiitaAdapter, validateQiitaToken } from "../../features/qiita/adapters/qiitaAdapter";
+import {
+  createQiitaAdapter,
+  validateQiitaToken,
+} from "../../features/qiita/adapters/qiitaAdapter";
 import type { QiitaItem } from "../../features/qiita/types/qiita";
 import type { ApiError } from "../../types/error";
 
@@ -30,7 +33,8 @@ describe("QiitaAdapter", () => {
       user: {
         id: "example_user",
         name: "Example User",
-        profile_image_url: "https://qiita-image-store.s3.amazonaws.com/0/12345/profile-images/1234567.png",
+        profile_image_url:
+          "https://qiita-image-store.s3.amazonaws.com/0/12345/profile-images/1234567.png",
         description: "フロントエンドエンジニア",
         github_login_name: "example_user",
         twitter_screen_name: "example_user",
@@ -47,7 +51,7 @@ describe("QiitaAdapter", () => {
       },
       tags: [
         { name: "React", versions: ["18"] },
-        { name: "JavaScript", versions: ["ES2022"] }
+        { name: "JavaScript", versions: ["ES2022"] },
       ],
       likes_count: 150,
       comments_count: 12,
@@ -69,7 +73,8 @@ describe("QiitaAdapter", () => {
       user: {
         id: "another_user",
         name: "Another User",
-        profile_image_url: "https://qiita-image-store.s3.amazonaws.com/0/67890/profile-images/7890123.png",
+        profile_image_url:
+          "https://qiita-image-store.s3.amazonaws.com/0/67890/profile-images/7890123.png",
         description: "TypeScript愛好家",
         github_login_name: "another_user",
         twitter_screen_name: "another_user",
@@ -86,7 +91,7 @@ describe("QiitaAdapter", () => {
       },
       tags: [
         { name: "TypeScript", versions: ["5.0"] },
-        { name: "React", versions: ["18"] }
+        { name: "React", versions: ["18"] },
       ],
       likes_count: 95,
       comments_count: 8,
@@ -115,7 +120,9 @@ describe("QiitaAdapter", () => {
     if (result.isOk()) {
       expect(result.value).toHaveLength(2);
       expect(result.value[0].title).toBe("React 18の新機能完全ガイド");
-      expect(result.value[1].title).toBe("TypeScriptとReactのベストプラクティス");
+      expect(result.value[1].title).toBe(
+        "TypeScriptとReactのベストプラクティス"
+      );
     }
   });
 
@@ -135,7 +142,8 @@ describe("QiitaAdapter", () => {
   });
 
   it("詳細検索条件を含む検索クエリを正しく構築する", async () => {
-    const expectedUrl = "https://qiita.com/api/v2/items?page=1&per_page=100&query=React%2Btag%3AJavaScript%2Buser%3Aexample%2Bcreated%3A%3E%3D2024-01-01%2Bcreated%3A%3C%3D2024-12-31%2Bstocks%3A%3E%3D50";
+    const expectedUrl =
+      "https://qiita.com/api/v2/items?page=1&per_page=100&query=React%2Btag%3AJavaScript%2Buser%3Aexample%2Bcreated%3A%3E%3D2024-01-01%2Bcreated%3A%3C%3D2024-12-31%2Bstocks%3A%3E%3D50";
 
     const mockHttpClient = createMockHttpClient([
       createSuccessResponse(expectedUrl, [], "GET"),
@@ -158,7 +166,8 @@ describe("QiitaAdapter", () => {
   });
 
   it("複数タグを正しく処理する", async () => {
-    const expectedUrl = "https://qiita.com/api/v2/items?page=1&per_page=100&query=React%2Btag%3AJavaScript%2Btag%3ATypeScript%2Btag%3ANext.js";
+    const expectedUrl =
+      "https://qiita.com/api/v2/items?page=1&per_page=100&query=React%2Btag%3AJavaScript%2Btag%3ATypeScript%2Btag%3ANext.js";
 
     const mockHttpClient = createMockHttpClient([
       createSuccessResponse(expectedUrl, [], "GET"),

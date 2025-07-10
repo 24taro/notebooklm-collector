@@ -61,7 +61,7 @@ export const QiitaAdvancedFilters: React.FC<QiitaAdvancedFiltersProps> = ({
       <button
         type="button"
         onClick={onToggle}
-        className="w-full px-4 py-3 text-left flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors rounded-t-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+        className="w-full px-4 py-3 text-left flex items-center justify-between bg-gray-50 hover:bg-gray-100 transition-colors rounded-t-lg focus:outline-none focus:ring-2 focus:ring-qiita-primary"
       >
         <span className="text-sm font-medium text-gray-700">詳細検索条件</span>
         <svg
@@ -72,6 +72,7 @@ export const QiitaAdvancedFilters: React.FC<QiitaAdvancedFiltersProps> = ({
           stroke="currentColor"
           viewBox="0 0 24 24"
         >
+          <title>{isExpanded ? "閉じる" : "展開"}</title>
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -98,7 +99,7 @@ export const QiitaAdvancedFilters: React.FC<QiitaAdvancedFiltersProps> = ({
               value={localFilters.tags || ""}
               onChange={(e) => updateFilter("tags", e.target.value)}
               placeholder="JavaScript, React, TypeScript"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-qiita-primary focus:border-qiita-primary transition-colors"
             />
             <p className="mt-1 text-xs text-gray-500">
               カンマ区切りで複数指定可能
@@ -119,16 +120,16 @@ export const QiitaAdvancedFilters: React.FC<QiitaAdvancedFiltersProps> = ({
               value={localFilters.user || ""}
               onChange={(e) => updateFilter("user", e.target.value)}
               placeholder="Qiita"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-qiita-primary focus:border-qiita-primary transition-colors"
             />
             <p className="mt-1 text-xs text-gray-500">QiitaユーザーIDを指定</p>
           </div>
 
           {/* 投稿期間 */}
           <div>
-            <label className="block text-sm font-medium text-gray-700 mb-2">
+            <div className="block text-sm font-medium text-gray-700 mb-2">
               投稿期間
-            </label>
+            </div>
             <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
               <div>
                 <label
@@ -142,7 +143,7 @@ export const QiitaAdvancedFilters: React.FC<QiitaAdvancedFiltersProps> = ({
                   id="qiita-start-date"
                   value={localFilters.startDate || ""}
                   onChange={(e) => updateFilter("startDate", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-qiita-primary focus:border-qiita-primary transition-colors"
                 />
               </div>
               <div>
@@ -157,7 +158,7 @@ export const QiitaAdvancedFilters: React.FC<QiitaAdvancedFiltersProps> = ({
                   id="qiita-end-date"
                   value={localFilters.endDate || ""}
                   onChange={(e) => updateFilter("endDate", e.target.value)}
-                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-qiita-primary focus:border-qiita-primary transition-colors"
                 />
               </div>
             </div>
@@ -183,7 +184,7 @@ export const QiitaAdvancedFilters: React.FC<QiitaAdvancedFiltersProps> = ({
               onChange={handleMinStocksChange}
               placeholder="100"
               min="0"
-              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-qiita-primary focus:border-qiita-primary transition-colors"
             />
             <p className="mt-1 text-xs text-gray-500">
               指定した数以上のストック数を持つ記事のみ検索
@@ -199,7 +200,7 @@ export const QiitaAdvancedFilters: React.FC<QiitaAdvancedFiltersProps> = ({
                 setLocalFilters(emptyFilters);
                 onFiltersChange(emptyFilters);
               }}
-              className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+              className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-qiita-primary transition-colors"
             >
               <svg
                 className="w-4 h-4 mr-1"
@@ -207,6 +208,7 @@ export const QiitaAdvancedFilters: React.FC<QiitaAdvancedFiltersProps> = ({
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
+                <title>クリア</title>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"

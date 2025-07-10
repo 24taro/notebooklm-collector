@@ -43,9 +43,9 @@ export const QiitaMarkdownPreview: React.FC<QiitaMarkdownPreviewProps> = ({
   // よく使われているタグ
   const tagFrequency = items.reduce(
     (acc, item) => {
-      item.tags.forEach((tag) => {
+      for (const tag of item.tags) {
         acc[tag.name] = (acc[tag.name] || 0) + 1;
-      });
+      }
       return acc;
     },
     {} as Record<string, number>
@@ -69,8 +69,9 @@ export const QiitaMarkdownPreview: React.FC<QiitaMarkdownPreviewProps> = ({
             Markdownプレビュー
           </h3>
           <button
+            type="button"
             onClick={() => setIsExpanded(!isExpanded)}
-            className="inline-flex items-center text-sm text-green-600 hover:text-green-700 transition-colors"
+            className="inline-flex items-center text-sm text-qiita-primary hover:text-qiita-primary-dark transition-colors"
           >
             {isExpanded ? "折りたたむ" : "詳細を表示"}
             <svg
@@ -81,6 +82,7 @@ export const QiitaMarkdownPreview: React.FC<QiitaMarkdownPreviewProps> = ({
               stroke="currentColor"
               viewBox="0 0 24 24"
             >
+              <title>{isExpanded ? "折りたたむ" : "詳細を表示"}</title>
               <path
                 strokeLinecap="round"
                 strokeLinejoin="round"
@@ -96,7 +98,7 @@ export const QiitaMarkdownPreview: React.FC<QiitaMarkdownPreviewProps> = ({
       <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
           <div className="text-center">
-            <div className="text-2xl font-bold text-green-600">
+            <div className="text-2xl font-bold text-qiita-primary">
               {items.length}
             </div>
             <div className="text-sm text-gray-600">記事数</div>
@@ -142,7 +144,7 @@ export const QiitaMarkdownPreview: React.FC<QiitaMarkdownPreviewProps> = ({
                       href={item.url}
                       target="_blank"
                       rel="noopener noreferrer"
-                      className="text-green-600 hover:text-green-700 font-medium truncate block"
+                      className="text-qiita-primary hover:text-qiita-primary-dark font-medium truncate block"
                     >
                       {item.title}
                     </a>
@@ -166,7 +168,7 @@ export const QiitaMarkdownPreview: React.FC<QiitaMarkdownPreviewProps> = ({
                 {topTags.map(([tag, count]) => (
                   <span
                     key={tag}
-                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800"
+                    className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-qiita-primary/10 text-qiita-primary"
                   >
                     {tag} ({count})
                   </span>

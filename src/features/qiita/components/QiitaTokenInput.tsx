@@ -1,4 +1,5 @@
-import React, {
+import type React from "react";
+import {
   type FC,
   forwardRef,
   useImperativeHandle,
@@ -25,7 +26,7 @@ export const QiitaTokenInput = forwardRef<
     },
   }));
   const [savedToken, setSavedToken] = useLocalStorage<string>(
-    "qiitaApiToken",
+    "qiitaApiToken", // 既存のキーとの互換性のため維持
     ""
   );
   const [showSaveButton, setShowSaveButton] = useState(false);
@@ -85,11 +86,13 @@ export const QiitaTokenInput = forwardRef<
             onChange={handleInputChange}
             placeholder="40文字の16進数トークンを入力してください"
             disabled={disabled}
-            className={`w-full px-3 py-2 pr-24 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors ${
+            className={`w-full px-3 py-2 pr-24 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-qiita-primary focus:border-qiita-primary transition-colors ${
               !hasValidFormat || error ? "border-red-500 bg-red-50" : ""
             } ${disabled ? "bg-gray-100 cursor-not-allowed" : ""}`}
             maxLength={40}
-            aria-describedby={error || !hasValidFormat ? "qiita-token-error" : undefined}
+            aria-describedby={
+              error || !hasValidFormat ? "qiita-token-error" : undefined
+            }
           />
 
           {/* 表示/非表示切り替えボタン */}
@@ -106,6 +109,7 @@ export const QiitaTokenInput = forwardRef<
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
+                <title>トークンを隠す</title>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -120,6 +124,7 @@ export const QiitaTokenInput = forwardRef<
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
+                <title>トークンを表示</title>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -155,7 +160,7 @@ export const QiitaTokenInput = forwardRef<
             <button
               type="button"
               onClick={handleSaveToken}
-              className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+              className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-qiita-primary hover:bg-qiita-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-qiita-primary transition-colors"
             >
               <svg
                 className="w-4 h-4 mr-1"
@@ -163,6 +168,7 @@ export const QiitaTokenInput = forwardRef<
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
+                <title>保存</title>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -178,7 +184,7 @@ export const QiitaTokenInput = forwardRef<
             <button
               type="button"
               onClick={handleLoadToken}
-              className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+              className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-qiita-primary transition-colors"
             >
               <svg
                 className="w-4 h-4 mr-1"
@@ -186,6 +192,7 @@ export const QiitaTokenInput = forwardRef<
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
+                <title>読み込み</title>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -201,11 +208,7 @@ export const QiitaTokenInput = forwardRef<
 
       {/* エラーメッセージ */}
       {(error || !hasValidFormat) && (
-        <p
-          id="qiita-token-error"
-          className="text-sm text-red-600"
-          role="alert"
-        >
+        <p id="qiita-token-error" className="text-sm text-red-600" role="alert">
           {error || "トークンは40文字の16進数である必要があります"}
         </p>
       )}
@@ -218,7 +221,7 @@ export const QiitaTokenInput = forwardRef<
             href="https://qiita.com/settings/applications"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-green-600 hover:text-green-700 underline"
+            className="text-qiita-primary hover:text-qiita-primary-dark underline"
           >
             Qiita設定ページ
           </a>

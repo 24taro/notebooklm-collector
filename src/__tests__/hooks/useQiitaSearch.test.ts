@@ -1,9 +1,9 @@
 import { renderHook, waitFor } from "@testing-library/react";
-import { describe, expect, it, vi } from "vitest";
 import { err, ok } from "neverthrow";
 import toast from "react-hot-toast";
-import { useQiitaSearch } from "../../features/qiita/hooks/useQiitaSearch";
+import { describe, expect, it, vi } from "vitest";
 import type { QiitaAdapter } from "../../features/qiita/adapters/qiitaAdapter";
+import { useQiitaSearch } from "../../features/qiita/hooks/useQiitaSearch";
 import type { QiitaItem } from "../../features/qiita/types/qiita";
 import type { ApiError } from "../../types/error";
 
@@ -22,7 +22,8 @@ describe("useQiitaSearch", () => {
       id: "c686397e4a0f4f11683d",
       title: "React 18の新機能完全ガイド",
       body: "# React 18について\n\nReact 18の新機能を詳しく解説します。",
-      rendered_body: "<h1>React 18について</h1><p>React 18の新機能を詳しく解説します。</p>",
+      rendered_body:
+        "<h1>React 18について</h1><p>React 18の新機能を詳しく解説します。</p>",
       created_at: "2024-01-15T10:30:00+09:00",
       updated_at: "2024-01-15T12:00:00+09:00",
       url: "https://qiita.com/example/items/c686397e4a0f4f11683d",
@@ -46,7 +47,7 @@ describe("useQiitaSearch", () => {
       },
       tags: [
         { name: "React", versions: ["18"] },
-        { name: "JavaScript", versions: ["ES2022"] }
+        { name: "JavaScript", versions: ["ES2022"] },
       ],
       likes_count: 150,
       comments_count: 12,
@@ -60,7 +61,7 @@ describe("useQiitaSearch", () => {
   ];
 
   const createMockAdapter = (
-    searchResult: ReturnType<QiitaAdapter['searchItems']>
+    searchResult: ReturnType<QiitaAdapter["searchItems"]>
   ): QiitaAdapter => ({
     searchItems: vi.fn().mockResolvedValue(searchResult),
   });
@@ -72,7 +73,7 @@ describe("useQiitaSearch", () => {
   describe("初期状態", () => {
     it("初期値が正しく設定される", () => {
       const mockAdapter = createMockAdapter(ok([]));
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useQiitaSearch({ adapter: mockAdapter })
       );
 
@@ -88,12 +89,12 @@ describe("useQiitaSearch", () => {
   describe("正常な検索", () => {
     it("検索が成功した場合、結果が設定される", async () => {
       const mockAdapter = createMockAdapter(ok(mockQiitaItems));
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useQiitaSearch({ adapter: mockAdapter })
       );
 
       const validToken = "0123456789abcdef0123456789abcdef01234567";
-      
+
       await result.current.searchItems(validToken, "React");
 
       await waitFor(() => {
@@ -111,12 +112,12 @@ describe("useQiitaSearch", () => {
 
     it("検索結果が0件の場合、成功トーストが表示される", async () => {
       const mockAdapter = createMockAdapter(ok([]));
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useQiitaSearch({ adapter: mockAdapter })
       );
 
       const validToken = "0123456789abcdef0123456789abcdef01234567";
-      
+
       await result.current.searchItems(validToken, "NotFound");
 
       await waitFor(() => {
@@ -124,12 +125,14 @@ describe("useQiitaSearch", () => {
       });
 
       expect(result.current.items).toEqual([]);
-      expect(toast.success).toHaveBeenCalledWith("検索結果が見つかりませんでした。");
+      expect(toast.success).toHaveBeenCalledWith(
+        "検索結果が見つかりませんでした。"
+      );
     });
 
     it("詳細フィルターを含む検索が正しく実行される", async () => {
       const mockAdapter = createMockAdapter(ok(mockQiitaItems));
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useQiitaSearch({ adapter: mockAdapter })
       );
 
@@ -141,7 +144,7 @@ describe("useQiitaSearch", () => {
         endDate: "2024-12-31",
         minStocks: 50,
       };
-      
+
       await result.current.searchItems(validToken, "React", advancedFilters);
 
       await waitFor(() => {
@@ -159,13 +162,15 @@ describe("useQiitaSearch", () => {
   describe("バリデーションエラー", () => {
     it("トークンが空の場合、エラートーストが表示される", async () => {
       const mockAdapter = createMockAdapter(ok([]));
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useQiitaSearch({ adapter: mockAdapter })
       );
-      
+
       await result.current.searchItems("", "React");
 
-      expect(toast.error).toHaveBeenCalledWith("Qiitaアクセストークンを入力してください。");
+      expect(toast.error).toHaveBeenCalledWith(
+        "Qiitaアクセストークンを入力してください。"
+      );
       expect(result.current.items).toEqual([]);
       expect(result.current.canRetry).toBe(false);
       expect(mockAdapter.searchItems).not.toHaveBeenCalled();
@@ -173,13 +178,15 @@ describe("useQiitaSearch", () => {
 
     it("トークンの形式が無効な場合、エラートーストが表示される", async () => {
       const mockAdapter = createMockAdapter(ok([]));
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useQiitaSearch({ adapter: mockAdapter })
       );
-      
+
       await result.current.searchItems("invalid-token", "React");
 
-      expect(toast.error).toHaveBeenCalledWith("アクセストークンは40文字の16進数である必要があります。");
+      expect(toast.error).toHaveBeenCalledWith(
+        "アクセストークンは40文字の16進数である必要があります。"
+      );
       expect(result.current.items).toEqual([]);
       expect(result.current.canRetry).toBe(false);
       expect(mockAdapter.searchItems).not.toHaveBeenCalled();
@@ -187,12 +194,12 @@ describe("useQiitaSearch", () => {
 
     it("キーワードと詳細フィルターがすべて空の場合、メッセージが表示される", async () => {
       const mockAdapter = createMockAdapter(ok([]));
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useQiitaSearch({ adapter: mockAdapter })
       );
 
       const validToken = "0123456789abcdef0123456789abcdef01234567";
-      
+
       await result.current.searchItems(validToken, "");
 
       expect(toast.success).toHaveBeenCalledWith(
@@ -205,7 +212,7 @@ describe("useQiitaSearch", () => {
 
     it("キーワードが空でも詳細フィルターがあれば検索が実行される", async () => {
       const mockAdapter = createMockAdapter(ok(mockQiitaItems));
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useQiitaSearch({ adapter: mockAdapter })
       );
 
@@ -213,7 +220,7 @@ describe("useQiitaSearch", () => {
       const advancedFilters = {
         tags: "React",
       };
-      
+
       await result.current.searchItems(validToken, "", advancedFilters);
 
       await waitFor(() => {
@@ -235,13 +242,13 @@ describe("useQiitaSearch", () => {
         message: "Unauthorized access",
       };
       const mockAdapter = createMockAdapter(err(authError));
-      
-      const { result } = renderHook(() => 
+
+      const { result } = renderHook(() =>
         useQiitaSearch({ adapter: mockAdapter })
       );
 
       const validToken = "0123456789abcdef0123456789abcdef01234567";
-      
+
       await result.current.searchItems(validToken, "React");
 
       await waitFor(() => {
@@ -260,13 +267,13 @@ describe("useQiitaSearch", () => {
         message: "Rate limit exceeded",
       };
       const mockAdapter = createMockAdapter(err(rateLimitError));
-      
-      const { result } = renderHook(() => 
+
+      const { result } = renderHook(() =>
         useQiitaSearch({ adapter: mockAdapter })
       );
 
       const validToken = "0123456789abcdef0123456789abcdef01234567";
-      
+
       await result.current.searchItems(validToken, "React");
 
       await waitFor(() => {
@@ -283,13 +290,13 @@ describe("useQiitaSearch", () => {
         message: "Network connection failed",
       };
       const mockAdapter = createMockAdapter(err(networkError));
-      
-      const { result } = renderHook(() => 
+
+      const { result } = renderHook(() =>
         useQiitaSearch({ adapter: mockAdapter })
       );
 
       const validToken = "0123456789abcdef0123456789abcdef01234567";
-      
+
       await result.current.searchItems(validToken, "React");
 
       await waitFor(() => {
@@ -306,13 +313,13 @@ describe("useQiitaSearch", () => {
         message: "Unknown error occurred",
       };
       const mockAdapter = createMockAdapter(err(unknownError));
-      
-      const { result } = renderHook(() => 
+
+      const { result } = renderHook(() =>
         useQiitaSearch({ adapter: mockAdapter })
       );
 
       const validToken = "0123456789abcdef0123456789abcdef01234567";
-      
+
       await result.current.searchItems(validToken, "React");
 
       await waitFor(() => {
@@ -330,23 +337,24 @@ describe("useQiitaSearch", () => {
         type: "network",
         message: "Network connection failed",
       };
-      
+
       // 最初はエラー、再試行時は成功するモック
-      const mockSearchItems = vi.fn()
+      const mockSearchItems = vi
+        .fn()
         .mockResolvedValueOnce(err(networkError))
         .mockResolvedValueOnce(ok(mockQiitaItems));
-      
+
       const mockAdapter: QiitaAdapter = {
         searchItems: mockSearchItems,
       };
-      
-      const { result } = renderHook(() => 
+
+      const { result } = renderHook(() =>
         useQiitaSearch({ adapter: mockAdapter })
       );
 
       const validToken = "0123456789abcdef0123456789abcdef01234567";
       const advancedFilters = { tags: "React" };
-      
+
       // 最初の検索（失敗）
       await result.current.searchItems(validToken, "React", advancedFilters);
 
@@ -378,10 +386,10 @@ describe("useQiitaSearch", () => {
 
     it("最後の検索パラメータがない場合、retrySearchは何もしない", async () => {
       const mockAdapter = createMockAdapter(ok([]));
-      const { result } = renderHook(() => 
+      const { result } = renderHook(() =>
         useQiitaSearch({ adapter: mockAdapter })
       );
-      
+
       // 検索を実行せずに再試行
       result.current.retrySearch();
 
@@ -391,7 +399,7 @@ describe("useQiitaSearch", () => {
 
   describe("ローディング状態", () => {
     it("検索中はisLoadingがtrueになる", async () => {
-      let resolveSearch: (value: any) => void;
+      let resolveSearch: (value: Result<QiitaItem[], ApiError>) => void;
       const searchPromise = new Promise((resolve) => {
         resolveSearch = resolve;
       });
@@ -399,21 +407,24 @@ describe("useQiitaSearch", () => {
       const mockAdapter: QiitaAdapter = {
         searchItems: vi.fn().mockReturnValue(searchPromise),
       };
-      
-      const { result } = renderHook(() => 
+
+      const { result } = renderHook(() =>
         useQiitaSearch({ adapter: mockAdapter })
       );
 
       const validToken = "0123456789abcdef0123456789abcdef01234567";
-      
+
       // 検索開始
-      const searchPromiseResult = result.current.searchItems(validToken, "React");
+      const searchPromiseResult = result.current.searchItems(
+        validToken,
+        "React"
+      );
 
       // ローディング状態の確認
       expect(result.current.isLoading).toBe(true);
 
       // 検索完了
-      resolveSearch!(ok(mockQiitaItems));
+      resolveSearch?.(ok(mockQiitaItems));
       await searchPromiseResult;
 
       await waitFor(() => {
@@ -429,13 +440,13 @@ describe("useQiitaSearch", () => {
         message: "Unauthorized access",
       };
       const mockAdapter = createMockAdapter(err(authError));
-      
-      const { result } = renderHook(() => 
+
+      const { result } = renderHook(() =>
         useQiitaSearch({ adapter: mockAdapter })
       );
 
       const validToken = "0123456789abcdef0123456789abcdef01234567";
-      
+
       await result.current.searchItems(validToken, "React");
 
       await waitFor(() => {
@@ -449,13 +460,13 @@ describe("useQiitaSearch", () => {
         message: "Unauthorized access",
       };
       const mockAdapter = createMockAdapter(err(authError));
-      
-      const { result } = renderHook(() => 
+
+      const { result } = renderHook(() =>
         useQiitaSearch({ adapter: mockAdapter })
       );
 
       const validToken = "0123456789abcdef0123456789abcdef01234567";
-      
+
       await result.current.searchItems(validToken, "React");
 
       await waitFor(() => {

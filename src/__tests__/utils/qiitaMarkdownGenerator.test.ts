@@ -11,7 +11,8 @@ describe("qiitaMarkdownGenerator", () => {
       id: "c686397e4a0f4f11683d",
       title: "React 18の新機能完全ガイド",
       body: "# React 18について\n\nReact 18の新機能を詳しく解説します。",
-      rendered_body: "<h1>React 18について</h1><p>React 18の新機能を詳しく解説します。</p>",
+      rendered_body:
+        "<h1>React 18について</h1><p>React 18の新機能を詳しく解説します。</p>",
       created_at: "2024-01-15T10:30:00+09:00",
       updated_at: "2024-01-15T12:00:00+09:00",
       url: "https://qiita.com/example/items/c686397e4a0f4f11683d",
@@ -35,7 +36,7 @@ describe("qiitaMarkdownGenerator", () => {
       },
       tags: [
         { name: "React", versions: ["18"] },
-        { name: "JavaScript", versions: ["ES2022"] }
+        { name: "JavaScript", versions: ["ES2022"] },
       ],
       likes_count: 150,
       comments_count: 12,
@@ -50,7 +51,8 @@ describe("qiitaMarkdownGenerator", () => {
       id: "d787498f5b1f5f22794e",
       title: "TypeScriptとReactのベストプラクティス",
       body: "# TypeScriptについて\n\nTypeScriptを使ったReact開発のコツを紹介します。\n\n## 型定義\n\n型安全性を保つために...",
-      rendered_body: "<h1>TypeScriptについて</h1><p>TypeScriptを使ったReact開発のコツを紹介します。</p>",
+      rendered_body:
+        "<h1>TypeScriptについて</h1><p>TypeScriptを使ったReact開発のコツを紹介します。</p>",
       created_at: "2024-01-14T15:45:00+09:00",
       updated_at: "2024-01-14T16:00:00+09:00",
       url: "https://qiita.com/another/items/d787498f5b1f5f22794e",
@@ -74,7 +76,7 @@ describe("qiitaMarkdownGenerator", () => {
       },
       tags: [
         { name: "TypeScript", versions: ["5.0"] },
-        { name: "React", versions: ["18"] }
+        { name: "React", versions: ["18"] },
       ],
       likes_count: 95,
       comments_count: 8,
@@ -89,7 +91,8 @@ describe("qiitaMarkdownGenerator", () => {
       id: "e898509f6c2f6f33905f",
       title: "Next.js 14のApp Routerを使った開発",
       body: "# Next.js 14について\n\nApp Routerの使い方を詳しく解説します。",
-      rendered_body: "<h1>Next.js 14について</h1><p>App Routerの使い方を詳しく解説します。</p>",
+      rendered_body:
+        "<h1>Next.js 14について</h1><p>App Routerの使い方を詳しく解説します。</p>",
       created_at: "2024-01-13T09:15:00+09:00",
       updated_at: "2024-01-13T10:00:00+09:00",
       url: "https://qiita.com/nextjs_dev/items/e898509f6c2f6f33905f",
@@ -113,7 +116,7 @@ describe("qiitaMarkdownGenerator", () => {
       },
       tags: [
         { name: "Next.js", versions: ["14"] },
-        { name: "React", versions: ["18"] }
+        { name: "React", versions: ["18"] },
       ],
       likes_count: 200,
       comments_count: 15,
@@ -134,12 +137,10 @@ describe("qiitaMarkdownGenerator", () => {
       });
 
       it("nullまたはundefinedの場合は空文字列を返す", () => {
-        expect(
-          generateQiitaMarkdown(null as unknown as QiitaItem[])
-        ).toBe("");
-        expect(
-          generateQiitaMarkdown(undefined as unknown as QiitaItem[])
-        ).toBe("");
+        expect(generateQiitaMarkdown(null as unknown as QiitaItem[])).toBe("");
+        expect(generateQiitaMarkdown(undefined as unknown as QiitaItem[])).toBe(
+          ""
+        );
       });
 
       it("記事リストから正しいMarkdownを生成する", () => {
@@ -165,14 +166,24 @@ describe("qiitaMarkdownGenerator", () => {
         expect(result).toContain("## Collection Overview");
         expect(result).toContain("- **Total Articles**: 3");
         expect(result).toContain('- **Search Keyword**: "React"');
-        expect(result).toContain("- **Source**: Qiita Knowledge Sharing Platform");
-        expect(result).toContain("- **Total Engagement**: 👍 445 likes, 📚 274 stocks, 💬 35 comments");
+        expect(result).toContain(
+          "- **Source**: Qiita Knowledge Sharing Platform"
+        );
+        expect(result).toContain(
+          "- **Total Engagement**: 👍 445 likes, 📚 274 stocks, 💬 35 comments"
+        );
 
         // 目次の確認
         expect(result).toContain("## Articles Index");
-        expect(result).toContain("1. [React 18の新機能完全ガイド](#article-1) - 2024/1/15 by Example User");
-        expect(result).toContain("2. [TypeScriptとReactのベストプラクティス](#article-2) - 2024/1/14 by Another User");
-        expect(result).toContain("3. [Next.js 14のApp Routerを使った開発](#article-3) - 2024/1/13 by Next.js Developer");
+        expect(result).toContain(
+          "1. [React 18の新機能完全ガイド](#article-1) - 2024/1/15 by Example User"
+        );
+        expect(result).toContain(
+          "2. [TypeScriptとReactのベストプラクティス](#article-2) - 2024/1/14 by Another User"
+        );
+        expect(result).toContain(
+          "3. [Next.js 14のApp Routerを使った開発](#article-3) - 2024/1/13 by Next.js Developer"
+        );
 
         // 記事内容の確認
         expect(result).toContain("## Articles Content");
@@ -218,7 +229,9 @@ describe("qiitaMarkdownGenerator", () => {
         const result = generateQiitaMarkdown(mockQiitaItems);
 
         expect(result).toContain('date_range: "2024-01-13 - 2024-01-15"');
-        expect(result).toMatch(/- \*\*Date Range\*\*: 2024\/1\/13 - 2024\/1\/15/);
+        expect(result).toMatch(
+          /- \*\*Date Range\*\*: 2024\/1\/13 - 2024\/1\/15/
+        );
       });
 
       it("記事の日付が正しく日本語形式でフォーマットされる", () => {
@@ -237,7 +250,9 @@ describe("qiitaMarkdownGenerator", () => {
         expect(result).toContain('title: "React 18の新機能完全ガイド"');
         expect(result).toContain('created_at: "2024-01-15T10:30:00+09:00"');
         expect(result).toContain('updated_at: "2024-01-15T12:00:00+09:00"');
-        expect(result).toContain('url: "https://qiita.com/example/items/c686397e4a0f4f11683d"');
+        expect(result).toContain(
+          'url: "https://qiita.com/example/items/c686397e4a0f4f11683d"'
+        );
         expect(result).toContain('author: "example_user"');
         expect(result).toContain('author_name: "Example User"');
         expect(result).toContain('tags: ["React", "JavaScript"]');
@@ -259,7 +274,9 @@ describe("qiitaMarkdownGenerator", () => {
         expect(result).toContain("- **Author**: Example User (@example_user)");
         expect(result).toContain("- **Document ID**: c686397e4a0f4f11683d");
         expect(result).toContain("- **Tags**: React, JavaScript");
-        expect(result).toContain("- **Engagement**: 👍 150 likes, 📚 89 stocks, 💬 12 comments, 👀 2500 views");
+        expect(result).toContain(
+          "- **Engagement**: 👍 150 likes, 📚 89 stocks, 💬 12 comments, 👀 2500 views"
+        );
       });
 
       it("著者の組織・場所情報が表示される", () => {
@@ -307,7 +324,9 @@ describe("qiitaMarkdownGenerator", () => {
       it("記事ごとのエンゲージメント情報が表示される", () => {
         const result = generateQiitaMarkdown([mockQiitaItems[0]]);
 
-        expect(result).toContain("👍 150 likes, 📚 89 stocks, 💬 12 comments, 👀 2500 views");
+        expect(result).toContain(
+          "👍 150 likes, 📚 89 stocks, 💬 12 comments, 👀 2500 views"
+        );
       });
 
       it("page_views_countがnullの場合はviewsが表示されない", () => {
@@ -339,7 +358,7 @@ describe("qiitaMarkdownGenerator", () => {
 
         const result = generateQiitaMarkdown([noTagItem]);
 
-        expect(result).toContain('tags: []');
+        expect(result).toContain("tags: []");
         expect(result).not.toContain("- **Tags**:");
       });
 
@@ -400,10 +419,7 @@ describe("qiitaMarkdownGenerator", () => {
       });
 
       it("プレビュー用の簡潔なMarkdownを生成する", () => {
-        const result = generateQiitaPreviewMarkdown(
-          mockQiitaItems,
-          "React"
-        );
+        const result = generateQiitaPreviewMarkdown(mockQiitaItems, "React");
 
         // プレビュータイトル
         expect(result).toContain("# Qiita 検索結果プレビュー");
@@ -434,7 +450,9 @@ describe("qiitaMarkdownGenerator", () => {
       it("記事のメタデータが簡潔に表示される", () => {
         const result = generateQiitaPreviewMarkdown([mockQiitaItems[0]]);
 
-        expect(result).toContain("**投稿者**: Example User | **投稿日**: 2024/1/15 | **👍**: 150 | **📚**: 89");
+        expect(result).toContain(
+          "**投稿者**: Example User | **投稿日**: 2024/1/15 | **👍**: 150 | **📚**: 89"
+        );
         expect(result).toContain("**タグ**: `React`, `JavaScript`");
       });
 
@@ -461,7 +479,9 @@ describe("qiitaMarkdownGenerator", () => {
       it("記事リンクが含まれる", () => {
         const result = generateQiitaPreviewMarkdown([mockQiitaItems[0]]);
 
-        expect(result).toContain("[記事を読む](https://qiita.com/example/items/c686397e4a0f4f11683d)");
+        expect(result).toContain(
+          "[記事を読む](https://qiita.com/example/items/c686397e4a0f4f11683d)"
+        );
       });
 
       it("タグがない記事ではタグ行が表示されない", () => {
@@ -491,7 +511,9 @@ describe("qiitaMarkdownGenerator", () => {
         expect(result).toContain("## 1. 記事 1");
         expect(result).toContain("## 10. 記事 10");
         expect(result).not.toContain("## 11. 記事 11");
-        expect(result).toContain("*他に5件の記事があります。ダウンロードして全ての記事を確認してください。*");
+        expect(result).toContain(
+          "*他に5件の記事があります。ダウンロードして全ての記事を確認してください。*"
+        );
       });
 
       it("10件以下の場合は件数表示に注記が含まれない", () => {

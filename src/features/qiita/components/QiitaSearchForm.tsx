@@ -9,12 +9,17 @@ import { QiitaAdvancedFilters } from "./QiitaAdvancedFilters";
 import { QiitaMarkdownPreview } from "./QiitaMarkdownPreview";
 import { QiitaTokenInput } from "./QiitaTokenInput";
 
+const LOCAL_STORAGE_TOKEN_KEY = "qiitaApiToken";
+
 /**
  * Qiita検索のメインフォームコンポーネント
  */
 export const QiitaSearchForm: React.FC = () => {
   // LocalStorage連携によるトークン管理
-  const [token, setToken] = useLocalStorage<string>("qiitaApiToken", "");
+  const [token, setToken] = useLocalStorage<string>(
+    LOCAL_STORAGE_TOKEN_KEY,
+    ""
+  );
 
   // フォーム状態
   const [searchQuery, setSearchQuery] = useState<string>("");
@@ -74,7 +79,7 @@ export const QiitaSearchForm: React.FC = () => {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="React, TypeScript, API設計..."
-            className="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-colors text-lg"
+            className="w-full px-4 py-3 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-qiita-primary focus:border-qiita-primary transition-colors text-lg"
           />
           <p className="mt-1 text-sm text-gray-500">
             記事のタイトルや本文から検索します
@@ -94,7 +99,7 @@ export const QiitaSearchForm: React.FC = () => {
           <button
             type="submit"
             disabled={isLoading || !token.trim() || !hasSearchConditions}
-            className="flex-1 sm:flex-none inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            className="flex-1 sm:flex-none inline-flex items-center justify-center px-6 py-3 border border-transparent text-base font-medium rounded-md text-white bg-qiita-primary hover:bg-qiita-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-qiita-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
           >
             {isLoading ? (
               <>
@@ -104,6 +109,7 @@ export const QiitaSearchForm: React.FC = () => {
                   fill="none"
                   viewBox="0 0 24 24"
                 >
+                  <title>検索中</title>
                   <circle
                     className="opacity-25"
                     cx="12"
@@ -111,12 +117,12 @@ export const QiitaSearchForm: React.FC = () => {
                     r="10"
                     stroke="currentColor"
                     strokeWidth="4"
-                  ></circle>
+                  />
                   <path
                     className="opacity-75"
                     fill="currentColor"
                     d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                  ></path>
+                  />
                 </svg>
                 検索中...
               </>
@@ -128,6 +134,7 @@ export const QiitaSearchForm: React.FC = () => {
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
+                  <title>検索</title>
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -145,7 +152,7 @@ export const QiitaSearchForm: React.FC = () => {
             <button
               type="button"
               onClick={retrySearch}
-              className="inline-flex items-center justify-center px-4 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 transition-colors"
+              className="inline-flex items-center justify-center px-4 py-3 border border-gray-300 text-base font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-qiita-primary transition-colors"
             >
               <svg
                 className="w-5 h-5 mr-2"
@@ -153,6 +160,7 @@ export const QiitaSearchForm: React.FC = () => {
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
+                <title>再試行</title>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -175,6 +183,7 @@ export const QiitaSearchForm: React.FC = () => {
                 stroke="currentColor"
                 viewBox="0 0 24 24"
               >
+                <title>検索結果なし</title>
                 <path
                   strokeLinecap="round"
                   strokeLinejoin="round"
@@ -201,9 +210,10 @@ export const QiitaSearchForm: React.FC = () => {
               検索結果: {items.length}件の記事
             </h3>
             <button
+              type="button"
               onClick={handleMarkdownDownload}
               disabled={isDownloading}
-              className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-green-600 hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="inline-flex items-center justify-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-qiita-primary hover:bg-qiita-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-qiita-primary disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {isDownloading ? (
                 <>
@@ -213,6 +223,7 @@ export const QiitaSearchForm: React.FC = () => {
                     fill="none"
                     viewBox="0 0 24 24"
                   >
+                    <title>ダウンロード中</title>
                     <circle
                       className="opacity-25"
                       cx="12"
@@ -220,12 +231,12 @@ export const QiitaSearchForm: React.FC = () => {
                       r="10"
                       stroke="currentColor"
                       strokeWidth="4"
-                    ></circle>
+                    />
                     <path
                       className="opacity-75"
                       fill="currentColor"
                       d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
-                    ></path>
+                    />
                   </svg>
                   ダウンロード中...
                 </>
@@ -237,6 +248,7 @@ export const QiitaSearchForm: React.FC = () => {
                     stroke="currentColor"
                     viewBox="0 0 24 24"
                   >
+                    <title>ダウンロード</title>
                     <path
                       strokeLinecap="round"
                       strokeLinejoin="round"

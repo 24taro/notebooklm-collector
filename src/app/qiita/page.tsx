@@ -176,13 +176,14 @@ export default function QiitaPage() {
                 APIトークンや取得された記事の内容は、お使いのブラウザ内でのみ処理されます。
                 これらの情報が外部のサーバーに送信されたり、保存されたりすることは一切ありませんので、安心してご利用いただけます。
               </p>
-              <div className="mt-6 inline-flex items-center px-4 py-2 bg-green-100 border border-green-200 rounded-md">
+              <div className="mt-6 inline-flex items-center px-4 py-2 bg-qiita-primary/10 border border-qiita-primary/20 rounded-md">
                 <svg
-                  className="w-5 h-5 text-green-600 mr-2"
+                  className="w-5 h-5 text-qiita-primary mr-2"
                   fill="none"
                   stroke="currentColor"
                   viewBox="0 0 24 24"
                 >
+                  <title>プライバシー保護</title>
                   <path
                     strokeLinecap="round"
                     strokeLinejoin="round"
@@ -190,7 +191,7 @@ export default function QiitaPage() {
                     d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"
                   />
                 </svg>
-                <span className="text-green-800 font-medium">
+                <span className="text-qiita-primary font-medium">
                   プライバシー保護設計
                 </span>
               </div>

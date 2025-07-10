@@ -40,7 +40,8 @@ const mockQiitaItems = [
     id: "c686397e4a0f4f11683d",
     title: "React 18の新機能完全ガイド",
     body: "# React 18について\n\nReact 18の新機能を詳しく解説します。\n\n### 新機能1: Automatic Batching\n\nReact 18では自動バッチングが...",
-    rendered_body: "<h1>React 18について</h1><p>React 18の新機能を詳しく解説します。</p>",
+    rendered_body:
+      "<h1>React 18について</h1><p>React 18の新機能を詳しく解説します。</p>",
     created_at: "2024-01-15T10:30:00+09:00",
     updated_at: "2024-01-15T12:00:00+09:00",
     url: "https://qiita.com/example/items/c686397e4a0f4f11683d",
@@ -64,7 +65,7 @@ const mockQiitaItems = [
     },
     tags: [
       { name: "React", versions: ["18"] },
-      { name: "JavaScript", versions: ["ES2022"] }
+      { name: "JavaScript", versions: ["ES2022"] },
     ],
     likes_count: 150,
     comments_count: 12,
@@ -79,7 +80,8 @@ const mockQiitaItems = [
     id: "d787498f5b1f5f22794e",
     title: "TypeScriptとReactのベストプラクティス",
     body: "# TypeScriptについて\n\nTypeScriptを使ったReact開発のコツを紹介します。",
-    rendered_body: "<h1>TypeScriptについて</h1><p>TypeScriptを使ったReact開発のコツを紹介します。</p>",
+    rendered_body:
+      "<h1>TypeScriptについて</h1><p>TypeScriptを使ったReact開発のコツを紹介します。</p>",
     created_at: "2024-01-14T15:45:00+09:00",
     updated_at: "2024-01-14T16:00:00+09:00",
     url: "https://qiita.com/another/items/d787498f5b1f5f22794e",
@@ -103,7 +105,7 @@ const mockQiitaItems = [
     },
     tags: [
       { name: "TypeScript", versions: ["5.0"] },
-      { name: "React", versions: ["18"] }
+      { name: "React", versions: ["18"] },
     ],
     likes_count: 95,
     comments_count: 8,
@@ -118,7 +120,8 @@ const mockQiitaItems = [
     id: "e898509f6c2f6f33905f",
     title: "Next.js 14のApp Routerを使った開発",
     body: "# Next.js 14について\n\nApp Routerの使い方を詳しく解説します。",
-    rendered_body: "<h1>Next.js 14について</h1><p>App Routerの使い方を詳しく解説します。</p>",
+    rendered_body:
+      "<h1>Next.js 14について</h1><p>App Routerの使い方を詳しく解説します。</p>",
     created_at: "2024-01-13T09:15:00+09:00",
     updated_at: "2024-01-13T10:00:00+09:00",
     url: "https://qiita.com/nextjs_dev/items/e898509f6c2f6f33905f",
@@ -142,7 +145,7 @@ const mockQiitaItems = [
     },
     tags: [
       { name: "Next.js", versions: ["14"] },
-      { name: "React", versions: ["18"] }
+      { name: "React", versions: ["18"] },
     ],
     likes_count: 200,
     comments_count: 15,
@@ -184,6 +187,6 @@ export const CustomStyling: Story = {
   args: {
     items: mockQiitaItems,
     searchKeyword: "TypeScript",
-    className: "border-green-500 bg-green-50",
+    className: "border-qiita-primary bg-qiita-primary/5",
   },
 };

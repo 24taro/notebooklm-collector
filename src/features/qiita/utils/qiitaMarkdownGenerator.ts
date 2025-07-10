@@ -60,7 +60,7 @@ export const generateQiitaMarkdown = (
     markdown += `- **Search Keyword**: "${searchKeyword}"\n`;
   }
   markdown += `- **Date Range**: ${dateRange}\n`;
-  markdown += `- **Source**: Qiita Knowledge Sharing Platform\n`;
+  markdown += "- **Source**: Qiita Knowledge Sharing Platform\n";
   markdown += `- **Total Engagement**: 👍 ${totalLikes} likes, 📚 ${totalStocks} stocks, 💬 ${totalComments} comments\n\n`;
 
   // 目次
@@ -176,7 +176,7 @@ export const generateQiitaPreviewMarkdown = (
   const previewItems = items.slice(0, 10);
   const hasMore = items.length > 10;
 
-  let markdown = `# Qiita 検索結果プレビュー\n\n`;
+  let markdown = "# Qiita 検索結果プレビュー\n\n";
 
   if (searchKeyword) {
     markdown += `**検索キーワード**: "${searchKeyword}"\n\n`;
