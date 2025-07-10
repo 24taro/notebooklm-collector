@@ -382,8 +382,5 @@ export function useGitHubForm() {
 
     // イベントハンドラー
     onSubmit: handleSubmit,
-    onDownload: () => {
-      // ダウンロード処理は上位コンポーネントで実装
-    },
   };
 }

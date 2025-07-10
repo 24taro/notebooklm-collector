@@ -104,7 +104,8 @@ describe("GitHubAdapter", () => {
         items: [],
       };
 
-      const expectedUrl = "https://api.github.com/search/issues?q=%22bug%22+repo%3Atest%2Frepo+author%3Atestuser+label%3A%22bug%22+state%3Aopen+type%3Aissue&sort=created&order=desc&per_page=100&page=1";
+      const expectedUrl =
+        "https://api.github.com/search/issues?q=%22bug%22+repo%3Atest%2Frepo+author%3Atestuser+label%3A%22bug%22+state%3Aopen+type%3Aissue&sort=created&order=desc&per_page=100&page=1";
 
       const mockHttpClient = createMockHttpClient([
         createSuccessResponse(expectedUrl, mockResponse, "GET"),

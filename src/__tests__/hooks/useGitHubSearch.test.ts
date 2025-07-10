@@ -273,7 +273,9 @@ describe("useGitHubSearch", () => {
 
       // ローディング状態をチェック
       expect(result.current.isLoading).toBe(true);
-      expect(result.current.progressStatus.message).toContain("GitHub Issues/Pull Requests");
+      expect(result.current.progressStatus.message).toContain(
+        "GitHub Issues/Pull Requests"
+      );
 
       // 検索完了
       await act(async () => {
@@ -355,7 +357,9 @@ describe("useGitHubSearch", () => {
       });
 
       expect(result.current.markdownContent).toContain("GitHub Discussions");
-      expect(result.current.markdownContent).toContain("Keyword: authentication");
+      expect(result.current.markdownContent).toContain(
+        "Keyword: authentication"
+      );
       expect(result.current.markdownContent).toContain("Count: 1");
     });
   });
@@ -555,7 +559,7 @@ describe("useGitHubSearch", () => {
 
 describe("useGitHubForm", () => {
   // react-hot-toastのmockを使用するため、実際のtoastを使用する代わりにmockを確認
-  let mockToast: any;
+  let mockToast: Record<string, unknown>;
 
   beforeEach(async () => {
     vi.clearAllMocks();

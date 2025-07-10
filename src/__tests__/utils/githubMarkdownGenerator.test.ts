@@ -1,9 +1,12 @@
-import type { GitHubDiscussion, GitHubIssue } from "@/features/github/types/github";
+import type {
+  GitHubDiscussion,
+  GitHubIssue,
+} from "@/features/github/types/github";
 import {
-  generateGitHubIssuesMarkdown,
   generateGitHubDiscussionsMarkdown,
-  generateGitHubIssuesMarkdownForPreview,
   generateGitHubDiscussionsMarkdownForPreview,
+  generateGitHubIssuesMarkdown,
+  generateGitHubIssuesMarkdownForPreview,
 } from "@/features/github/utils/githubMarkdownGenerator";
 import { describe, expect, it } from "vitest";
 
@@ -144,7 +147,8 @@ describe("githubMarkdownGenerator", () => {
       number: 1,
       title: "How to implement authentication?",
       body: "I'm looking for best practices on implementing authentication in this project.",
-      bodyText: "I'm looking for best practices on implementing authentication in this project.",
+      bodyText:
+        "I'm looking for best practices on implementing authentication in this project.",
       createdAt: "2023-01-01T00:00:00Z",
       updatedAt: "2023-01-01T00:00:00Z",
       url: "https://github.com/test/repo/discussions/1",
@@ -198,7 +202,10 @@ describe("githubMarkdownGenerator", () => {
     });
 
     it("undefinedの場合は空文字列を返す", () => {
-      const result = generateGitHubIssuesMarkdown(undefined as any, "test");
+      const result = generateGitHubIssuesMarkdown(
+        undefined as GitHubIssue[],
+        "test"
+      );
       expect(result).toBe("");
     });
 
@@ -208,9 +215,9 @@ describe("githubMarkdownGenerator", () => {
       // YAML Front Matterをチェック
       expect(result).toContain('source: "github"');
       expect(result).toContain('search_type: "issues"');
-      expect(result).toContain('total_items: 2');
-      expect(result).toContain('issues_count: 1');
-      expect(result).toContain('pull_requests_count: 1');
+      expect(result).toContain("total_items: 2");
+      expect(result).toContain("issues_count: 1");
+      expect(result).toContain("pull_requests_count: 1");
       expect(result).toContain('search_keyword: "login bug"');
 
       // タイトルとOverviewをチェック
@@ -241,7 +248,7 @@ describe("githubMarkdownGenerator", () => {
       const result = generateGitHubIssuesMarkdown(mockIssues);
 
       expect(result).toContain('source: "github"');
-      expect(result).not.toContain('search_keyword:');
+      expect(result).not.toContain("search_keyword:");
       expect(result).toContain("Bug: Login fails with special characters");
     });
   });
@@ -253,7 +260,10 @@ describe("githubMarkdownGenerator", () => {
     });
 
     it("undefinedの場合は空文字列を返す", () => {
-      const result = generateGitHubDiscussionsMarkdown(undefined as any, "test");
+      const result = generateGitHubDiscussionsMarkdown(
+        undefined as GitHubDiscussion[],
+        "test"
+      );
       expect(result).toBe("");
     });
 
@@ -263,8 +273,8 @@ describe("githubMarkdownGenerator", () => {
       // YAML Front Matterをチェック
       expect(result).toContain('source: "github"');
       expect(result).toContain('search_type: "discussions"');
-      expect(result).toContain('total_discussions: 1');
-      expect(result).toContain('answered_discussions: 1');
+      expect(result).toContain("total_discussions: 1");
+      expect(result).toContain("answered_discussions: 1");
       expect(result).toContain('search_keyword: "auth"');
 
       // タイトルとOverviewをチェック
@@ -299,11 +309,18 @@ describe("githubMarkdownGenerator", () => {
     });
 
     it("Issuesの配列からプレビューMarkdownを生成する", () => {
-      const result = generateGitHubIssuesMarkdownForPreview(mockIssues, "login");
+      const result = generateGitHubIssuesMarkdownForPreview(
+        mockIssues,
+        "login"
+      );
 
       // プレビュー形式の内容をチェック
-      expect(result).toContain("## Issue #123: Bug: Login fails with special characters");
-      expect(result).toContain("## PR #124: Fix: Add validation for email addresses");
+      expect(result).toContain(
+        "## Issue #123: Bug: Login fails with special characters"
+      );
+      expect(result).toContain(
+        "## PR #124: Fix: Add validation for email addresses"
+      );
       expect(result).toContain("**Repository**: test/repo");
       expect(result).toContain("**作成者**: testuser");
       expect(result).toContain("**作成者**: devuser");
@@ -320,12 +337,12 @@ describe("githubMarkdownGenerator", () => {
     it("長い本文は切り詰められる", () => {
       const longBodyIssue: GitHubIssue = {
         ...mockIssues[0],
-        body: "A".repeat(200) + "This should be truncated",
+        body: `${"A".repeat(200)}This should be truncated`,
       };
 
       const result = generateGitHubIssuesMarkdownForPreview([longBodyIssue]);
 
-      expect(result).toContain("A".repeat(150) + "...");
+      expect(result).toContain(`${"A".repeat(150)}...`);
       expect(result).not.toContain("This should be truncated");
     });
   });
@@ -337,9 +354,12 @@ describe("githubMarkdownGenerator", () => {
     });
 
     it("Discussionsの配列からプレビューMarkdownを生成する", () => {
-      const result = generateGitHubDiscussionsMarkdownForPreview(mockDiscussions);
+      const result =
+        generateGitHubDiscussionsMarkdownForPreview(mockDiscussions);
 
-      expect(result).toContain("## Discussion #1: How to implement authentication?");
+      expect(result).toContain(
+        "## Discussion #1: How to implement authentication?"
+      );
       expect(result).toContain("**Repository**: test/repo");
       expect(result).toContain("**作成者**: questioner");
       expect(result).toContain("**カテゴリ**: Q&A");
@@ -355,7 +375,9 @@ describe("githubMarkdownGenerator", () => {
         answer: undefined,
       };
 
-      const result = generateGitHubDiscussionsMarkdownForPreview([unansweredDiscussion]);
+      const result = generateGitHubDiscussionsMarkdownForPreview([
+        unansweredDiscussion,
+      ]);
 
       expect(result).toContain("**状態**: ❓ 未回答");
     });
