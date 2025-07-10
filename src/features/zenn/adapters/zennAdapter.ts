@@ -2,8 +2,8 @@
 // HTTPクライアントアダプターを使用してZenn APIにアクセスし、Result型で結果を返す
 
 import { type Result, err, ok } from "neverthrow";
-import type { HttpClient } from "./types";
-import type { ApiError } from "../types/error";
+import type { HttpClient } from "../../../adapters/types";
+import type { ApiError } from "../../../types/error";
 import type {
   ZennArticle,
   ZennApiResponse,

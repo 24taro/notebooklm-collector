@@ -5,8 +5,8 @@ import { describe, expect, it } from "vitest";
 import {
   generateZennMarkdown,
   generateZennMarkdownForPreview,
-} from "../../utils/zennMarkdownGenerator";
-import type { ZennArticle } from "../../types/zenn";
+} from "../../features/zenn/utils/zennMarkdownGenerator";
+import type { ZennArticle } from "../../features/zenn/types/zenn";
 
 describe("zennMarkdownGenerator", () => {
   const mockUser = {

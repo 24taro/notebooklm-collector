@@ -3,7 +3,7 @@
 
 "use client";
 
-import { createFetchHttpClient } from "../adapters/fetchHttpClient";
+import { createFetchHttpClient } from "../../../adapters/fetchHttpClient";
 import {
   type ZennAdapter,
   createZennAdapter,
@@ -16,11 +16,11 @@ import type {
   UseZennSearchState,
   UseZennSearchOptions,
 } from "../types/zenn";
-import type { ApiError } from "../types/error";
+import type { ApiError } from "../../../types/error";
 import {
   getErrorActionSuggestion,
   getUserFriendlyErrorMessage,
-} from "../utils/errorMessage";
+} from "../../../utils/errorMessage";
 import { useCallback, useState } from "react";
 import toast from "react-hot-toast";
 

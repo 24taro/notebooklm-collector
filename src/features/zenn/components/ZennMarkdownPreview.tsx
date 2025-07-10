@@ -3,17 +3,7 @@
 import type { FC } from "react";
 import { useState } from "react";
 import type { ZennArticle } from "../types/zenn";
-
-interface ZennMarkdownPreviewProps {
-  markdown?: string;
-  articles?: ZennArticle[];
-  title?: string;
-  onDownload?: () => void;
-  downloadFileName?: string;
-  className?: string;
-  emptyMessage?: string;
-  useAccordion?: boolean;
-}
+import type { ZennMarkdownPreviewProps } from "../types/forms";
 
 /**
  * Zenn用Markdownプレビューコンポーネント

@@ -4,10 +4,10 @@ import { useState } from "react";
 import { Toaster } from "react-hot-toast";
 import Footer from "../../components/Footer";
 import Header from "../../components/Header";
-import { ZennMarkdownPreview } from "../../components/ZennMarkdownPreview";
-import { ZennSearchForm } from "../../components/ZennSearchForm";
-import type { ZennArticle } from "../../types/zenn";
-import { generateZennMarkdown } from "../../utils/zennMarkdownGenerator";
+import { ZennMarkdownPreview } from "../../features/zenn/components/ZennMarkdownPreview";
+import { ZennSearchForm } from "../../features/zenn/components/ZennSearchForm";
+import type { ZennArticle } from "../../features/zenn/types/zenn";
+import { generateZennMarkdown } from "../../features/zenn/utils/zennMarkdownGenerator";
 import { useDownload } from "../../hooks/useDownload";
 import type { ApiError } from "../../types/error";
 

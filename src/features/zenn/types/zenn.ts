@@ -118,7 +118,7 @@ export type UseZennSearchResult = UseZennSearchState & {
  * useZennSearch フックオプション（アダプター注入用）
  */
 export type UseZennSearchOptions = {
-  adapter?: import("@/adapters/zennAdapter").ZennAdapter;
+  adapter?: import("../adapters/zennAdapter").ZennAdapter;
 };
 
 /**

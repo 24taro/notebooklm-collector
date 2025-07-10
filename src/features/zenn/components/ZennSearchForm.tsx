@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState, type FormEvent, useEffect } from "react";
-import { useDownload } from "../hooks/useDownload";
+import { useDownload } from "../../../hooks/useDownload";
 import { useZennSearch } from "../hooks/useZennSearch";
-import type { ApiError } from "../types/error";
+import type { ApiError } from "../../../types/error";
 import type { ZennArticle } from "../types/zenn";
 import {
   generateZennMarkdown,
@@ -11,17 +11,7 @@ import {
 } from "../utils/zennMarkdownGenerator";
 import { ZennUsernameInput } from "./ZennUsernameInput";
 
-interface ZennSearchFormProps {
-  onSearchResults?: (results: {
-    articles: ZennArticle[];
-    filteredArticles: ZennArticle[];
-    markdownContent: string;
-    isLoading: boolean;
-    error: ApiError | null;
-    searchKeyword?: string;
-    searchUsername?: string;
-  }) => void;
-}
+import type { ZennSearchFormProps } from "../types/forms";
 
 /**
  * Zenn検索フォームコンポーネント

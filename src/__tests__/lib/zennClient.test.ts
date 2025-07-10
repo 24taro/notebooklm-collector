@@ -10,12 +10,12 @@ import {
   fetchLatestZennArticles,
   searchZennArticles,
   getDefaultZennAdapter,
-} from "../../lib/zennClient";
-import type { ZennArticle } from "../../types/zenn";
+} from "../../features/zenn/adapters/zennClient";
+import type { ZennArticle } from "../../features/zenn/types/zenn";
 import type { ApiError } from "../../types/error";
 
 // アダプターのモック
-vi.mock("../../adapters/zennAdapter", () => ({
+vi.mock("../../features/zenn/adapters/zennAdapter", () => ({
   createZennAdapter: vi.fn(() => ({
     searchArticles: vi.fn(),
   })),

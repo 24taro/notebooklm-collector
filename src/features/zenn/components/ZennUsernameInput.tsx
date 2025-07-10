@@ -1,13 +1,7 @@
 "use client";
 
 import type { FC } from "react";
-
-type ZennUsernameInputProps = {
-  username: string;
-  onUsernameChange: (username: string) => void;
-  error?: string;
-  disabled?: boolean;
-};
+import type { ZennUsernameInputProps } from "../types/forms";
 
 /**
  * Zennユーザー名入力コンポーネント

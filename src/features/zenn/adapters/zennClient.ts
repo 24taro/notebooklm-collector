@@ -1,7 +1,7 @@
 import type { Result } from "neverthrow";
-import { createFetchHttpClient } from "../adapters/fetchHttpClient";
-import { createZennAdapter } from "../adapters/zennAdapter";
-import type { ApiError } from "../types/error";
+import { createFetchHttpClient } from "../../../adapters/fetchHttpClient";
+import { createZennAdapter } from "./zennAdapter";
+import type { ApiError } from "../../../types/error";
 import type { ZennArticle, ZennSearchParams } from "../types/zenn";
 
 // デフォルトのZennアダプターインスタンス

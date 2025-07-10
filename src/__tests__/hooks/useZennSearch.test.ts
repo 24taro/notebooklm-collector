@@ -1,10 +1,10 @@
 import { act, renderHook, waitFor } from "@testing-library/react";
 import { err, ok } from "neverthrow";
 import { type Mock, beforeEach, describe, expect, it, vi } from "vitest";
-import type { ZennAdapter } from "../../adapters/zennAdapter";
-import { useZennSearch } from "../../hooks/useZennSearch";
+import type { ZennAdapter } from "../../features/zenn/adapters/zennAdapter";
+import { useZennSearch } from "../../features/zenn/hooks/useZennSearch";
 import type { ApiError } from "../../types/error";
-import type { ZennArticle, ZennSearchParams } from "../../types/zenn";
+import type { ZennArticle, ZennSearchParams } from "../../features/zenn/types/zenn";
 
 // react-hot-toastのモック
 vi.mock("react-hot-toast", () => {
