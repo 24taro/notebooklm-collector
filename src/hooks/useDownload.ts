@@ -8,7 +8,7 @@ interface UseDownloadResult {
     markdownContent: string,
     keyword: string,
     postsExist: boolean,
-    sourceType?: "docbase" | "slack"
+    sourceType?: "docbase" | "slack" | "zenn"
   ) => Promise<void>;
 }
 
@@ -23,7 +23,7 @@ export const useDownload = (): UseDownloadResult => {
       markdownContent: string,
       keyword: string,
       postsExist: boolean,
-      sourceType: "docbase" | "slack" = "docbase"
+      sourceType: "docbase" | "slack" | "zenn" = "docbase"
     ) => {
       setIsDownloading(true);
       // ダウンロード対象がない場合は、fileDownloaderからのメッセージをtoastで表示

@@ -16,7 +16,7 @@ export default function HomePage() {
             情報ソースからデータを収集し、NotebookLM用Markdownを生成
           </p>
 
-          <div className="grid md:grid-cols-2 gap-4 md:gap-8">
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
             <Link
               href="/docbase"
               className="flex items-center space-x-4 p-6 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
@@ -53,6 +53,28 @@ export default function HomePage() {
                 <h2 className="text-lg text-gray-900">Slack連携</h2>
                 <p className="text-gray-600 mt-2">
                   Slackのスレッドを検索・収集
+                </p>
+              </div>
+            </Link>
+
+            <Link
+              href="/zenn"
+              className="flex items-center space-x-4 p-6 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
+            >
+              <div className="flex-shrink-0 w-16 h-16 flex items-center justify-center bg-gradient-to-br from-green-400 to-green-600 rounded-lg">
+                <svg
+                  className="w-8 h-8 text-white"
+                  fill="currentColor"
+                  viewBox="0 0 24 24"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/>
+                </svg>
+              </div>
+              <div>
+                <h2 className="text-lg text-gray-900">Zenn連携</h2>
+                <p className="text-gray-600 mt-2">
+                  Zennの技術記事を検索・収集
                 </p>
               </div>
             </Link>

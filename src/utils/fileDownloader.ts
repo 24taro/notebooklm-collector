@@ -5,13 +5,13 @@
  * @param markdownContent ダウンロードするMarkdown文字列
  * @param keyword ファイル名に使用するキーワード
  * @param postsExist 投稿があったかどうか
- * @param sourceType ソースタイプ（'docbase' | 'slack'）
+ * @param sourceType ソースタイプ（'docbase' | 'slack' | 'zenn'）
  */
 export const downloadMarkdownFile = (
   markdownContent: string,
   keyword: string,
   postsExist: boolean,
-  sourceType: "docbase" | "slack" = "docbase"
+  sourceType: "docbase" | "slack" | "zenn" = "docbase"
 ): { success: boolean; message?: string } => {
   // 投稿が存在しない、またはMarkdownコンテントが空の場合はダウンロードしない
   if (!postsExist || !markdownContent.trim()) {
