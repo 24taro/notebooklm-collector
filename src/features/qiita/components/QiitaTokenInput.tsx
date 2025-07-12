@@ -8,27 +8,15 @@ import {
   useState,
 } from "react";
 import useLocalStorage from "../../../hooks/useLocalStorage";
-
-type DocbaseTokenInputProps = {
-  token: string;
-  onTokenChange: (token: string) => void;
-  error?: string;
-  disabled?: boolean;
-  className?: string;
-};
-
-// focusメソッドを持つRefの型を定義
-export type DocbaseTokenInputRef = {
-  focus: () => void;
-};
+import type { QiitaTokenInputProps, QiitaTokenInputRef } from "../types/forms";
 
 /**
- * Docbaseアクセストークン入力コンポーネント
+ * Qiitaアクセストークン入力コンポーネント
  * LocalStorageとの連携機能を含む
  */
-export const DocbaseTokenInput = forwardRef<
-  DocbaseTokenInputRef,
-  DocbaseTokenInputProps
+export const QiitaTokenInput = forwardRef<
+  QiitaTokenInputRef,
+  QiitaTokenInputProps
 >(({ token, onTokenChange, error, disabled, className = "" }, ref) => {
   const inputRef = useRef<HTMLInputElement>(null);
 
@@ -38,9 +26,8 @@ export const DocbaseTokenInput = forwardRef<
       inputRef.current?.focus();
     },
   }));
-
   const [savedToken, setSavedToken] = useLocalStorage<string>(
-    "docbaseToken", // 既存のキーとの互換性のため維持
+    "qiitaApiToken", // 既存のキーとの互換性のため維持
     ""
   );
   const [showSaveButton, setShowSaveButton] = useState(false);
@@ -79,10 +66,9 @@ export const DocbaseTokenInput = forwardRef<
     setIsTokenVisible(!isTokenVisible);
   };
 
-  // トークン形式のバリデーション（基本的なチェック）
+  // トークン形式のバリデーション（40文字の16進数）
   const isValidTokenFormat = (token: string): boolean => {
-    // Docbaseトークンは最低限の長さチェックのみ（具体的な形式は不明）
-    return token.length >= 10 && token.trim() === token;
+    return /^[0-9a-f]{40}$/i.test(token);
   };
 
   const hasValidFormat = token.length === 0 || isValidTokenFormat(token);
@@ -90,10 +76,10 @@ export const DocbaseTokenInput = forwardRef<
   return (
     <div className={`space-y-2 ${className}`}>
       <label
-        htmlFor="docbase-token"
+        htmlFor="qiita-token"
         className="block text-sm font-medium text-gray-700"
       >
-        Docbaseアクセストークン
+        Qiitaアクセストークン
         <span className="text-red-500 ml-1">*</span>
       </label>
 
@@ -101,17 +87,18 @@ export const DocbaseTokenInput = forwardRef<
         <div className="relative">
           <input
             type={isTokenVisible ? "text" : "password"}
-            id="docbase-token"
+            id="qiita-token"
             ref={inputRef}
             value={token}
             onChange={handleInputChange}
-            placeholder="DocbaseのAPIトークンを入力してください"
+            placeholder="40文字の16進数トークンを入力してください"
             disabled={disabled}
-            className={`w-full px-3 py-2 pr-24 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-docbase-primary focus:border-docbase-primary transition-colors ${
+            className={`w-full px-3 py-2 pr-24 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-qiita-primary focus:border-qiita-primary transition-colors ${
               !hasValidFormat || error ? "border-red-500 bg-red-50" : ""
             } ${disabled ? "bg-gray-100 cursor-not-allowed" : ""}`}
+            maxLength={40}
             aria-describedby={
-              error || !hasValidFormat ? "docbase-token-error" : undefined
+              error || !hasValidFormat ? "qiita-token-error" : undefined
             }
           />
 
@@ -165,13 +152,13 @@ export const DocbaseTokenInput = forwardRef<
         {/* バリデーションエラー表示 */}
         {!hasValidFormat && (
           <p className="text-sm text-red-600">
-            トークンの形式が正しくありません。
+            トークンは40文字の16進数である必要があります。
           </p>
         )}
 
         {/* 文字数カウンター */}
         <div className="text-xs text-gray-500 text-right">
-          {isMounted ? `${token.length}文字` : "0文字"}
+          {isMounted ? `${token.length}/40文字` : "0/40文字"}
         </div>
 
         {/* ボタン群 */}
@@ -180,7 +167,7 @@ export const DocbaseTokenInput = forwardRef<
             <button
               type="button"
               onClick={handleSaveToken}
-              className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-docbase-primary hover:bg-docbase-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-docbase-primary transition-colors"
+              className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-qiita-primary hover:bg-qiita-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-qiita-primary transition-colors"
             >
               <svg
                 className="w-4 h-4 mr-1"
@@ -204,7 +191,7 @@ export const DocbaseTokenInput = forwardRef<
             <button
               type="button"
               onClick={handleLoadToken}
-              className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-docbase-primary transition-colors"
+              className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-qiita-primary transition-colors"
             >
               <svg
                 className="w-4 h-4 mr-1"
@@ -228,12 +215,8 @@ export const DocbaseTokenInput = forwardRef<
 
       {/* エラーメッセージ */}
       {(error || !hasValidFormat) && (
-        <p
-          id="docbase-token-error"
-          className="text-sm text-red-600"
-          role="alert"
-        >
-          {error || "トークンの形式が正しくありません"}
+        <p id="qiita-token-error" className="text-sm text-red-600" role="alert">
+          {error || "トークンは40文字の16進数である必要があります"}
         </p>
       )}
 
@@ -242,20 +225,20 @@ export const DocbaseTokenInput = forwardRef<
         <p>
           📝 トークンは{" "}
           <a
-            href="https://help.docbase.io/posts/45703"
+            href="https://qiita.com/settings/applications"
             target="_blank"
             rel="noopener noreferrer"
-            className="text-docbase-primary hover:text-docbase-primary-dark underline"
+            className="text-qiita-primary hover:text-qiita-primary-dark underline"
           >
-            Docbase設定ページ
+            Qiita設定ページ
           </a>
           で発行できます
         </p>
         <p>🔒 トークンはブラウザ内でのみ保存され、外部に送信されません</p>
-        <p>✅ 「memo:read」権限が必要です</p>
+        <p>✅ スコープ「read_qiita」が必要です</p>
       </div>
     </div>
   );
 });
 
-DocbaseTokenInput.displayName = "DocbaseTokenInput";
+QiitaTokenInput.displayName = "QiitaTokenInput";

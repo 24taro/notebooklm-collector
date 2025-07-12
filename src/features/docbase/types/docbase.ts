@@ -46,3 +46,19 @@ export type DocbasePostsResponse = {
     total: number;
   };
 };
+
+/**
+ * Docbase詳細検索条件
+ */
+export type DocbaseAdvancedFilters = {
+  /** タグ検索（カンマ区切りで複数指定可能） */
+  tags?: string;
+  /** 投稿者指定（ユーザーID） */
+  author?: string;
+  /** タイトルに含むキーワード */
+  titleFilter?: string;
+  /** 投稿期間（開始日）YYYY-MM-DD形式 */
+  startDate?: string;
+  /** 投稿期間（終了日）YYYY-MM-DD形式 */
+  endDate?: string;
+};

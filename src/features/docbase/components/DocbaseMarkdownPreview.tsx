@@ -39,6 +39,8 @@ export const DocbaseMarkdownPreview: FC<DocbaseMarkdownPreviewProps> = ({
 }) => {
   const [openItems, setOpenItems] = useState<number[]>([]);
 
+  const [isExpanded, setIsExpanded] = useState(false);
+
   // アコーディオンの開閉状態を管理
   const toggleItem = (index: number) => {
     setOpenItems((prev) =>
@@ -62,19 +64,234 @@ export const DocbaseMarkdownPreview: FC<DocbaseMarkdownPreviewProps> = ({
     );
   }
 
+  // 統計情報の計算（アコーディオン表示時のみ）
+  const calculateStats = () => {
+    if (!posts || posts.length === 0) return null;
+
+    const totalCharacters = posts.reduce(
+      (sum, post) => sum + post.body.length,
+      0
+    );
+    const averageCharacters = Math.round(totalCharacters / posts.length);
+
+    // 最新記事トップ3
+    const recentArticles = [...posts]
+      .sort(
+        (a, b) =>
+          new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+      )
+      .slice(0, 3);
+
+    // 最長記事トップ3
+    const longestArticles = [...posts]
+      .sort((a, b) => b.body.length - a.body.length)
+      .slice(0, 3);
+
+    // よく使われているタグ
+    const tagFrequency = posts.reduce(
+      (acc, post) => {
+        for (const tag of post.tags) {
+          acc[tag.name] = (acc[tag.name] || 0) + 1;
+        }
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+
+    const topTags = Object.entries(tagFrequency)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 5);
+
+    // 投稿者統計
+    const authorFrequency = posts.reduce(
+      (acc, post) => {
+        acc[post.user.name] = (acc[post.user.name] || 0) + 1;
+        return acc;
+      },
+      {} as Record<string, number>
+    );
+
+    const topAuthors = Object.entries(authorFrequency)
+      .sort(([, a], [, b]) => b - a)
+      .slice(0, 3);
+
+    return {
+      totalCharacters,
+      averageCharacters,
+      recentArticles,
+      longestArticles,
+      topTags,
+      topAuthors,
+    };
+  };
+
+  const stats = calculateStats();
+
   // アコーディオン表示の場合
   if (useAccordion && posts && posts.length > 0) {
     return (
-      <div className={`max-w-3xl mx-auto ${className}`}>
-        {title && (
-          <div className="mb-1">
-            <h2 className="text-base font-medium text-gray-800">{title}</h2>
+      <div
+        className={`bg-white border border-gray-200 rounded-lg shadow-sm ${className}`}
+      >
+        {/* ヘッダー */}
+        <div className="px-6 py-4 border-b border-gray-200">
+          <div className="flex items-center justify-between">
+            <h3 className="text-lg font-semibold text-gray-900">
+              Markdownプレビュー
+            </h3>
+            <button
+              type="button"
+              onClick={() => setIsExpanded(!isExpanded)}
+              className="inline-flex items-center text-sm text-docbase-primary hover:text-docbase-primary-dark transition-colors"
+            >
+              {isExpanded ? "折りたたむ" : "詳細を表示"}
+              <svg
+                className={`ml-1 w-4 h-4 transition-transform duration-200 ${
+                  isExpanded ? "rotate-180" : ""
+                }`}
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <title>{isExpanded ? "折りたたむ" : "詳細を表示"}</title>
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M19 9l-7 7-7-7"
+                />
+              </svg>
+            </button>
+          </div>
+        </div>
+
+        {/* 統計情報 */}
+        <div className="px-6 py-4 bg-gray-50 border-b border-gray-200">
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            <div className="text-center">
+              <div className="text-2xl font-bold text-docbase-primary">
+                {posts.length}
+              </div>
+              <div className="text-sm text-gray-600">記事数</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-blue-500">
+                {stats?.totalCharacters.toLocaleString()}
+              </div>
+              <div className="text-sm text-gray-600">総文字数</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-green-500">
+                {stats?.averageCharacters.toLocaleString()}
+              </div>
+              <div className="text-sm text-gray-600">平均文字数</div>
+            </div>
+            <div className="text-center">
+              <div className="text-2xl font-bold text-purple-500">
+                {stats?.topTags.length || 0}
+              </div>
+              <div className="text-sm text-gray-600">タグ種類</div>
+            </div>
+          </div>
+        </div>
+
+        {/* 詳細統計（展開時のみ） */}
+        {isExpanded && stats && (
+          <div className="px-6 py-4 border-b border-gray-200 space-y-4">
+            {/* 最新記事トップ3 */}
+            <div>
+              <h4 className="text-sm font-semibold text-gray-900 mb-2">
+                最新記事 TOP3
+              </h4>
+              <div className="space-y-2">
+                {stats.recentArticles.map((post, index) => (
+                  <div
+                    key={post.id}
+                    className="flex items-start space-x-2 text-sm"
+                  >
+                    <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-xs font-semibold">
+                      {index + 1}
+                    </span>
+                    <div className="flex-1 min-w-0">
+                      <a
+                        href={post.url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-docbase-primary hover:text-docbase-primary-dark font-medium truncate block"
+                      >
+                        {post.title}
+                      </a>
+                      <div className="text-gray-500 text-xs">
+                        📅 {new Date(post.created_at).toLocaleDateString()} • 📝{" "}
+                        {post.body.length}文字 • by {post.user.name}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* よく使われているタグ */}
+            {stats.topTags.length > 0 && (
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900 mb-2">
+                  よく使われているタグ
+                </h4>
+                <div className="flex flex-wrap gap-2">
+                  {stats.topTags.map(([tag, count]) => (
+                    <span
+                      key={tag}
+                      className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-docbase-primary/10 text-docbase-primary"
+                    >
+                      {tag} ({count})
+                    </span>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 投稿者統計 */}
+            {stats.topAuthors.length > 0 && (
+              <div>
+                <h4 className="text-sm font-semibold text-gray-900 mb-2">
+                  投稿数が多いユーザー TOP3
+                </h4>
+                <div className="space-y-1">
+                  {stats.topAuthors.map(([author, count], index) => (
+                    <div
+                      key={author}
+                      className="flex items-center justify-between text-sm"
+                    >
+                      <span className="flex items-center">
+                        <span className="w-4 h-4 bg-yellow-100 text-yellow-800 rounded-full flex items-center justify-center text-xs font-semibold mr-2">
+                          {index + 1}
+                        </span>
+                        {author}
+                      </span>
+                      <span className="text-gray-500">{count}記事</span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* 文字数統計 */}
+            <div>
+              <h4 className="text-sm font-semibold text-gray-900 mb-1">
+                文字数統計
+              </h4>
+              <p className="text-sm text-gray-600">
+                総文字数: {stats.totalCharacters.toLocaleString()}文字 （平均:{" "}
+                {stats.averageCharacters.toLocaleString()}文字/記事）
+              </p>
+            </div>
           </div>
         )}
 
-        <div className="border border-gray-200 rounded-xl bg-white shadow-sm">
-          <div className="p-4 border-b border-gray-100">
-            <p className="text-sm text-gray-600">
+        {/* アコーディオンコンテンツ */}
+        <div className="border-b border-gray-200">
+          <div className="p-4">
+            <p className="text-sm text-gray-600 mb-4">
               検索結果: {posts.length}件の記事（最大10件まで表示）
             </p>
           </div>
@@ -105,6 +322,8 @@ export const DocbaseMarkdownPreview: FC<DocbaseMarkdownPreviewProps> = ({
                         <div className="flex items-center gap-2 mb-2 text-sm text-gray-500">
                           <span>{createdAt}</span>
                           <span>•</span>
+                          <span>{post.body.length}文字</span>
+                          <span>•</span>
                           <a
                             href={post.url}
                             target="_blank"
@@ -114,6 +333,21 @@ export const DocbaseMarkdownPreview: FC<DocbaseMarkdownPreviewProps> = ({
                           >
                             Docbaseで開く
                           </a>
+                        </div>
+                        <div className="flex items-center gap-1 mb-2">
+                          {post.tags.slice(0, 3).map((tag) => (
+                            <span
+                              key={tag.name}
+                              className="inline-flex items-center px-2 py-0.5 rounded text-xs font-medium bg-gray-100 text-gray-800"
+                            >
+                              {tag.name}
+                            </span>
+                          ))}
+                          {post.tags.length > 3 && (
+                            <span className="text-xs text-gray-500">
+                              +{post.tags.length - 3}
+                            </span>
+                          )}
                         </div>
                         {!isOpen && (
                           <p className="text-sm text-gray-600 line-clamp-2">
@@ -159,6 +393,24 @@ export const DocbaseMarkdownPreview: FC<DocbaseMarkdownPreviewProps> = ({
                 </div>
               );
             })}
+          </div>
+
+          {/* フッター */}
+          <div className="px-6 py-4 border-t border-gray-200 bg-gray-50">
+            <div className="flex items-center justify-between text-sm text-gray-600">
+              <span>
+                {posts.length > 10
+                  ? `最初の10件を表示（残り${posts.length - 10}件）`
+                  : `全${posts.length}件を表示`}
+              </span>
+              <span>NotebookLM 最適化形式</span>
+            </div>
+
+            {/* ヘルプテキスト */}
+            <div className="mt-2 text-xs text-gray-500">
+              💡 ダウンロードしたMarkdownファイルには全ての記事が含まれ、YAML
+              Front Matterと詳細な記事情報も追加されます
+            </div>
           </div>
         </div>
       </div>

@@ -1,5 +1,5 @@
 import type { Result } from "neverthrow"; // Resultを型としてインポート (typeキーワードを明示)
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import toast from "react-hot-toast"; // react-hot-toastをインポート
 import { createFetchHttpClient } from "../../../adapters/fetchHttpClient";
 import type { ApiError } from "../../../types/error";
@@ -8,24 +8,20 @@ import {
   getUserFriendlyErrorMessage,
 } from "../../../utils/errorMessage";
 import {
-  type DocbaseAdapter,
-  createDocbaseAdapter,
-} from "../adapters/docbaseAdapter";
-import type { DocbasePostListItem } from "../types/docbase";
+  type QiitaAdapter,
+  createQiitaAdapter,
+  validateQiitaToken,
+} from "../adapters/qiitaAdapter";
+import type { QiitaAdvancedFilters, QiitaItem } from "../types/qiita";
 
-// 詳細検索条件の型定義（forms.tsからインポートして再エクスポート）
-import type { DocbaseAdvancedFilters } from "../types/docbase";
-export type { DocbaseAdvancedFilters };
-
-interface UseDocbaseSearchResult {
-  posts: DocbasePostListItem[];
+interface UseQiitaSearchResult {
+  items: QiitaItem[];
   isLoading: boolean;
   error: ApiError | null;
-  searchPosts: (
-    domain: string,
+  searchItems: (
     token: string,
     keyword: string,
-    advancedFilters?: DocbaseAdvancedFilters // advancedFilters をオプションで追加
+    advancedFilters?: QiitaAdvancedFilters
   ) => Promise<void>;
   canRetry: boolean; // 再試行可能かどうかのフラグ
   retrySearch: () => void; // 再試行用の関数
@@ -33,59 +29,57 @@ interface UseDocbaseSearchResult {
   getErrorSuggestion: () => string | null; // エラーアクション提案
 }
 
-interface UseDocbaseSearchOptions {
-  adapter?: DocbaseAdapter; // アダプターを注入可能にする（テスト用）
+interface UseQiitaSearchOptions {
+  adapter?: QiitaAdapter; // アダプターを注入可能にする（テスト用）
 }
 
 /**
- * Docbaseの投稿を検索するためのカスタムフック
+ * Qiitaの記事を検索するためのカスタムフック
  */
-export const useDocbaseSearch = (
-  options?: UseDocbaseSearchOptions
-): UseDocbaseSearchResult => {
+export const useQiitaSearch = (
+  options?: UseQiitaSearchOptions
+): UseQiitaSearchResult => {
   // アダプターの初期化（注入されていない場合はデフォルトを使用）
-  const adapter =
-    options?.adapter || createDocbaseAdapter(createFetchHttpClient());
-  const [posts, setPosts] = useState<DocbasePostListItem[]>([]);
+  const adapter = useMemo(
+    () => options?.adapter || createQiitaAdapter(createFetchHttpClient()),
+    [options?.adapter]
+  );
+  const [items, setItems] = useState<QiitaItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<ApiError | null>(null);
   const [lastSearchParams, setLastSearchParams] = useState<{
-    domain: string;
     token: string;
     keyword: string;
-    advancedFilters?: DocbaseAdvancedFilters; // advancedFilters を追加
+    advancedFilters?: QiitaAdvancedFilters;
   } | null>(null);
   const [canRetry, setCanRetry] = useState<boolean>(false);
 
   const executeSearch = useCallback(
     async (
-      domain: string,
       token: string,
       keyword: string,
-      advancedFilters?: DocbaseAdvancedFilters
+      advancedFilters?: QiitaAdvancedFilters
     ) => {
       setIsLoading(true);
       setError(null);
       setCanRetry(false);
-      setLastSearchParams({ domain, token, keyword, advancedFilters }); // 最後に検索したパラメータを保存
+      setLastSearchParams({ token, keyword, advancedFilters }); // 最後に検索したパラメータを保存
 
-      const result: Result<DocbasePostListItem[], ApiError> =
-        await adapter.searchPosts({
-          domain,
-          token,
-          keyword,
-          advancedFilters, // advancedFilters を渡す
-        });
+      const result: Result<QiitaItem[], ApiError> = await adapter.searchItems({
+        token,
+        keyword,
+        advancedFilters,
+      });
 
       if (result.isOk()) {
-        setPosts(result.value);
-        if (result.value.length === 0) {
+        setItems(result.value);
+        if (result.value.length === 0 && keyword.trim() !== "") {
           toast.success("検索結果が見つかりませんでした。");
         }
       } else {
         const apiError = result.error;
         setError(apiError);
-        setPosts([]);
+        setItems([]);
         // ユーザーフレンドリーなエラーメッセージでトースト通知
         const friendlyMessage = getUserFriendlyErrorMessage(apiError);
         toast.error(friendlyMessage);
@@ -104,44 +98,49 @@ export const useDocbaseSearch = (
     [adapter]
   );
 
-  const searchPosts = useCallback(
+  const searchItems = useCallback(
     async (
-      domain: string,
       token: string,
       keyword: string,
-      advancedFilters?: DocbaseAdvancedFilters
+      advancedFilters?: QiitaAdvancedFilters
     ) => {
-      if (!keyword.trim() && !domain.trim() && !token.trim()) {
-        // 全て空なら何もしない
-        setPosts([]);
+      // トークンバリデーション
+      if (!token.trim()) {
+        toast.error("Qiitaアクセストークンを入力してください。");
+        setItems([]);
         setError(null);
         setCanRetry(false);
         return;
       }
-      if (!domain.trim() || !token.trim()) {
-        toast.error("Docbaseドメインとトークンを入力してください。");
-        setPosts([]);
+
+      // Qiita固有のトークン形式チェック
+      if (!validateQiitaToken(token.trim())) {
+        toast.error("アクセストークンは40文字の16進数である必要があります。");
+        setItems([]);
         setError(null);
         setCanRetry(false);
         return;
       }
+
+      // 検索条件の確認
       if (
         !keyword.trim() &&
         !advancedFilters?.tags?.trim() &&
-        !advancedFilters?.author?.trim() &&
-        !advancedFilters?.titleFilter?.trim() &&
+        !advancedFilters?.user?.trim() &&
         !advancedFilters?.startDate?.trim() &&
-        !advancedFilters?.endDate?.trim()
+        !advancedFilters?.endDate?.trim() &&
+        !advancedFilters?.minStocks
       ) {
         toast.success(
           "キーワードまたは詳細検索条件を入力して検索してください。"
-        ); // 検索前にキーワードが空ならメッセージ表示
-        setPosts([]);
+        );
+        setItems([]);
         setError(null);
         setCanRetry(false);
         return;
       }
-      await executeSearch(domain, token, keyword, advancedFilters); // advancedFilters を渡す
+
+      await executeSearch(token, keyword, advancedFilters);
     },
     [executeSearch]
   );
@@ -150,10 +149,9 @@ export const useDocbaseSearch = (
     if (lastSearchParams) {
       toast.dismiss(); // 既存のエラートーストを消す
       executeSearch(
-        lastSearchParams.domain,
         lastSearchParams.token,
         lastSearchParams.keyword,
-        lastSearchParams.advancedFilters // advancedFilters を渡す
+        lastSearchParams.advancedFilters
       );
     }
   }, [lastSearchParams, executeSearch]);
@@ -175,10 +173,10 @@ export const useDocbaseSearch = (
   }, [error]);
 
   return {
-    posts,
+    items,
     isLoading,
     error,
-    searchPosts,
+    searchItems,
     canRetry,
     retrySearch,
     getUserFriendlyError,
