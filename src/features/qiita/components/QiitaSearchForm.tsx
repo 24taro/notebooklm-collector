@@ -26,6 +26,7 @@ export const QiitaSearchForm: React.FC = () => {
   const [showAdvanced, setShowAdvanced] = useState<boolean>(false);
   const [advancedFilters, setAdvancedFilters] =
     useState<QiitaAdvancedFiltersType>({});
+  const [hasSearched, setHasSearched] = useState<boolean>(false);
 
   // カスタムフック
   const { items, isLoading, error, searchItems, canRetry, retrySearch } =
@@ -36,6 +37,7 @@ export const QiitaSearchForm: React.FC = () => {
   // フォーム送信ハンドラー
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    setHasSearched(true);
     searchItems(token, searchQuery, advancedFilters);
   };
 
@@ -101,7 +103,7 @@ export const QiitaSearchForm: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading || !token.trim() || !hasSearchConditions}
-              className="w-full inline-flex items-center justify-center py-2.5 px-4 border border-transparent shadow-sm text-sm font-medium rounded-sm text-white bg-qiita-primary hover:bg-qiita-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-qiita-primary disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors duration-150 ease-in-out"
+              className="w-full inline-flex items-center justify-center py-2.5 px-4 border border-transparent shadow-sm text-sm font-medium rounded-sm text-white bg-qiita-primary hover:bg-qiita-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-qiita-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 ease-in-out"
             >
               {isLoading ? (
                 <>
@@ -183,35 +185,32 @@ export const QiitaSearchForm: React.FC = () => {
           )}
 
           {/* 検索結果がない場合のメッセージ */}
-          {!isLoading &&
-            items.length === 0 &&
-            hasSearchConditions &&
-            !error && (
-              <div className="text-center py-8">
-                <div className="text-gray-400 mb-4">
-                  <svg
-                    className="w-16 h-16 mx-auto"
-                    fill="none"
-                    stroke="currentColor"
-                    viewBox="0 0 24 24"
-                  >
-                    <title>検索結果なし</title>
-                    <path
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      strokeWidth={1}
-                      d="M9.172 16.172a4 4 0 015.656 0M9 12h6m-6-4h6m2 5.291A7.962 7.962 0 0118 12H22l-3.353-3.353a1.002 1.002 0 00-.094-.083A8 8 0 004 12v4.411z"
-                    />
-                  </svg>
-                </div>
-                <p className="text-lg text-gray-600 mb-2">
-                  検索結果が見つかりませんでした
-                </p>
-                <p className="text-sm text-gray-500">
-                  検索条件を変更して再試行してください
-                </p>
+          {!isLoading && items.length === 0 && hasSearched && !error && (
+            <div className="text-center py-8">
+              <div className="text-gray-400 mb-4">
+                <svg
+                  className="w-16 h-16 mx-auto"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <title>検索結果なし</title>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"
+                  />
+                </svg>
               </div>
-            )}
+              <p className="text-lg text-gray-600 mb-2">
+                検索結果が見つかりませんでした
+              </p>
+              <p className="text-sm text-gray-500">
+                検索条件を変更して再試行してください
+              </p>
+            </div>
+          )}
         </form>
 
         {/* 検索結果の統計情報 */}
