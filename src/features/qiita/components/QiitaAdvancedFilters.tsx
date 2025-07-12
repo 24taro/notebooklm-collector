@@ -182,7 +182,7 @@ export const QiitaAdvancedFilters: React.FC<QiitaAdvancedFiltersProps> = ({
               id="qiita-min-stocks"
               value={localFilters.minStocks || ""}
               onChange={handleMinStocksChange}
-              placeholder="10"
+              placeholder="0"
               min="0"
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-qiita-primary focus:border-qiita-primary transition-colors"
             />
