@@ -123,6 +123,7 @@ export type SlackTokenInputProps = {
   onTokenChange: (token: string) => void;
   error?: string;
   disabled?: boolean;
+  className?: string;
 };
 
 /**

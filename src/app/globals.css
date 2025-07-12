@@ -7,6 +7,16 @@
   --color-primary-dark: oklch(55.49% 0.11 249.89);
   --color-docbase-primary: oklch(64.49% 0.11 249.89);
   --color-docbase-primary-dark: oklch(55.49% 0.11 249.89);
+  --color-qiita-primary: oklch(66.31% 0.14 133.17);
+  --color-qiita-primary-dark: oklch(58.31% 0.14 133.17);
+  --color-qiita-primary-light: oklch(70.31% 0.12 133.17);
+  --color-qiita-text: oklch(25.49% 0.02 256.85);
+  --color-qiita-text-sub: oklch(55.68% 0.03 256.85);
+  --color-slack-primary: oklch(25.89% 0.08 309.72);
+  --color-slack-primary-dark: oklch(19.89% 0.08 309.72);
+  --color-slack-primary-light: oklch(31.89% 0.08 309.72);
+  --color-slack-text: oklch(25.49% 0.02 256.85);
+  --color-slack-text-sub: oklch(55.68% 0.03 256.85);
   --font-sans: var(--font-noto-sans-jp);
   --font-mono: var(--font-geist-mono);
 }
