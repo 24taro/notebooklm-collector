@@ -115,8 +115,7 @@ function buildQiitaSearchQuery(
       (!advancedFilters.tags?.trim() &&
         !advancedFilters.user?.trim() &&
         !advancedFilters.startDate?.trim() &&
-        !advancedFilters.endDate?.trim() &&
-        !advancedFilters.minStocks))
+        !advancedFilters.endDate?.trim()))
   ) {
     return "";
   }
@@ -125,7 +124,7 @@ function buildQiitaSearchQuery(
   let query = keyword.trim();
 
   if (advancedFilters) {
-    const { tags, user, startDate, endDate, minStocks } = advancedFilters;
+    const { tags, user, startDate, endDate } = advancedFilters;
 
     // タグ検索（複数タグをカンマ区切りで指定可能）
     if (tags?.trim()) {
@@ -154,11 +153,6 @@ function buildQiitaSearchQuery(
       query += query
         ? `+created:<=${endDate.trim()}`
         : `created:<=${endDate.trim()}`;
-    }
-
-    // 最小ストック数検索（Qiita独自機能）
-    if (minStocks && minStocks > 0) {
-      query += query ? `+stocks:>=${minStocks}` : `stocks:>=${minStocks}`;
     }
   }
 

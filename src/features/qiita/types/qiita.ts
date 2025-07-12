@@ -138,8 +138,6 @@ export type QiitaAdvancedFilters = {
   startDate?: string;
   /** 作成日（終了日）YYYY-MM-DD形式 */
   endDate?: string;
-  /** 最小ストック数 */
-  minStocks?: number;
 };
 
 /**
