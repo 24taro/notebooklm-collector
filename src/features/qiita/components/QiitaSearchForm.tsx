@@ -103,7 +103,7 @@ export const QiitaSearchForm: React.FC = () => {
             <button
               type="submit"
               disabled={isLoading || !token.trim() || !hasSearchConditions}
-              className="w-full inline-flex items-center justify-center py-2.5 px-4 border border-transparent shadow-sm text-sm font-medium rounded-sm text-white bg-qiita-primary hover:bg-qiita-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-qiita-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 ease-in-out"
+              className="w-full inline-flex items-center justify-center py-2.5 px-4 border border-transparent shadow-sm text-sm font-medium rounded-sm text-white bg-[#55C500] hover:bg-[#4CAF50] focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#55C500] disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 ease-in-out"
             >
               {isLoading ? (
                 <>
@@ -138,7 +138,7 @@ export const QiitaSearchForm: React.FC = () => {
               type="button"
               onClick={handleMarkdownDownload}
               disabled={isLoading || isDownloading || items.length === 0}
-              className="w-full inline-flex items-center justify-center py-2.5 px-4 border border-qiita-primary shadow-sm text-sm font-medium rounded-sm text-qiita-primary bg-white hover:bg-qiita-primary/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-qiita-primary disabled:bg-gray-50 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed transition-colors duration-150 ease-in-out"
+              className="w-full inline-flex items-center justify-center py-2.5 px-4 border border-[#55C500] shadow-sm text-sm font-medium rounded-sm text-[#55C500] bg-white hover:bg-[#55C500]/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-[#55C500] disabled:bg-gray-50 disabled:text-gray-400 disabled:border-gray-200 disabled:cursor-not-allowed transition-colors duration-150 ease-in-out"
             >
               {isDownloading ? (
                 <>
@@ -215,7 +215,7 @@ export const QiitaSearchForm: React.FC = () => {
 
         {/* 検索結果の統計情報 */}
         {items.length > 0 && !isLoading && !error && (
-          <div className="p-4 bg-qiita-primary/5 border border-qiita-primary/20 rounded-lg">
+          <div className="p-4 bg-[#55C500]/5 border border-[#55C500]/20 rounded-lg">
             <p className="text-sm text-gray-700">取得件数: {items.length}件</p>
             {items.length > 10 && (
               <p className="text-sm text-gray-600 mt-1">
