@@ -16,6 +16,13 @@ export default {
           text: "#1F2937",
           "text-sub": "#6B7280",
         },
+        qiita: {
+          primary: "#55C500", // Qiita ブランドグリーン
+          "primary-dark": "#4CAF50",
+          "primary-light": "#66BB6A",
+          text: "#1F2937",
+          "text-sub": "#6B7280",
+        },
       },
       lineClamp: {
         2: "2",

@@ -1,0 +1,12 @@
+<svg width="64" height="64" viewBox="0 0 64 64" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Qiitaのロゴを簡略化したアイコン -->
+  <rect width="64" height="64" rx="8" fill="#55C500"/>
+  <path d="M16 20h32v4H16V20z" fill="white"/>
+  <path d="M16 28h24v4H16V28z" fill="white"/>
+  <path d="M16 36h28v4H16V36z" fill="white"/>
+  <path d="M16 44h20v4H16V44z" fill="white"/>
+  <!-- Q文字を簡略化 -->
+  <circle cx="48" cy="48" r="8" fill="white"/>
+  <circle cx="48" cy="48" r="4" fill="#55C500"/>
+  <path d="M52 52l4 4" stroke="white" stroke-width="2" stroke-linecap="round"/>
+</svg>
