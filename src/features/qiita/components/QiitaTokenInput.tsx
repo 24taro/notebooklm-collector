@@ -2,6 +2,7 @@ import type React from "react";
 import {
   type FC,
   forwardRef,
+  useEffect,
   useImperativeHandle,
   useRef,
   useState,
@@ -31,6 +32,12 @@ export const QiitaTokenInput = forwardRef<
   );
   const [showSaveButton, setShowSaveButton] = useState(false);
   const [isTokenVisible, setIsTokenVisible] = useState(false);
+  const [isMounted, setIsMounted] = useState(false);
+
+  // クライアントサイドでのみ実行
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
 
   // 入力値の変更ハンドラー
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -151,7 +158,7 @@ export const QiitaTokenInput = forwardRef<
 
         {/* 文字数カウンター */}
         <div className="text-xs text-gray-500 text-right">
-          {token.length}/40文字
+          {isMounted ? `${token.length}/40文字` : "0/40文字"}
         </div>
 
         {/* ボタン群 */}
