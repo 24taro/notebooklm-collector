@@ -13,9 +13,8 @@ import {
 } from "../adapters/docbaseAdapter";
 import type { DocbasePostListItem } from "../types/docbase";
 
-// 詳細検索条件の型定義（forms.tsからインポートして再エクスポート）
+// 詳細検索条件の型定義
 import type { DocbaseAdvancedFilters } from "../types/forms";
-export type { DocbaseAdvancedFilters as AdvancedFilters };
 
 interface UseDocbaseSearchResult {
   posts: DocbasePostListItem[];

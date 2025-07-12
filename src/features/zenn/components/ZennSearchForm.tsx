@@ -47,7 +47,6 @@ export const ZennSearchForm: FC<ZennSearchFormProps> = ({
 }) => {
   const [searchKeyword, setSearchKeyword] = useState("");
   const [searchUsername, setSearchUsername] = useState("");
-  const [markdownContent, setMarkdownContent] = useState("");
   const [showAdvancedSearch, setShowAdvancedSearch] = useState(false);
 
   // フィルター状態
@@ -73,7 +72,6 @@ export const ZennSearchForm: FC<ZennSearchFormProps> = ({
 
   const handleSubmit = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setMarkdownContent("");
 
     // 基本検索パラメータ
     const searchParams = {
@@ -108,22 +106,20 @@ export const ZennSearchForm: FC<ZennSearchFormProps> = ({
 
   // 検索結果・フィルター結果の変化を監視してプレビュー更新
   useEffect(() => {
-    if (filteredArticles && filteredArticles.length > 0) {
-      const md = generateZennMarkdownForPreview(
-        filteredArticles.slice(0, 10),
-        searchKeyword || searchUsername
-      );
-      setMarkdownContent(md);
-    } else {
-      setMarkdownContent("");
-    }
+    const newMarkdownContent =
+      filteredArticles && filteredArticles.length > 0
+        ? generateZennMarkdownForPreview(
+            filteredArticles.slice(0, 10),
+            searchKeyword || searchUsername
+          )
+        : "";
 
     // 親コンポーネントに検索結果を通知
     if (onSearchResults) {
       onSearchResults({
         articles: articles || [],
         filteredArticles: filteredArticles || [],
-        markdownContent,
+        markdownContent: newMarkdownContent,
         isLoading,
         error,
         searchKeyword: searchKeyword || undefined,
@@ -135,7 +131,6 @@ export const ZennSearchForm: FC<ZennSearchFormProps> = ({
     articles,
     searchKeyword,
     searchUsername,
-    markdownContent,
     isLoading,
     error,
     onSearchResults,
@@ -153,8 +148,13 @@ export const ZennSearchForm: FC<ZennSearchFormProps> = ({
       const filename = searchKeyword || searchUsername || "zenn-articles";
       handleDownload(fullMarkdown, filename, articlesExist, "zenn");
     } else {
+      // プレビュー用Markdownを生成
+      const previewMarkdown = generateZennMarkdownForPreview(
+        filteredArticles.slice(0, 10),
+        searchKeyword || searchUsername
+      );
       const filename = searchKeyword || searchUsername || "zenn-articles";
-      handleDownload(markdownContent, filename, articlesExist, "zenn");
+      handleDownload(previewMarkdown, filename, articlesExist, "zenn");
     }
   };
 
