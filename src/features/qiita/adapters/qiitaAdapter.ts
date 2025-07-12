@@ -132,26 +132,26 @@ function buildQiitaSearchQuery(
         .split(",")
         .map((t) => t.trim())
         .filter((t) => t)) {
-        query += query ? `+tag:${tag}` : `tag:${tag}`;
+        query += query ? ` tag:${tag}` : `tag:${tag}`;
       }
     }
 
     // ユーザー検索（Docbaseのauthorに対応）
     if (user?.trim()) {
-      query += query ? `+user:${user.trim()}` : `user:${user.trim()}`;
+      query += query ? ` user:${user.trim()}` : `user:${user.trim()}`;
     }
 
     // 作成日検索（Qiita API v2）
     // 検証により >= と <= も正常に動作することを確認
     if (startDate?.trim()) {
       query += query
-        ? `+created:>=${startDate.trim()}`
+        ? ` created:>=${startDate.trim()}`
         : `created:>=${startDate.trim()}`;
     }
 
     if (endDate?.trim()) {
       query += query
-        ? `+created:<=${endDate.trim()}`
+        ? ` created:<=${endDate.trim()}`
         : `created:<=${endDate.trim()}`;
     }
   }
