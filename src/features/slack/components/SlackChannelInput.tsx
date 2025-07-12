@@ -22,7 +22,7 @@ export const SlackChannelInput: FC<SlackChannelInputProps> = ({
         onChange={(e) => onChannelChange(e.target.value)}
         placeholder="#general"
         disabled={disabled}
-        className={`block w-full px-3 py-2 border ${error ? "border-red-500" : "border-gray-400"} rounded-md shadow-sm placeholder-docbase-text-sub focus:outline-none focus:ring-1 ${error ? "focus:ring-red-500 focus:border-red-500" : "focus:ring-docbase-primary focus:border-docbase-primary"} disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors`}
+        className={`block w-full px-3 py-2 border ${error ? "border-red-500" : "border-gray-400"} rounded-md shadow-sm placeholder-slack-text-sub focus:outline-none focus:ring-1 ${error ? "focus:ring-red-500 focus:border-red-500" : "focus:ring-slack-primary focus:border-slack-primary"} disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors`}
         aria-describedby={error ? "slack-channel-error" : undefined}
       />
       {error && (

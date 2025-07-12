@@ -57,7 +57,7 @@ export function SlackSearchForm({ form }: SlackSearchFormProps) {
               id="startDate"
               value={form.startDate}
               onChange={(e) => form.onStartDateChange(e.target.value)}
-              className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-docbase-primary focus:border-docbase-primary disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+              className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-slack-primary focus:border-slack-primary disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
             />
           </div>
           <div>
@@ -72,7 +72,7 @@ export function SlackSearchForm({ form }: SlackSearchFormProps) {
               id="endDate"
               value={form.endDate}
               onChange={(e) => form.onEndDateChange(e.target.value)}
-              className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-docbase-primary focus:border-docbase-primary disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
+              className="block w-full px-3 py-2 border border-gray-400 rounded-md shadow-sm focus:outline-none focus:ring-1 focus:ring-slack-primary focus:border-slack-primary disabled:bg-gray-100 disabled:cursor-not-allowed transition-colors"
             />
           </div>
         </div>
@@ -83,7 +83,7 @@ export function SlackSearchForm({ form }: SlackSearchFormProps) {
         <button
           type="submit"
           disabled={form.isLoading || form.isDownloading || !form.token.trim()}
-          className="w-full inline-flex items-center justify-center py-2.5 px-4 border border-transparent shadow-sm text-sm font-medium rounded-sm text-white bg-docbase-primary hover:bg-docbase-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-docbase-primary disabled:bg-gray-300 disabled:text-gray-500 disabled:cursor-not-allowed transition-colors duration-150 ease-in-out"
+          className="w-full inline-flex items-center justify-center py-2.5 px-4 border border-transparent shadow-sm text-sm font-medium rounded-sm text-white bg-slack-primary hover:bg-slack-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slack-primary disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-150 ease-in-out"
         >
           {form.isLoading ? (
             <>
@@ -123,7 +123,7 @@ export function SlackSearchForm({ form }: SlackSearchFormProps) {
               form.slackThreads.length > 0
             )
           }
-          className="w-full inline-flex items-center justify-center py-2.5 px-4 border border-docbase-primary shadow-sm text-sm font-medium rounded-sm text-docbase-primary bg-white hover:bg-docbase-primary/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-docbase-primary disabled:bg-gray-50 disabled:text-gray-400 disabled:border-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors duration-150 ease-in-out"
+          className="w-full inline-flex items-center justify-center py-2.5 px-4 border border-slack-primary shadow-sm text-sm font-medium rounded-sm text-slack-primary bg-white hover:bg-slack-primary/10 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-slack-primary disabled:bg-gray-50 disabled:text-gray-400 disabled:border-gray-200 disabled:text-gray-400 disabled:cursor-not-allowed transition-colors duration-150 ease-in-out"
           disabled={
             form.isLoading ||
             form.isDownloading ||

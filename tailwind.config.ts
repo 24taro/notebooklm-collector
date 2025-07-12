@@ -23,6 +23,13 @@ export default {
           text: "#1F2937",
           "text-sub": "#6B7280",
         },
+        slack: {
+          primary: "#4A154B", // Slack公式紫
+          "primary-dark": "#350d36",
+          "primary-light": "#611f69",
+          text: "#1F2937",
+          "text-sub": "#6B7280",
+        },
       },
       lineClamp: {
         2: "2",
