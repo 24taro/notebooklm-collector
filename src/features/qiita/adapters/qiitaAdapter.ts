@@ -143,16 +143,21 @@ function buildQiitaSearchQuery(
     }
 
     // 作成日検索（Qiita特有の構文）
+    // 注意: Qiita APIでは >= や <= は使えない。> と < のみ使用可能
     if (startDate?.trim()) {
+      // 開始日を含むために、前日の日付を使用
+      const date = new Date(startDate.trim());
+      date.setDate(date.getDate() - 1);
+      const adjustedStartDate = date.toISOString().split("T")[0];
       query += query
-        ? `+created:>=${startDate.trim()}`
-        : `created:>=${startDate.trim()}`;
+        ? `+created:>${adjustedStartDate}`
+        : `created:>${adjustedStartDate}`;
     }
 
     if (endDate?.trim()) {
       query += query
-        ? `+created:<=${endDate.trim()}`
-        : `created:<=${endDate.trim()}`;
+        ? `+created:<${endDate.trim()}`
+        : `created:<${endDate.trim()}`;
     }
 
     // 最小ストック数検索（Qiita独自機能）

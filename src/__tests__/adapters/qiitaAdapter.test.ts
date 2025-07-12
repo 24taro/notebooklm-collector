@@ -144,7 +144,7 @@ describe("QiitaAdapter", () => {
 
   it("詳細検索条件を含む検索クエリを正しく構築する", async () => {
     const expectedUrl =
-      "https://qiita.com/api/v2/items?page=1&per_page=100&query=React%2Btag%3AJavaScript%2Buser%3Aexample%2Bcreated%3A%3E%3D2024-01-01%2Bcreated%3A%3C%3D2024-12-31%2Bstocks%3A%3E%3D50";
+      "https://qiita.com/api/v2/items?page=1&per_page=100&query=React%2Btag%3AJavaScript%2Buser%3Aexample%2Bcreated%3A%3E2023-12-31%2Bcreated%3A%3C2024-12-31%2Bstocks%3A%3E%3D50";
 
     const mockHttpClient = createMockHttpClient([
       createSuccessResponse(expectedUrl, [], "GET"),
