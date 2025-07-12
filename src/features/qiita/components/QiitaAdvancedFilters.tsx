@@ -44,6 +44,17 @@ export const QiitaAdvancedFilters: React.FC<QiitaAdvancedFiltersProps> = ({
     localFilters.endDate
   );
 
+  // 数値バリデーション関数
+  const handleMinStocksChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    if (value === "" || /^\d+$/.test(value)) {
+      updateFilter(
+        "minStocks",
+        value === "" ? undefined : Number.parseInt(value, 10)
+      );
+    }
+  };
+
   return (
     <div className={`border border-gray-200 rounded-lg ${className}`}>
       {/* ヘッダー（クリックで展開/折りたたみ） */}
@@ -156,6 +167,28 @@ export const QiitaAdvancedFilters: React.FC<QiitaAdvancedFiltersProps> = ({
                 終了日は開始日以降に設定してください
               </p>
             )}
+          </div>
+
+          {/* ストック数の絞り込み */}
+          <div>
+            <label
+              htmlFor="qiita-min-stocks"
+              className="block text-sm font-medium text-gray-700 mb-1"
+            >
+              最小ストック数
+            </label>
+            <input
+              type="number"
+              id="qiita-min-stocks"
+              value={localFilters.minStocks || ""}
+              onChange={handleMinStocksChange}
+              placeholder="10"
+              min="0"
+              className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-[#55C500] focus:border-[#55C500] transition-colors"
+            />
+            <p className="mt-1 text-xs text-gray-500">
+              指定した数以上のストックを持つ記事のみ検索（未記入の場合は絞り込みなし）
+            </p>
           </div>
 
           {/* リセットボタン */}

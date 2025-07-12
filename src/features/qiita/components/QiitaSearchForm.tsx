@@ -57,7 +57,8 @@ export const QiitaSearchForm: React.FC = () => {
     advancedFilters.tags?.trim() ||
     advancedFilters.user?.trim() ||
     advancedFilters.startDate?.trim() ||
-    advancedFilters.endDate?.trim();
+    advancedFilters.endDate?.trim() ||
+    advancedFilters.minStocks;
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">

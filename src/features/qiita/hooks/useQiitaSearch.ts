@@ -128,7 +128,8 @@ export const useQiitaSearch = (
         !advancedFilters?.tags?.trim() &&
         !advancedFilters?.user?.trim() &&
         !advancedFilters?.startDate?.trim() &&
-        !advancedFilters?.endDate?.trim()
+        !advancedFilters?.endDate?.trim() &&
+        !advancedFilters?.minStocks
       ) {
         toast.success(
           "キーワードまたは詳細検索条件を入力して検索してください。"

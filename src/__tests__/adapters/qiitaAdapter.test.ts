@@ -144,7 +144,7 @@ describe("QiitaAdapter", () => {
 
   it("詳細検索条件を含む検索クエリを正しく構築する", async () => {
     const expectedUrl =
-      "https://qiita.com/api/v2/items?page=1&per_page=100&query=React%20tag%3AJavaScript%20user%3Aexample%20created%3A%3E%3D2024-01-01%20created%3A%3C%3D2024-12-31";
+      "https://qiita.com/api/v2/items?page=1&per_page=100&query=React+tag%3AJavaScript+user%3Aexample+created%3A%3E%3D2024-01-01+created%3A%3C%3D2024-12-31+stocks%3A%3E%3D5";
 
     const mockHttpClient = createMockHttpClient([
       createSuccessResponse(expectedUrl, [], "GET"),
@@ -159,6 +159,7 @@ describe("QiitaAdapter", () => {
         user: "example",
         startDate: "2024-01-01",
         endDate: "2024-12-31",
+        minStocks: 5,
       },
     });
 
@@ -167,7 +168,7 @@ describe("QiitaAdapter", () => {
 
   it("複数タグを正しく処理する", async () => {
     const expectedUrl =
-      "https://qiita.com/api/v2/items?page=1&per_page=100&query=React%20tag%3AJavaScript%20tag%3ATypeScript%20tag%3ANext.js";
+      "https://qiita.com/api/v2/items?page=1&per_page=100&query=React+tag%3AJavaScript+tag%3ATypeScript+tag%3ANext.js";
 
     const mockHttpClient = createMockHttpClient([
       createSuccessResponse(expectedUrl, [], "GET"),
@@ -179,6 +180,26 @@ describe("QiitaAdapter", () => {
       keyword: "React",
       advancedFilters: {
         tags: "JavaScript, TypeScript, Next.js",
+      },
+    });
+
+    expect(result.isOk()).toBe(true);
+  });
+
+  it("ストック数の絞り込みを正しく処理する", async () => {
+    const expectedUrl =
+      "https://qiita.com/api/v2/items?page=1&per_page=100&query=React+stocks%3A%3E%3D20";
+
+    const mockHttpClient = createMockHttpClient([
+      createSuccessResponse(expectedUrl, [], "GET"),
+    ]);
+
+    const adapter = createQiitaAdapter(mockHttpClient);
+    const result = await adapter.searchItems({
+      ...mockSearchParams,
+      keyword: "React",
+      advancedFilters: {
+        minStocks: 20,
       },
     });
 
