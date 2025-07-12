@@ -1,5 +1,5 @@
 import type { Result } from "neverthrow"; // Resultを型としてインポート (typeキーワードを明示)
-import { useCallback, useState } from "react";
+import { useCallback, useMemo, useState } from "react";
 import toast from "react-hot-toast"; // react-hot-toastをインポート
 import { createFetchHttpClient } from "../../../adapters/fetchHttpClient";
 import type { ApiError } from "../../../types/error";
@@ -40,8 +40,10 @@ export const useQiitaSearch = (
   options?: UseQiitaSearchOptions
 ): UseQiitaSearchResult => {
   // アダプターの初期化（注入されていない場合はデフォルトを使用）
-  const adapter =
-    options?.adapter || createQiitaAdapter(createFetchHttpClient());
+  const adapter = useMemo(
+    () => options?.adapter || createQiitaAdapter(createFetchHttpClient()),
+    [options?.adapter]
+  );
   const [items, setItems] = useState<QiitaItem[]>([]);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<ApiError | null>(null);
