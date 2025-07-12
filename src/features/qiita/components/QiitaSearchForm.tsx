@@ -209,6 +209,13 @@ export const QiitaSearchForm: React.FC = () => {
               <p className="text-sm text-gray-500">
                 検索条件を変更して再試行してください
               </p>
+              {advancedFilters.minStocks && advancedFilters.minStocks >= 50 && (
+                <p className="text-sm text-yellow-600 mt-2">
+                  ヒント: 最小ストック数が{advancedFilters.minStocks}
+                  に設定されています。
+                  より小さい値に変更すると、より多くの記事が見つかる可能性があります。
+                </p>
+              )}
             </div>
           )}
         </form>

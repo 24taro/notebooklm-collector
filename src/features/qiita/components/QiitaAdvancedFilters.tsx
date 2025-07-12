@@ -182,12 +182,12 @@ export const QiitaAdvancedFilters: React.FC<QiitaAdvancedFiltersProps> = ({
               id="qiita-min-stocks"
               value={localFilters.minStocks || ""}
               onChange={handleMinStocksChange}
-              placeholder="100"
+              placeholder="10"
               min="0"
               className="w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-qiita-primary focus:border-qiita-primary transition-colors"
             />
             <p className="mt-1 text-xs text-gray-500">
-              指定した数以上のストック数を持つ記事のみ検索
+              指定した数以上のストック数を持つ記事のみ検索（通常は10-50程度が適切）
             </p>
           </div>
 
