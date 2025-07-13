@@ -108,10 +108,14 @@ export const DocbaseTokenInput = forwardRef<
             placeholder="DocbaseのAPIトークンを入力してください"
             disabled={disabled}
             className={`w-full px-3 py-2 pr-24 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-docbase-primary focus:border-docbase-primary transition-colors ${
-              !hasValidFormat || error ? "border-red-500 bg-red-50" : ""
+              isMounted && (!hasValidFormat || error)
+                ? "border-red-500 bg-red-50"
+                : ""
             } ${disabled ? "bg-gray-100 cursor-not-allowed" : ""}`}
             aria-describedby={
-              error || !hasValidFormat ? "docbase-token-error" : undefined
+              isMounted && (error || !hasValidFormat)
+                ? "docbase-token-error"
+                : undefined
             }
           />
 
@@ -162,72 +166,67 @@ export const DocbaseTokenInput = forwardRef<
           </button>
         </div>
 
-        {/* バリデーションエラー表示 */}
-        {!hasValidFormat && (
-          <p className="text-sm text-red-600">
-            トークンの形式が正しくありません。
-          </p>
-        )}
-
         {/* 文字数カウンター */}
         <div className="text-xs text-gray-500 text-right">
           {isMounted ? `${token.length}文字` : "0文字"}
         </div>
 
         {/* ボタン群 */}
-        <div className="flex space-x-2">
-          {showSaveButton && hasValidFormat && (
-            <button
-              type="button"
-              onClick={handleSaveToken}
-              className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-docbase-primary hover:bg-docbase-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-docbase-primary transition-colors"
-            >
-              <svg
-                className="w-4 h-4 mr-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+        {isMounted && (
+          <div className="flex space-x-2">
+            {showSaveButton && hasValidFormat && (
+              <button
+                type="button"
+                onClick={handleSaveToken}
+                className="inline-flex items-center px-3 py-1.5 border border-transparent text-xs font-medium rounded text-white bg-docbase-primary hover:bg-docbase-primary-dark focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-docbase-primary transition-colors"
               >
-                <title>保存</title>
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12"
-                />
-              </svg>
-              保存
-            </button>
-          )}
+                <svg
+                  className="w-4 h-4 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <title>保存</title>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M8 7H5a2 2 0 00-2 2v9a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-3m-1 4l-3-3m0 0l-3 3m3-3v12"
+                  />
+                </svg>
+                保存
+              </button>
+            )}
 
-          {savedToken && savedToken !== token && (
-            <button
-              type="button"
-              onClick={handleLoadToken}
-              className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-docbase-primary transition-colors"
-            >
-              <svg
-                className="w-4 h-4 mr-1"
-                fill="none"
-                stroke="currentColor"
-                viewBox="0 0 24 24"
+            {savedToken && savedToken !== token && (
+              <button
+                type="button"
+                onClick={handleLoadToken}
+                className="inline-flex items-center px-3 py-1.5 border border-gray-300 text-xs font-medium rounded text-gray-700 bg-white hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-docbase-primary transition-colors"
               >
-                <title>読み込み</title>
-                <path
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  strokeWidth={2}
-                  d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
-                />
-              </svg>
-              保存済みを読込
-            </button>
-          )}
-        </div>
+                <svg
+                  className="w-4 h-4 mr-1"
+                  fill="none"
+                  stroke="currentColor"
+                  viewBox="0 0 24 24"
+                >
+                  <title>読み込み</title>
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"
+                  />
+                </svg>
+                保存済みを読込
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
-      {/* エラーメッセージ */}
-      {(error || !hasValidFormat) && (
+      {/* エラーメッセージ（統合版） */}
+      {isMounted && (error || !hasValidFormat) && (
         <p
           id="docbase-token-error"
           className="text-sm text-red-600"
