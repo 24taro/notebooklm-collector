@@ -16,7 +16,7 @@ export default function HomePage() {
             情報ソースからデータを収集し、NotebookLM用Markdownを生成
           </p>
 
-          <div className="grid md:grid-cols-3 gap-4 md:gap-8">
+          <div className="grid lg:grid-cols-2 gap-4 md:gap-8">
             <Link
               href="/docbase"
               className="flex items-center space-x-4 p-6 border border-gray-200 rounded-lg hover:border-gray-300 transition-colors"
