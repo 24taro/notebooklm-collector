@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- 背景円 -->
+  <circle cx="16" cy="16" r="15" fill="#3B82F6" stroke="#1E40AF" stroke-width="2"/>
+  
+  <!-- 虫眼鏡のレンズ部分 -->
+  <circle cx="13" cy="13" r="6" fill="none" stroke="#FFFFFF" stroke-width="2.5"/>
+  
+  <!-- 虫眼鏡の柄部分 -->
+  <line x1="18" y1="18" x2="23" y2="23" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round"/>
+  
+  <!-- データ点（調査らしさを演出） -->
+  <circle cx="11" cy="11" r="1" fill="#FEF3C7"/>
+  <circle cx="15" cy="10" r="0.8" fill="#FEF3C7"/>
+  <circle cx="13" cy="15" r="0.7" fill="#FEF3C7"/>
+</svg>

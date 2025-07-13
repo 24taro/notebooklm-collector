@@ -211,11 +211,11 @@ export const DocbaseAdvancedFilters: React.FC<DocbaseAdvancedFiltersProps> = ({
           </div>
 
           {/* ヘルプテキスト */}
-          <div className="bg-blue-50 border border-blue-200 rounded-md p-3">
-            <h4 className="text-sm font-medium text-blue-800 mb-2">
+          <div className="bg-docbase-primary/5 border border-docbase-primary/20 rounded-md p-3">
+            <h4 className="text-sm font-medium text-docbase-primary mb-2">
               💡 検索のコツ
             </h4>
-            <ul className="text-xs text-blue-700 space-y-1">
+            <ul className="text-xs text-docbase-primary/80 space-y-1">
               <li>• タグは正確な名前で指定（例: チーム運営, not team）</li>
               <li>• 投稿者検索では @ を付けずにIDを入力</li>
               <li>• タイトルキーワードで文書種別を絞り込み可能</li>

@@ -175,19 +175,19 @@ export const DocbaseMarkdownPreview: FC<DocbaseMarkdownPreviewProps> = ({
               <div className="text-sm text-gray-600">記事数</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-blue-500">
+              <div className="text-2xl font-bold text-docbase-primary">
                 {stats?.totalCharacters.toLocaleString()}
               </div>
               <div className="text-sm text-gray-600">総文字数</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-green-500">
+              <div className="text-2xl font-bold text-docbase-primary">
                 {stats?.averageCharacters.toLocaleString()}
               </div>
               <div className="text-sm text-gray-600">平均文字数</div>
             </div>
             <div className="text-center">
-              <div className="text-2xl font-bold text-purple-500">
+              <div className="text-2xl font-bold text-docbase-primary">
                 {stats?.topTags.length || 0}
               </div>
               <div className="text-sm text-gray-600">タグ種類</div>
@@ -209,7 +209,7 @@ export const DocbaseMarkdownPreview: FC<DocbaseMarkdownPreviewProps> = ({
                     key={post.id}
                     className="flex items-start space-x-2 text-sm"
                   >
-                    <span className="flex-shrink-0 w-5 h-5 bg-blue-100 text-blue-800 rounded-full flex items-center justify-center text-xs font-semibold">
+                    <span className="flex-shrink-0 w-5 h-5 bg-docbase-primary/10 text-docbase-primary rounded-full flex items-center justify-center text-xs font-semibold">
                       {index + 1}
                     </span>
                     <div className="flex-1 min-w-0">
@@ -263,7 +263,7 @@ export const DocbaseMarkdownPreview: FC<DocbaseMarkdownPreviewProps> = ({
                       className="flex items-center justify-between text-sm"
                     >
                       <span className="flex items-center">
-                        <span className="w-4 h-4 bg-yellow-100 text-yellow-800 rounded-full flex items-center justify-center text-xs font-semibold mr-2">
+                        <span className="w-4 h-4 bg-docbase-primary/10 text-docbase-primary rounded-full flex items-center justify-center text-xs font-semibold mr-2">
                           {index + 1}
                         </span>
                         {author}
