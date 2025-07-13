@@ -16,7 +16,15 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "NotebookLM Collector",
-  description: "Collect DocBase articles for NotebookLM",
+  description:
+    "Docbase、Slack、Qiitaからデータを収集し、NotebookLM用Markdownを生成するツール",
+  icons: {
+    icon: [
+      { url: "/favicon.svg", type: "image/svg+xml" },
+      { url: "/favicon.ico", sizes: "any" },
+    ],
+    apple: [{ url: "/favicon.svg", type: "image/svg+xml" }],
+  },
 };
 
 export default function RootLayout({

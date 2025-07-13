@@ -1,0 +1,21 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32" width="32" height="32">
+  <!-- 背景 -->
+  <rect width="32" height="32" rx="6" fill="#1E40AF"/>
+  
+  <!-- 虫眼鏡のレンズ部分 -->
+  <circle cx="12" cy="12" r="7" fill="none" stroke="#FFFFFF" stroke-width="2.5"/>
+  
+  <!-- 虫眼鏡の柄部分 -->
+  <line x1="17.5" y1="17.5" x2="24" y2="24" stroke="#FFFFFF" stroke-width="3" stroke-linecap="round"/>
+  
+  <!-- ドキュメントアイコン（収集を表現） -->
+  <rect x="20" y="6" width="8" height="10" rx="1" fill="#60A5FA" stroke="#FFFFFF" stroke-width="1"/>
+  <line x1="22" y1="9" x2="26" y2="9" stroke="#FFFFFF" stroke-width="0.8"/>
+  <line x1="22" y1="11" x2="26" y2="11" stroke="#FFFFFF" stroke-width="0.8"/>
+  <line x1="22" y1="13" x2="24" y2="13" stroke="#FFFFFF" stroke-width="0.8"/>
+  
+  <!-- データ点（調査・分析を表現） -->
+  <circle cx="10" cy="10" r="1" fill="#FEF3C7"/>
+  <circle cx="14" cy="9" r="0.8" fill="#FEF3C7"/>
+  <circle cx="12" cy="14" r="0.7" fill="#FEF3C7"/>
+</svg>
