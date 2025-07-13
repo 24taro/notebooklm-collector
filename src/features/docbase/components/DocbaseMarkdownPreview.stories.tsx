@@ -533,7 +533,7 @@ export const CustomStyling: Story = {
 - 余白の調整
 - Docbase専用のスタイリング`,
     title: "カスタムスタイル",
-    className: "bg-blue-50 p-8 rounded-xl",
+    className: "bg-docbase-primary/5 p-8 rounded-xl",
     onDownload: action("download-clicked"),
   },
 };

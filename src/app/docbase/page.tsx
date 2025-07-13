@@ -18,7 +18,7 @@ export default function DocbasePage() {
             "!border !border-gray-200 !bg-white !text-gray-700 !shadow-lg !rounded-md",
           success: {
             iconTheme: {
-              primary: "#3B82F6", // Docbase Blue
+              primary: "#5692ce", // Docbase Blue（テーマ色に統一）
               secondary: "#FFFFFF",
             },
           },
@@ -47,7 +47,7 @@ export default function DocbasePage() {
         </section>
 
         {/* CTAセクション */}
-        <div className="flex justify-center bg-blue-500 w-full py-10">
+        <div className="flex justify-center bg-docbase-primary w-full py-10">
           <div className="flex flex-col items-center">
             <button
               type="button"
@@ -56,7 +56,7 @@ export default function DocbasePage() {
                   .getElementById("main-tool-section")
                   ?.scrollIntoView({ behavior: "smooth" })
               }
-              className="px-8 py-3 bg-white hover:bg-gray-50 text-blue-600 font-semibold rounded-md shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 ease-in-out text-lg border-2 border-blue-600"
+              className="px-8 py-3 bg-white hover:bg-gray-50 text-docbase-primary font-semibold rounded-md shadow-md hover:shadow-lg transform hover:scale-105 transition-all duration-200 ease-in-out text-lg border-2 border-docbase-primary"
             >
               今すぐMarkdownを生成
             </button>
@@ -98,7 +98,7 @@ export default function DocbasePage() {
               ].map((item, index) => (
                 <div key={item.step} className="text-center md:text-left">
                   <div className="flex items-center justify-center md:justify-start mb-4">
-                    <span className="flex items-center justify-center w-10 h-10 bg-blue-500 text-white text-xl font-bold rounded-full mr-4">
+                    <span className="flex items-center justify-center w-10 h-10 bg-docbase-primary text-white text-xl font-bold rounded-full mr-4">
                       {item.step}
                     </span>
                     <span className="text-3xl">{item.icon}</span>
@@ -117,45 +117,45 @@ export default function DocbasePage() {
 
         {/* Docbase特有の機能説明セクション */}
         <section className="w-full mt-12">
-          <div className="max-w-screen-lg mx-auto px-6 sm:px-10 lg:px-24 py-16 rounded-xl border border-gray-200 bg-blue-50">
+          <div className="max-w-screen-lg mx-auto px-6 sm:px-10 lg:px-24 py-16 rounded-xl border border-gray-200 bg-docbase-primary/5">
             <h2 className="text-3xl md:text-4xl font-bold mb-8 text-center text-gray-800">
               ✨ Docbase連携の特徴
             </h2>
             <div className="grid md:grid-cols-2 gap-8">
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-blue-700">
+                <h3 className="text-xl font-semibold text-docbase-primary-dark">
                   🎯 高度な検索機能
                 </h3>
                 <ul className="space-y-2 text-gray-700">
                   <li className="flex items-start">
-                    <span className="text-blue-500 mr-2">•</span>
+                    <span className="text-docbase-primary mr-2">•</span>
                     タグ・投稿者・期間での絞り込み検索
                   </li>
                   <li className="flex items-start">
-                    <span className="text-blue-500 mr-2">•</span>
+                    <span className="text-docbase-primary mr-2">•</span>
                     タイトルキーワードによる文書種別フィルター
                   </li>
                   <li className="flex items-start">
-                    <span className="text-blue-500 mr-2">•</span>
+                    <span className="text-docbase-primary mr-2">•</span>
                     最大500件までのチーム記事取得
                   </li>
                 </ul>
               </div>
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-blue-700">
+                <h3 className="text-xl font-semibold text-docbase-primary-dark">
                   📊 豊富なメタデータ
                 </h3>
                 <ul className="space-y-2 text-gray-700">
                   <li className="flex items-start">
-                    <span className="text-blue-500 mr-2">•</span>
+                    <span className="text-docbase-primary mr-2">•</span>
                     記事の文字数・作成日時・タグ情報
                   </li>
                   <li className="flex items-start">
-                    <span className="text-blue-500 mr-2">•</span>
+                    <span className="text-docbase-primary mr-2">•</span>
                     著者情報と投稿数統計
                   </li>
                   <li className="flex items-start">
-                    <span className="text-blue-500 mr-2">•</span>
+                    <span className="text-docbase-primary mr-2">•</span>
                     チーム知識ベースの傾向分析
                   </li>
                 </ul>
